@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
-using SupportHub.Web.Data;
+using SupportHub.Data;
 
 namespace SupportHub.Web.Components.Account;
 

@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using SupportHub.Data;
 using SupportHub.Web.Components.Account.Pages;
 using SupportHub.Web.Components.Account.Pages.Manage;
-using SupportHub.Web.Data;
 
 namespace Microsoft.AspNetCore.Routing;
 

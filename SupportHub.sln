@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SupportHub.WebApi", "Suppor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SupportHub.Web", "SupportHub.Web\SupportHub.Web.csproj", "{95DA949F-E97C-4E66-A576-BF20A7648216}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SupportHub", "SupportHub\SupportHub.csproj", "{127918A3-4AC2-4F64-B495-6BBC2A366584}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{95DA949F-E97C-4E66-A576-BF20A7648216}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95DA949F-E97C-4E66-A576-BF20A7648216}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95DA949F-E97C-4E66-A576-BF20A7648216}.Release|Any CPU.Build.0 = Release|Any CPU
+		{127918A3-4AC2-4F64-B495-6BBC2A366584}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{127918A3-4AC2-4F64-B495-6BBC2A366584}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{127918A3-4AC2-4F64-B495-6BBC2A366584}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{127918A3-4AC2-4F64-B495-6BBC2A366584}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

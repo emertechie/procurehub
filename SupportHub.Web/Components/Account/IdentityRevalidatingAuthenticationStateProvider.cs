@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using SupportHub.Web.Data;
+using SupportHub.Data;
 
 namespace SupportHub.Web.Components.Account;
 

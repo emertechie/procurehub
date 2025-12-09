@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SupportHub.Data;
 using SupportHub.Web.Components;
 using SupportHub.Web.Components.Account;
-using SupportHub.Web.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
