@@ -1,4 +1,4 @@
-﻿namespace SupportHub.Tests;
+﻿namespace SupportHub.WebApi.Tests;
 
 public class DepartmentTests
 {

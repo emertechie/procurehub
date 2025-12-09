@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SupportHub.Tests", "SupportHub.Tests\SupportHub.Tests.csproj", "{71FDFA12-F51C-412C-8DA6-F682B6C6BD95}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SupportHub.WebApi.Tests", "SupportHub.WebApi.Tests\SupportHub.WebApi.Tests.csproj", "{71FDFA12-F51C-412C-8DA6-F682B6C6BD95}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SupportHub.WebApi", "SupportHub.WebApi\SupportHub.WebApi.csproj", "{017E9BAB-358A-4EFD-A1E9-1FA50950525A}"
 EndProject
