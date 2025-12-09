@@ -22,6 +22,14 @@ void ConfigureApiEndpoints(WebApplication app)
         ) => handler.HandleAsync(new ListDepartments.Request(), token))
         .WithName("GetDepartments");
 
+    app.MapGet("/departments/{id:int}", async (
+            int id,
+            [FromServices] IRequestHandler<GetDepartment.Request, GetDepartment.Response?> handler,
+            CancellationToken token) => await handler.HandleAsync(new GetDepartment.Request(id), token) is var response
+                ? Results.Ok(response)
+                : Results.NotFound())
+        .WithName("GetDepartmentById");
+
     app.MapPost("/departments", async (
             CreateDepartment.Request request,
             [FromServices] IRequestHandler<CreateDepartment.Request, int> handler,

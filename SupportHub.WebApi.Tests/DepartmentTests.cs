@@ -18,7 +18,7 @@ public class DepartmentTests
     }
 
     [Fact]
-    public async Task Can_create_department()
+    public async Task Can_create_and_fetch_department()
     {
         // Assert no departments yet
         var listDeptsResp1 = await _client.GetAsync("/departments", TestContext.Current.CancellationToken);
@@ -35,9 +35,14 @@ public class DepartmentTests
         Assert.Matches(@"^/departments/\d+$", location);
         var newDepartmentId = int.Parse(location!.Split('/').Last());
         
-        // Assert department created
+        // Assert department returned in list
         var listDeptsResp2 = await _client.GetAsync("/departments", TestContext.Current.CancellationToken);
         var departments2 = await listDeptsResp2.Content.ReadFromJsonAsync<ListDepartments.Response[]>(TestContext.Current.CancellationToken);
         Assert.Equal(new ListDepartments.Response[] { new(newDepartmentId, "New Department") }, departments2);
+        
+        // Assert can get department by ID
+        var getDeptResp = await _client.GetAsync($"/departments/{newDepartmentId}", TestContext.Current.CancellationToken);
+        var department = await getDeptResp.Content.ReadFromJsonAsync<GetDepartment.Response>(TestContext.Current.CancellationToken);
+        Assert.Equal(new GetDepartment.Response(newDepartmentId, "New Department"), department);
     }
 }
