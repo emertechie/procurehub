@@ -10,9 +10,9 @@ public static class CreateStaff
     // TODO: validator
 
     public class Handler(ApplicationDbContext dbContext)
-        : ICommandHandler<Command, string>
+        : IRequestHandler<Command, string>
     {
-        public async Task<string> HandleAsync(Command command)
+        public async Task<string> HandleAsync(Command command, CancellationToken token)
         {
             var now = DateTime.UtcNow;
             var staff = new Models.Staff
@@ -23,7 +23,7 @@ public static class CreateStaff
                 EnabledAt = DateTime.UtcNow
             };
             dbContext.Staff.Add(staff);
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync(token);
         
             return staff.UserId;
         }
