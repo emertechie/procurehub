@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using SupportHub.Data;
+using SupportHub.ServiceDefaults;
 using SupportHub.Web.Components;
 using SupportHub.Web.Components.Account;
 
@@ -36,9 +36,7 @@ static void RegisterServices(WebApplicationBuilder webApplicationBuilder)
 
     var connectionString = webApplicationBuilder.Configuration.GetConnectionString("DefaultConnection") ??
                            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-    webApplicationBuilder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseSqlite(connectionString));
-    webApplicationBuilder.Services.AddDatabaseDeveloperPageExceptionFilter();
+    webApplicationBuilder.Services.AddSupportHubDatabaseWithSqlite(connectionString);
 
     webApplicationBuilder.Services.AddIdentityCore<ApplicationUser>(options =>
         {

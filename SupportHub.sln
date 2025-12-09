@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SupportHub.Web", "SupportHu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SupportHub", "SupportHub\SupportHub.csproj", "{127918A3-4AC2-4F64-B495-6BBC2A366584}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SupportHub.ServiceDefaults", "SupportHub.ServiceDefaults\SupportHub.ServiceDefaults.csproj", "{6E48012C-B48C-4433-A088-2791D9E84538}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{127918A3-4AC2-4F64-B495-6BBC2A366584}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{127918A3-4AC2-4F64-B495-6BBC2A366584}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{127918A3-4AC2-4F64-B495-6BBC2A366584}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E48012C-B48C-4433-A088-2791D9E84538}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E48012C-B48C-4433-A088-2791D9E84538}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E48012C-B48C-4433-A088-2791D9E84538}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E48012C-B48C-4433-A088-2791D9E84538}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

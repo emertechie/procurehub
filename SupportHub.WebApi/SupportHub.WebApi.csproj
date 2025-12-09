@@ -11,6 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\SupportHub.ServiceDefaults\SupportHub.ServiceDefaults.csproj" />
       <ProjectReference Include="..\SupportHub\SupportHub.csproj" />
     </ItemGroup>
 

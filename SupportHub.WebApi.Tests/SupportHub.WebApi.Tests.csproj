@@ -18,4 +18,8 @@
         <Using Include="Xunit"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\SupportHub.WebApi\SupportHub.WebApi.csproj" />
+    </ItemGroup>
+
 </Project>
