@@ -6,6 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>aspnet-SupportHub-0f3db9f5-1790-43dc-9814-f7bf964138f4</UserSecretsId>
         <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+        <RootNamespace>SupportHub</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
