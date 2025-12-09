@@ -22,17 +22,6 @@ public static class DatabaseServiceExtensions
         return services;
     }
     
-    /*/// <summary>
-    /// Adds database with SQL Server for production use
-    /// </summary>
-    public static IServiceCollection AddSupportHubDatabaseWithSqlServer(
-        this IServiceCollection services,
-        string connectionString)
-    {
-        return services.AddSupportHubDatabase(options =>
-            options.UseSqlServer(connectionString));
-    }*/
-    
     /// <summary>
     /// Adds database with SQLite (for development/testing)
     /// </summary>
@@ -43,15 +32,15 @@ public static class DatabaseServiceExtensions
         return services.AddSupportHubDatabase(options =>
             options.UseSqlite(connectionString));
     }
-    
-    /// <summary>
-    /// Adds database with in-memory SQLite (for integration tests)
+
+    /*/// <summary>
+    /// Adds database with SQL Server for production use
     /// </summary>
-    public static IServiceCollection AddSupportHubDatabaseInMemory(
-        this IServiceCollection services)
+    public static IServiceCollection AddSupportHubDatabaseWithSqlServer(
+        this IServiceCollection services,
+        string connectionString)
     {
         return services.AddSupportHubDatabase(options =>
-            options.UseSqlite("DataSource=:memory:")
-                .EnableSensitiveDataLogging());
-    }
+            options.UseSqlServer(connectionString));
+    }*/
 }

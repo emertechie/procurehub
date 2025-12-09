@@ -28,8 +28,9 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/weatherforecast", (ILogger<Program> logger) =>
     {
+        logger.LogInformation("Hello from the WeatherForecast endpoint!");
         var forecast = Enumerable.Range(1, 5).Select(index =>
                 new WeatherForecast
                 (
