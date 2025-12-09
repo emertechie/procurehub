@@ -1,13 +1,13 @@
 namespace SupportHub.Infrastructure;
 
 // ReSharper disable once TypeParameterCanBeVariant
-public interface IRequestHandler<TCommand>
+public interface IRequestHandler<TRequest>
 {
-    Task HandleAsync(TCommand command, CancellationToken token);
+    Task HandleAsync(TRequest request, CancellationToken token);
 }
 
 // ReSharper disable once TypeParameterCanBeVariant
-public interface IRequestHandler<TCommand, TReturn>
+public interface IRequestHandler<TRequest, TReturn>
 {
-    Task<TReturn> HandleAsync(TCommand command, CancellationToken token);
+    Task<TReturn> HandleAsync(TRequest request, CancellationToken token);
 }

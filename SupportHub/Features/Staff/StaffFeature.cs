@@ -5,19 +5,19 @@ namespace SupportHub.Features.Staff;
 
 public static class CreateStaff
 {
-    public record Command(string UserId);
+    public record Request(string UserId);
     
     // TODO: validator
 
     public class Handler(ApplicationDbContext dbContext)
-        : IRequestHandler<Command, string>
+        : IRequestHandler<Request, string>
     {
-        public async Task<string> HandleAsync(Command command, CancellationToken token)
+        public async Task<string> HandleAsync(Request request, CancellationToken token)
         {
             var now = DateTime.UtcNow;
             var staff = new Models.Staff
             {
-                UserId = command.UserId,
+                UserId = request.UserId,
                 CreatedAt = now,
                 UpdatedAt = DateTime.UtcNow,
                 EnabledAt = DateTime.UtcNow

@@ -1,16 +1,18 @@
 ﻿using System.Net;
+using System.Net.Http.Json;
+using SupportHub.Features.Departments;
 
 namespace SupportHub.WebApi.Tests;
 
 public class DepartmentTests
 {
-    private readonly HttpClient _client;
     private readonly ITestOutputHelper _testOutputHelper;
+    private readonly HttpClient _client;
 
     public DepartmentTests(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
-
+        
         var factory = new WebApiTestFactory(testOutputHelper);
         _client = factory.CreateClient();
     }
@@ -18,16 +20,24 @@ public class DepartmentTests
     [Fact]
     public async Task Can_create_department()
     {
-        _testOutputHelper.WriteLine("*** Running test: Can_create_department");
-        
-        // Act
-        var response = await _client.GetAsync("/weatherforecast", TestContext.Current.CancellationToken);
+        // Assert no departments yet
+        var listDeptsResp1 = await _client.GetAsync("/departments", TestContext.Current.CancellationToken);
+        var departments1 = await listDeptsResp1.Content.ReadFromJsonAsync<ListDepartments.Response[]>(TestContext.Current.CancellationToken);
+        Assert.Equal(Array.Empty<ListDepartments.Response>(), departments1);
 
-        // TODO: output response
+        // Create department
+        var createDeptReq = new CreateDepartment.Request("New Department");
+        var createDeptResp = await _client.PostAsync("/departments", JsonContent.Create(createDeptReq), TestContext.Current.CancellationToken);
+        Assert.Equal(HttpStatusCode.Created, createDeptResp.StatusCode);
 
-        // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        // Extract department ID from Location header
+        var location = createDeptResp.Headers.Location?.ToString();
+        Assert.Matches(@"^/departments/\d+$", location);
+        var newDepartmentId = int.Parse(location!.Split('/').Last());
         
-        throw new NotImplementedException();
+        // Assert department created
+        var listDeptsResp2 = await _client.GetAsync("/departments", TestContext.Current.CancellationToken);
+        var departments2 = await listDeptsResp2.Content.ReadFromJsonAsync<ListDepartments.Response[]>(TestContext.Current.CancellationToken);
+        Assert.Equal(new ListDepartments.Response[] { new(newDepartmentId, "New Department") }, departments2);
     }
 }

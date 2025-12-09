@@ -1,38 +1,37 @@
+using Microsoft.AspNetCore.Mvc;
+using SupportHub.Features.Departments;
 using SupportHub.Infrastructure;
 using SupportHub.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 RegisterServices(builder);
 
-var app = builder.Build();
-ConfigureApplication(app);
-ConfigureApiEndpoints(app);
+var webApp = builder.Build();
+ConfigureApplication(webApp);
+ConfigureApiEndpoints(webApp);
 
-app.Run();
+webApp.Run();
 
 return;
 
-void ConfigureApiEndpoints(WebApplication app1)
+void ConfigureApiEndpoints(WebApplication app)
 {
-    var summaries = new[]
-    {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
+    app.MapGet("/departments", (
+            [FromServices] IRequestHandler<ListDepartments.Request, ListDepartments.Response[]> handler,
+            CancellationToken token
+        ) => handler.HandleAsync(new ListDepartments.Request(), token))
+        .WithName("GetDepartments");
 
-    app1.MapGet("/weatherforecast", (ILogger<Program> logger) =>
+    app.MapPost("/departments", async (
+            CreateDepartment.Request request,
+            [FromServices] IRequestHandler<CreateDepartment.Request, int> handler,
+            CancellationToken token
+        ) =>
         {
-            logger.LogInformation("Hello from the WeatherForecast endpoint!");
-            var forecast = Enumerable.Range(1, 5).Select(index =>
-                    new WeatherForecast
-                    (
-                        DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                        Random.Shared.Next(-20, 55),
-                        summaries[Random.Shared.Next(summaries.Length)]
-                    ))
-                .ToArray();
-            return forecast;
+            var newId = await handler.HandleAsync(request, token);
+            return Results.Created($"/departments/{newId}", null);
         })
-        .WithName("GetWeatherForecast");
+        .WithName("CreateDepartment");
 }
 
 void RegisterServices(WebApplicationBuilder webApplicationBuilder)
@@ -44,7 +43,7 @@ void RegisterServices(WebApplicationBuilder webApplicationBuilder)
     var connectionString = webApplicationBuilder.Configuration.GetConnectionString("DefaultConnection") ??
                            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
     webApplicationBuilder.Services.AddSupportHubDatabaseWithSqlite(connectionString);
-
+    
     webApplicationBuilder.Services.AddRequestHandlers();
 }
 
@@ -57,9 +56,4 @@ void ConfigureApplication(WebApplication webApplication)
     }
 
     webApplication.UseHttpsRedirection();
-}
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
