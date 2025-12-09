@@ -1,3 +1,4 @@
+using SupportHub.Infrastructure;
 using SupportHub.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,8 @@ builder.Services.AddOpenApi();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
                        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddSupportHubDatabaseWithSqlite(connectionString);
+
+builder.Services.AddRequestHandlers();
 
 var app = builder.Build();
 

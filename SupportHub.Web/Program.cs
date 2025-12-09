@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using SupportHub.Data;
+using SupportHub.Infrastructure;
 using SupportHub.ServiceDefaults;
 using SupportHub.Web.Components;
 using SupportHub.Web.Components.Account;
@@ -48,6 +49,8 @@ static void RegisterServices(WebApplicationBuilder webApplicationBuilder)
         .AddDefaultTokenProviders();
 
     webApplicationBuilder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+    
+    webApplicationBuilder.Services.AddRequestHandlers();
 }
 
 static void ConfigureApplication(WebApplication webApplication)
