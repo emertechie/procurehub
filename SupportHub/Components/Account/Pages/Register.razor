@@ -6,6 +6,8 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using SupportHub.Data
+@using SupportHub.Features.Staff
+@using SupportHub.Infrastructure
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
@@ -14,7 +16,7 @@
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
-
+@inject ICommandHandler<CreateStaff.Command, string> CreateStaffCommandHandler
 <PageTitle>Register</PageTitle>
 
 <h1>Register</h1>
@@ -86,6 +88,10 @@
         Logger.LogInformation("User created a new account with password.");
 
         var userId = await UserManager.GetUserIdAsync(user);
+ 
+        // Create Staff record
+        await CreateStaffCommandHandler.HandleAsync(new CreateStaff.Command(userId));
+        
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
         var callbackUrl = NavigationManager.GetUriWithQueryParameters(

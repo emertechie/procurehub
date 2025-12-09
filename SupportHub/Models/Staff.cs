@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SupportHub.Data;
@@ -8,13 +9,15 @@ namespace SupportHub.Models;
 public class Staff
 {
     [Key]
+    [PersonalData]
+    // ReSharper disable once EntityFramework.ModelValidation.UnlimitedStringLength
     public string UserId { get; set; }
-    
+
     public ApplicationUser User { get; set; }
     
-    public int DepartmentId { get; set; }
+    public int? DepartmentId { get; set; }
 
-    public Department Department { get; set; }
+    public Department? Department { get; set; }
     
     public DateTime EnabledAt {  get; set; }
 
@@ -22,7 +25,7 @@ public class Staff
     
     public DateTime UpdatedAt {  get; set; }
     
-    public DateTime DeletedAt {  get; set; }
+    public DateTime? DeletedAt {  get; set; }
 }
 
 public class StaffEntityTypeConfiguration : IEntityTypeConfiguration<Staff>
