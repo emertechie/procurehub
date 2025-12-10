@@ -76,6 +76,6 @@ static void ConfigureApplication(WebApplication webApplication)
     webApplication.MapRazorComponents<App>()
         .AddInteractiveServerRenderMode();
 
-// Add additional endpoints required by the Identity /Account Razor components.
+    // Add additional endpoints required by the Identity /Account Razor components.
     webApplication.MapAdditionalIdentityEndpoints();
 }

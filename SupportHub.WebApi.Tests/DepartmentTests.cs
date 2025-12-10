@@ -24,7 +24,7 @@ public class DepartmentTests
     {
         // Assert no departments yet
         var listDeptsResp1 = await _client.GetAsync("/departments", CancellationToken);
-        var departments1 = await listDeptsResp1.Content.ReadFromJsonAsync<ListDepartments.Response[]>(CancellationToken);
+        var departments1 = await listDeptsResp1.AssertSuccessAndReadJsonAsync<ListDepartments.Response[]>(CancellationToken);
         Assert.Equal(Array.Empty<ListDepartments.Response>(), departments1);
 
         // Create department
@@ -39,17 +39,30 @@ public class DepartmentTests
         
         // Assert department returned in list
         var listDeptsResp2 = await _client.GetAsync("/departments", CancellationToken);
-        var departments2 = await listDeptsResp2.Content.ReadFromJsonAsync<ListDepartments.Response[]>(CancellationToken);
+        var departments2 = await listDeptsResp2.AssertSuccessAndReadJsonAsync<ListDepartments.Response[]>(CancellationToken);
         Assert.Equal(
             new ListDepartments.Response[] { new(newDepartmentId, "New Department") },
             departments2);
         
         // Assert can get department by ID
         var getDeptResp = await _client.GetAsync($"/departments/{newDepartmentId}", CancellationToken);
-        var department = await getDeptResp.Content.ReadFromJsonAsync<GetDepartment.Response>(CancellationToken);
+        var department = await getDeptResp.AssertSuccessAndReadJsonAsync<GetDepartment.Response>(CancellationToken);
         Assert.Equal(
             new GetDepartment.Response(newDepartmentId, "New Department"),
             department);
     }
 
+    [Fact]
+    public async Task Can_assign_staff_to_department()
+    {
+        // Set up departments
+        await Task.WhenAll(CreateDepartment("Sales"), CreateDepartment("Engineering"));
+
+        // Set up Staff
+
+        throw new NotImplementedException();
+    }
+    
+    private Task CreateDepartment(string name)
+        => _client.PostAsync("/departments", JsonContent.Create(new CreateDepartment.Request(name)), CancellationToken);
 }
