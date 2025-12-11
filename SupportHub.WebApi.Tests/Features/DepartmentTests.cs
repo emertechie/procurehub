@@ -2,7 +2,7 @@
 using System.Net.Http.Json;
 using SupportHub.Features.Departments;
 
-namespace SupportHub.WebApi.Tests;
+namespace SupportHub.WebApi.Tests.Features;
 
 public class DepartmentTests
 {
