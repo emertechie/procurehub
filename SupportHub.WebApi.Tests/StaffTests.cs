@@ -58,7 +58,24 @@ public class StaffTests
     [Fact]
     public async Task Cannot_create_staff_member_with_duplicate_email()
     {
-        throw new NotImplementedException();
+        var staffEmail = "new-staff1@example.com";
+        
+        // Create staff 1 - should work 
+        var createStaffReq1 = new CreateStaff.Request(staffEmail, "New Staff1");
+        var createDeptResp1 = await _client.PostAsync("/staff", JsonContent.Create(createStaffReq1), CancellationToken);
+        Assert.Equal(HttpStatusCode.Created, createDeptResp1.StatusCode);
+        
+        // Create staff 2 with same email - should fail 
+        var createStaffReq2 = new CreateStaff.Request(staffEmail, "New Staff2");
+        var createStaffResp2 = await _client.PostAsync("/staff", JsonContent.Create(createStaffReq2), CancellationToken);
+        
+        await createStaffResp2.AssertValidationProblemAsync(CancellationToken,
+            "Staff.UserCreationFailed",
+            "Failed to create staff user account",
+            new Dictionary<string, string[]>
+            {
+                ["DuplicateUserName"] = [$"Username '{staffEmail}' is already taken."]
+            });
     }
 
     [Fact]

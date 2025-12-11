@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using SupportHub.Common;
 using SupportHub.Data;
 using SupportHub.Features.Departments;
 using SupportHub.Features.Staff;
 using SupportHub.Infrastructure;
 using SupportHub.ServiceDefaults;
+using SupportHub.WebApi;
 
 var builder = WebApplication.CreateBuilder(args);
 RegisterServices(builder);
@@ -24,7 +26,8 @@ void ConfigureApiEndpoints(WebApplication app)
             [FromServices] IRequestHandler<ListStaff.Request, ListStaff.Response[]> handler,
             CancellationToken token
         ) => handler.HandleAsync(new ListStaff.Request(), token))
-        .WithName("GetStaff");
+        .WithName("GetStaff")
+        .WithTags("Staff");
     
     app.MapGet("/staff/{id}", async (
             string id,
@@ -32,30 +35,33 @@ void ConfigureApiEndpoints(WebApplication app)
             CancellationToken token) => await handler.HandleAsync(new GetStaff.Request(id), token) is var response
                 ? Results.Ok(response)
                 : Results.NotFound())
-        .WithName("GetStaffById");
+        .WithName("GetStaffById")
+        .WithTags("Staff");
 
     app.MapPost("/staff", async (
             CreateStaff.Request request,
-            [FromServices] IRequestHandler<CreateStaff.Request, CreateStaff.Response> handler,
+            [FromServices] IRequestHandler<CreateStaff.Request, Result<string>> handler,
             CancellationToken token
         ) =>
         {
-            var response = await handler.HandleAsync(request, token);
-            if (!response.Succeeded)
-            {
-                // TODO
-                throw new NotImplementedException();
-            }
-            return Results.Created($"/staff/{response.UserId}", null);
+            var result = await handler.HandleAsync(request, token);
+            return result.Match(
+                onSuccess: userId => Results.Created($"/staff/{userId}", new { userId }),
+                onFailure: error => error.ToProblemDetails()
+            );
         })
-        .WithName("CreateStaff");
+        .WithName("CreateStaff")
+        .WithTags("Staff")
+        .Produces<object>(StatusCodes.Status201Created)
+        .ProducesValidationProblem();
 
     // Departments
     app.MapGet("/departments", (
             [FromServices] IRequestHandler<ListDepartments.Request, ListDepartments.Response[]> handler,
             CancellationToken token
         ) => handler.HandleAsync(new ListDepartments.Request(), token))
-        .WithName("GetDepartments");
+        .WithName("GetDepartments")
+        .WithTags("Departments");
 
     app.MapGet("/departments/{id:int}", async (
             int id,
@@ -63,7 +69,8 @@ void ConfigureApiEndpoints(WebApplication app)
             CancellationToken token) => await handler.HandleAsync(new GetDepartment.Request(id), token) is var response
                 ? Results.Ok(response)
                 : Results.NotFound())
-        .WithName("GetDepartmentById");
+        .WithName("GetDepartmentById")
+        .WithTags("Departments");
 
     app.MapPost("/departments", async (
             CreateDepartment.Request request,
@@ -74,7 +81,8 @@ void ConfigureApiEndpoints(WebApplication app)
             var newId = await handler.HandleAsync(request, token);
             return Results.Created($"/departments/{newId}", null);
         })
-        .WithName("CreateDepartment");
+        .WithName("CreateDepartment")
+        .WithTags("Departments");
 }
 
 void RegisterServices(WebApplicationBuilder webApplicationBuilder)

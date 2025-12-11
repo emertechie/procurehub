@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using SupportHub.Common;
 using SupportHub.Data;
 using SupportHub.Infrastructure;
 
@@ -17,9 +18,9 @@ public static class CreateStaff
         ApplicationDbContext dbContext,
         UserManager<ApplicationUser> userManager,
         ILogger<Handler> logger)
-        : IRequestHandler<Request, Response>
+        : IRequestHandler<Request, Result<string>>
     {
-        public async Task<Response> HandleAsync(Request request, CancellationToken token)
+        public async Task<Result<string>> HandleAsync(Request request, CancellationToken token)
         {
             await using var transaction = await dbContext.Database.BeginTransactionAsync(token);
 
@@ -38,12 +39,12 @@ public static class CreateStaff
                     logger.LogWarning("Failed to create staff user with email {Email}. Errors: {Errors}",
                         request.Email,
                         string.Join(", ", result.Errors.Select(e => e.Description)));
-                    return new Response(false, result.Errors, null);
+                    return Result.Failure<string>(StaffErrors.UserCreationFailed(result.Errors));
                 }
 
                 var userId = await userManager.GetUserIdAsync(user);
 
-                // Create the Staff record
+                // Create the Staff record - linked 1-to-1 with the ASP.Net user record
                 var now = DateTime.UtcNow;
                 var staff = new Models.Staff
                 {
@@ -57,11 +58,9 @@ public static class CreateStaff
 
                 await transaction.CommitAsync(token);
 
-                logger.LogInformation("Created staff user with email {Email} and userId {UserId}",
-                    request.Email,
-                    userId);
+                logger.LogInformation("Created staff user with userId {UserId}", userId);
 
-                return new Response(true, Enumerable.Empty<IdentityError>(), userId);
+                return Result.Success(userId);
             }
             catch (Exception ex)
             {
