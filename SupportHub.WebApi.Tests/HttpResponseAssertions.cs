@@ -7,65 +7,67 @@ namespace SupportHub.WebApi.Tests;
 
 public static class HttpResponseAssertions
 {
-    public static async Task<ProblemDetails> AssertProblemDetailsAsync(this HttpResponseMessage response,
-        HttpStatusCode expectedStatus,
-        CancellationToken cancellationToken = default,
-        string? title = null,
-        string? detail = null)
+    extension(HttpResponseMessage response)
     {
-        Assert.Equal(expectedStatus, response.StatusCode);
-        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+        public async Task<ProblemDetails> AssertProblemDetailsAsync(
+            HttpStatusCode expectedStatus,
+            CancellationToken cancellationToken = default,
+            string? title = null,
+            string? detail = null)
+        {
+            Assert.Equal(expectedStatus, response.StatusCode);
+            Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
         
-        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>(cancellationToken);
-        Assert.NotNull(problemDetails);
-        Assert.Equal((int)expectedStatus, problemDetails.Status);
+            var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>(cancellationToken);
+            Assert.NotNull(problemDetails);
+            Assert.Equal((int)expectedStatus, problemDetails.Status);
         
-        if (detail != null)
-        {
-            Assert.Equal(detail, problemDetails.Detail);
+            if (detail != null)
+            {
+                Assert.Equal(detail, problemDetails.Detail);
+            }
+
+            if (title != null)
+            {
+                Assert.Equal(title, problemDetails.Title);
+            }
+
+            return problemDetails;
         }
 
-        if (title != null)
+        public async Task<HttpValidationProblemDetails> AssertValidationProblemAsync(
+            CancellationToken cancellationToken = default,
+            string? title = null,
+            string? detail = null,
+            IDictionary<string, string[]>? errors = null)
         {
-            Assert.Equal(title, problemDetails.Title);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+
+            var problemDetails = await response.Content.ReadFromJsonAsync<HttpValidationProblemDetails>(cancellationToken);
+
+            Assert.NotNull(problemDetails);
+            Assert.Equal(400, problemDetails.Status);
+            Assert.NotNull(problemDetails.Errors);
+            Assert.NotEmpty(problemDetails.Errors);
+
+            if (detail != null)
+            {
+                Assert.Equal(detail, problemDetails.Detail);
+            }
+
+            if (title != null)
+            {
+                Assert.Equal(title, problemDetails.Title);
+            }
+
+            if (errors != null)
+            {
+                Assert.Equal(errors, problemDetails.Errors);
+            }
+
+            return problemDetails;
         }
-
-        return problemDetails;
-    }
-
-    public static async Task<HttpValidationProblemDetails> AssertValidationProblemAsync(
-        this HttpResponseMessage response,
-        CancellationToken cancellationToken = default,
-        string? title = null,
-        string? detail = null,
-        IDictionary<string, string[]>? errors = null)
-    {
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
-
-        var problemDetails = await response.Content.ReadFromJsonAsync<HttpValidationProblemDetails>(cancellationToken);
-
-        Assert.NotNull(problemDetails);
-        Assert.Equal(400, problemDetails.Status);
-        Assert.NotNull(problemDetails.Errors);
-        Assert.NotEmpty(problemDetails.Errors);
-
-        if (detail != null)
-        {
-            Assert.Equal(detail, problemDetails.Detail);
-        }
-
-        if (title != null)
-        {
-            Assert.Equal(title, problemDetails.Title);
-        }
-
-        if (errors != null)
-        {
-            Assert.Equal(errors, problemDetails.Errors);
-        }
-
-        return problemDetails;
     }
 
     public static void AssertHasError(this HttpValidationProblemDetails problemDetails, string field, string? messageContains = null)
