@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using SupportHub.Common;
+using SupportHub.Constants;
 using SupportHub.Data;
 using SupportHub.Infrastructure;
 
@@ -32,17 +33,26 @@ public static class CreateStaff
                     UserName = request.Email,
                     Email = request.Email
                 };
-                var result = await userManager.CreateAsync(user, request.Password);
+                var addUserResult = await userManager.CreateAsync(user, request.Password);
 
-                if (!result.Succeeded)
+                if (!addUserResult.Succeeded)
                 {
                     logger.LogWarning("Failed to create staff user with email {Email}. Errors: {Errors}",
                         request.Email,
-                        string.Join(", ", result.Errors.Select(e => e.Description)));
-                    return Result.Failure<string>(StaffErrors.UserCreationFailed(result.Errors));
+                        string.Join(", ", addUserResult.Errors.Select(e => e.Description)));
+                    return Result.Failure<string>(StaffErrors.UserCreationFailed(addUserResult.Errors));
                 }
 
                 var userId = await userManager.GetUserIdAsync(user);
+
+                var addToRoleResult = await userManager.AddToRoleAsync(user, RoleNames.Staff);
+                if (!addToRoleResult.Succeeded)
+                {
+                    logger.LogWarning("Failed to add role to staff user {UserId}. Errors: {Errors}",
+                        userId,
+                        string.Join(", ", addToRoleResult.Errors.Select(e => e.Description)));
+                    return Result.Failure<string>(StaffErrors.UserCreationFailed(addToRoleResult.Errors));
+                }
 
                 // Create the Staff record - linked 1-to-1 with the ASP.Net user record
                 var now = DateTime.UtcNow;

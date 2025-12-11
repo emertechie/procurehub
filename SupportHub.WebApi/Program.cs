@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using SupportHub.Constants;
 using SupportHub.Data;
 using SupportHub.Infrastructure;
 using SupportHub.ServiceDefaults;
@@ -9,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 RegisterServices(builder);
 
 var webApp = builder.Build();
-ConfigureApplication(webApp);
+await ConfigureApplication(webApp);
 
 ApiEndpoints.Configure(webApp);
 
@@ -17,7 +18,7 @@ webApp.Run();
 
 return;
 
-void RegisterServices(WebApplicationBuilder webApplicationBuilder)
+void RegisterServices(WebApplicationBuilder appBuilder)
 {
     builder.Services.AddProblemDetails(options =>
     {
@@ -32,14 +33,15 @@ void RegisterServices(WebApplicationBuilder webApplicationBuilder)
 
     // Add services to the container.
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-    webApplicationBuilder.Services.AddOpenApi();
+    appBuilder.Services.AddOpenApi();
 
-    var connectionString = webApplicationBuilder.Configuration.GetConnectionString("DefaultConnection") ??
+    var connectionString = appBuilder.Configuration.GetConnectionString("DefaultConnection") ??
                            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-    webApplicationBuilder.Services.AddSupportHubDatabaseWithSqlite(connectionString);
+    appBuilder.Services.AddSupportHubDatabaseWithSqlite(connectionString);
 
     // Configure Identity with API endpoints (automatically adds Bearer token authentication)
     builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
+        .AddRoles<IdentityRole>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
 
     // Add API Key authentication scheme (AddIdentityApiEndpoints already added Bearer token)
@@ -76,31 +78,58 @@ void RegisterServices(WebApplicationBuilder webApplicationBuilder)
             policy.AddAuthenticationSchemes(IdentityConstants.BearerScheme);
             policy.RequireAuthenticatedUser();
         });
+
+        // Role-based policies
+        options.AddPolicy(RolePolicyNames.AdminOnly, policy =>
+        {
+            policy.RequireRole(RoleNames.Admin);
+        });
+
+        options.AddPolicy(RolePolicyNames.StaffOrAdmin, policy =>
+        {
+            policy.RequireRole(RoleNames.Admin, RoleNames.Staff);
+        });
     });
 
-    webApplicationBuilder.Services.AddRequestHandlers();
+    appBuilder.Services.AddRequestHandlers();
 }
 
-void ConfigureApplication(WebApplication webApplication)
+async Task ConfigureApplication(WebApplication app)
 {
     // Writes a ProblemDetails response for status codes between 400 and 599 that do not have a body
-    webApp.UseStatusCodePages();
+    app.UseStatusCodePages();
 
     // Turn unhandled exceptions into ProblemDetails response:
-    webApp.UseExceptionHandler();
+    app.UseExceptionHandler();
 
     // Configure the HTTP request pipeline.
-    if (webApplication.Environment.IsDevelopment())
+    if (app.Environment.IsDevelopment())
     {
-        webApplication.MapOpenApi();
+        app.MapOpenApi();
+        
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        
+        // Ensure DB created
+        dbContext.Database.EnsureCreated();
+
+        // Ensure roles created
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        foreach (var roleName in new[] { RoleNames.Admin, RoleNames.Staff })
+        {
+            if (!await roleManager.RoleExistsAsync(roleName))
+            {
+                await roleManager.CreateAsync(new IdentityRole(roleName));
+            }
+        }
     }
 
-    webApplication.UseHttpsRedirection();
+    app.UseHttpsRedirection();
 
     // Add authentication and authorization middleware
-    webApplication.UseAuthentication();
-    webApplication.UseAuthorization();
+    app.UseAuthentication();
+    app.UseAuthorization();
 
     // Map Identity API endpoints (login, register, refresh, etc.)
-    webApplication.MapIdentityApi<ApplicationUser>();
+    app.MapIdentityApi<ApplicationUser>();
 }

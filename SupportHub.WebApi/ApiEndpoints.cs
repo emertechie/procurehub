@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SupportHub.Common;
+using SupportHub.Constants;
 using SupportHub.Features.Departments;
 using SupportHub.Features.Staff;
 using SupportHub.Infrastructure;
@@ -62,6 +63,7 @@ public static class ApiEndpoints
                 CancellationToken token
             ) => handler.HandleAsync(new ListDepartments.Request(), token))
             .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
+            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess, RolePolicyNames.StaffOrAdmin)
             .WithName("GetDepartments")
             .WithTags("Departments");
 
