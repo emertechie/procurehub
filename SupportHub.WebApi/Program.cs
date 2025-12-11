@@ -12,21 +12,23 @@ ConfigureApplication(webApp);
 
 ApiEndpoints.Configure(webApp);
 
-// Writes a ProblemDetails response for status codes between 400 and 599 that do not have a body
-webApp.UseStatusCodePages(async handler 
-    => await Results.Problem(statusCode: handler.HttpContext.Response.StatusCode)
-        .ExecuteAsync(handler.HttpContext));
-
-// Turn unhandled exceptions into ProblemDetails response:
-webApp.UseExceptionHandler(exceptionHandler 
-    => exceptionHandler.Run(async context => await Results.Problem().ExecuteAsync(context)));
-
 webApp.Run();
 
 return;
 
 void RegisterServices(WebApplicationBuilder webApplicationBuilder)
 {
+    builder.Services.AddProblemDetails(options =>
+    {
+        options.CustomizeProblemDetails = context =>
+        {
+            context.ProblemDetails.Instance =
+                $"{context.HttpContext.Request.Method} {context.HttpContext.Request.Path}";
+
+            context.ProblemDetails.Extensions.TryAdd("requestId", context.HttpContext.TraceIdentifier);
+        };
+    });
+
     // Add services to the container.
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     webApplicationBuilder.Services.AddOpenApi();
@@ -44,6 +46,12 @@ void RegisterServices(WebApplicationBuilder webApplicationBuilder)
 
 void ConfigureApplication(WebApplication webApplication)
 {
+    // Writes a ProblemDetails response for status codes between 400 and 599 that do not have a body
+    webApp.UseStatusCodePages();
+
+    // Turn unhandled exceptions into ProblemDetails response:
+    webApp.UseExceptionHandler();
+
     // Configure the HTTP request pipeline.
     if (webApplication.Environment.IsDevelopment())
     {
