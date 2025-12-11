@@ -70,9 +70,9 @@ public class StaffTests
         var createStaffResp2 = await _client.PostAsync("/staff", JsonContent.Create(createStaffReq2), CancellationToken);
         
         await createStaffResp2.AssertValidationProblemAsync(CancellationToken,
-            "Staff.UserCreationFailed",
-            "Failed to create staff user account",
-            new Dictionary<string, string[]>
+            title: "Failed to create staff user account",
+            detail: "Staff.UserCreationFailed",
+            errors: new Dictionary<string, string[]>
             {
                 ["DuplicateUserName"] = [$"Username '{staffEmail}' is already taken."]
             });

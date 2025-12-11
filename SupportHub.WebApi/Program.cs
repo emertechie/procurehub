@@ -12,6 +12,11 @@ ConfigureApplication(webApp);
 
 ApiEndpoints.Configure(webApp);
 
+// Writes a ProblemDetails response for status codes between 400 and 599 that do not have a body
+webApp.UseStatusCodePages(async handler 
+    => await Results.Problem(statusCode: handler.HttpContext.Response.StatusCode)
+        .ExecuteAsync(handler.HttpContext));
+
 // Turn unhandled exceptions into ProblemDetails response:
 webApp.UseExceptionHandler(exceptionHandler 
     => exceptionHandler.Run(async context => await Results.Problem().ExecuteAsync(context)));

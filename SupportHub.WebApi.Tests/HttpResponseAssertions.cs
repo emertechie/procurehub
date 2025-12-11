@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,12 +7,11 @@ namespace SupportHub.WebApi.Tests;
 
 public static class HttpResponseAssertions
 {
-    public static async Task<ProblemDetails> AssertProblemDetailsAsync(
-        this HttpResponseMessage response,
+    public static async Task<ProblemDetails> AssertProblemDetailsAsync(this HttpResponseMessage response,
         HttpStatusCode expectedStatus,
         CancellationToken cancellationToken = default,
-        string? detail = null,
-        string? title = null)
+        string? title = null,
+        string? detail = null)
     {
         Assert.Equal(expectedStatus, response.StatusCode);
         Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
@@ -38,8 +36,8 @@ public static class HttpResponseAssertions
     public static async Task<HttpValidationProblemDetails> AssertValidationProblemAsync(
         this HttpResponseMessage response,
         CancellationToken cancellationToken = default,
-        string? detail = null,
         string? title = null,
+        string? detail = null,
         IDictionary<string, string[]>? errors = null)
     {
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
