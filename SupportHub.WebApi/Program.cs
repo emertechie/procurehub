@@ -12,10 +12,13 @@ ConfigureApplication(webApp);
 
 ApiEndpoints.Configure(webApp);
 
+// Turn unhandled exceptions into ProblemDetails response:
+webApp.UseExceptionHandler(exceptionHandler 
+    => exceptionHandler.Run(async context => await Results.Problem().ExecuteAsync(context)));
+
 webApp.Run();
 
 return;
-
 
 void RegisterServices(WebApplicationBuilder webApplicationBuilder)
 {
