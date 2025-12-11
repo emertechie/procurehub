@@ -4,8 +4,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SupportHub.WebApi.Tests", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SupportHub.WebApi", "SupportHub.WebApi\SupportHub.WebApi.csproj", "{017E9BAB-358A-4EFD-A1E9-1FA50950525A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SupportHub.Web", "SupportHub.Web\SupportHub.Web.csproj", "{95DA949F-E97C-4E66-A576-BF20A7648216}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SupportHub", "SupportHub\SupportHub.csproj", "{127918A3-4AC2-4F64-B495-6BBC2A366584}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SupportHub.ServiceDefaults", "SupportHub.ServiceDefaults\SupportHub.ServiceDefaults.csproj", "{6E48012C-B48C-4433-A088-2791D9E84538}"
@@ -24,10 +22,6 @@ Global
 		{017E9BAB-358A-4EFD-A1E9-1FA50950525A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{017E9BAB-358A-4EFD-A1E9-1FA50950525A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{017E9BAB-358A-4EFD-A1E9-1FA50950525A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{95DA949F-E97C-4E66-A576-BF20A7648216}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{95DA949F-E97C-4E66-A576-BF20A7648216}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{95DA949F-E97C-4E66-A576-BF20A7648216}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{95DA949F-E97C-4E66-A576-BF20A7648216}.Release|Any CPU.Build.0 = Release|Any CPU
 		{127918A3-4AC2-4F64-B495-6BBC2A366584}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{127918A3-4AC2-4F64-B495-6BBC2A366584}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{127918A3-4AC2-4F64-B495-6BBC2A366584}.Release|Any CPU.ActiveCfg = Release|Any CPU
