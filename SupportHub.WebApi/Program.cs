@@ -3,6 +3,7 @@ using SupportHub.Data;
 using SupportHub.Infrastructure;
 using SupportHub.ServiceDefaults;
 using SupportHub.WebApi;
+using SupportHub.WebApi.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 RegisterServices(builder);
@@ -37,9 +38,51 @@ void RegisterServices(WebApplicationBuilder webApplicationBuilder)
                            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
     webApplicationBuilder.Services.AddSupportHubDatabaseWithSqlite(connectionString);
 
-    builder.Services.AddAuthorization();
+    // Configure Identity with API endpoints
     builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
-        .AddEntityFrameworkStores<ApplicationDbContext>(); ;
+        .AddEntityFrameworkStores<ApplicationDbContext>();
+
+    // Configure Authentication with multiple schemes
+    builder.Services.AddAuthentication(options =>
+        {
+            // Use IdentityConstants.BearerScheme as default for Identity integration
+            options.DefaultAuthenticateScheme = IdentityConstants.BearerScheme;
+            options.DefaultChallengeScheme = IdentityConstants.BearerScheme;
+        })
+        .AddBearerToken(IdentityConstants.BearerScheme) // This is what Identity API uses
+        .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(
+            ApiKeyAuthenticationOptions.DefaultScheme,
+            options => {});
+
+    // Register API Key validator
+    builder.Services.AddScoped<IApiKeyValidator, ApiKeyValidator>();
+
+    // Configure Authorization with flexible policies
+    builder.Services.AddAuthorization(options =>
+    {
+        // Policy that accepts either Bearer token or API Key
+        options.AddPolicy("ApiAccess", policy =>
+        {
+            policy.AddAuthenticationSchemes(
+                IdentityConstants.BearerScheme,
+                ApiKeyAuthenticationOptions.DefaultScheme);
+            policy.RequireAuthenticatedUser();
+        });
+
+        // Policy for API Keys only
+        options.AddPolicy("ApiKeyOnly", policy =>
+        {
+            policy.AddAuthenticationSchemes(ApiKeyAuthenticationOptions.DefaultScheme);
+            policy.RequireAuthenticatedUser();
+        });
+
+        // Policy for Bearer token only (for user-specific actions)
+        options.AddPolicy("UserOnly", policy =>
+        {
+            policy.AddAuthenticationSchemes(IdentityConstants.BearerScheme);
+            policy.RequireAuthenticatedUser();
+        });
+    });
 
     webApplicationBuilder.Services.AddRequestHandlers();
 }
@@ -59,6 +102,11 @@ void ConfigureApplication(WebApplication webApplication)
     }
 
     webApplication.UseHttpsRedirection();
-    
-    webApplication.MapIdentityApi<IdentityUser>();
+
+    // Add authentication and authorization middleware
+    webApplication.UseAuthentication();
+    webApplication.UseAuthorization();
+
+    // Map Identity API endpoints (login, register, refresh, etc.)
+    webApplication.MapIdentityApi<ApplicationUser>();
 }
