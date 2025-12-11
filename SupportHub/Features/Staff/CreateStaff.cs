@@ -16,7 +16,6 @@ public static class CreateStaff
     public class Handler(
         ApplicationDbContext dbContext,
         UserManager<ApplicationUser> userManager,
-        // IUserStore<ApplicationUser> userStore,
         ILogger<Handler> logger)
         : IRequestHandler<Request, Response>
     {
@@ -32,8 +31,6 @@ public static class CreateStaff
                     UserName = request.Email,
                     Email = request.Email
                 };
-                // await userStore.SetUserNameAsync(user, request.Email, token);
-                // await EmailStore.SetEmailAsync(user, request.Email, token);
                 var result = await userManager.CreateAsync(user, request.Password);
 
                 if (!result.Succeeded)
@@ -73,17 +70,5 @@ public static class CreateStaff
                 throw;
             }
         }
-
-        /*private IUserEmailStore<ApplicationUser> EmailStore
-        {
-            get
-            {
-                if (!userManager.SupportsUserEmail)
-                {
-                    throw new NotSupportedException("The user store must support user email.");
-                }
-                return (IUserEmailStore<ApplicationUser>)userStore;
-            }
-        }*/
     }
 }
