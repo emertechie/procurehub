@@ -38,21 +38,15 @@ void RegisterServices(WebApplicationBuilder webApplicationBuilder)
                            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
     webApplicationBuilder.Services.AddSupportHubDatabaseWithSqlite(connectionString);
 
-    // Configure Identity with API endpoints
+    // Configure Identity with API endpoints (automatically adds Bearer token authentication)
     builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
 
-    // Configure Authentication with multiple schemes
-    builder.Services.AddAuthentication(options =>
-        {
-            // Use IdentityConstants.BearerScheme as default for Identity integration
-            options.DefaultAuthenticateScheme = IdentityConstants.BearerScheme;
-            options.DefaultChallengeScheme = IdentityConstants.BearerScheme;
-        })
-        .AddBearerToken(IdentityConstants.BearerScheme) // This is what Identity API uses
+    // Add API Key authentication scheme (AddIdentityApiEndpoints already added Bearer token)
+    builder.Services.AddAuthentication()
         .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(
             ApiKeyAuthenticationOptions.DefaultScheme,
-            options => {});
+            options => { });
 
     // Register API Key validator
     builder.Services.AddScoped<IApiKeyValidator, ApiKeyValidator>();
@@ -61,7 +55,7 @@ void RegisterServices(WebApplicationBuilder webApplicationBuilder)
     builder.Services.AddAuthorization(options =>
     {
         // Policy that accepts either Bearer token or API Key
-        options.AddPolicy("ApiAccess", policy =>
+        options.AddPolicy(AuthorizationPolicyNames.ApiKeyOrUserAccess, policy =>
         {
             policy.AddAuthenticationSchemes(
                 IdentityConstants.BearerScheme,
@@ -70,14 +64,14 @@ void RegisterServices(WebApplicationBuilder webApplicationBuilder)
         });
 
         // Policy for API Keys only
-        options.AddPolicy("ApiKeyOnly", policy =>
+        options.AddPolicy(AuthorizationPolicyNames.ApiKeyOnly, policy =>
         {
             policy.AddAuthenticationSchemes(ApiKeyAuthenticationOptions.DefaultScheme);
             policy.RequireAuthenticatedUser();
         });
 
         // Policy for Bearer token only (for user-specific actions)
-        options.AddPolicy("UserOnly", policy =>
+        options.AddPolicy(AuthorizationPolicyNames.UserOnly, policy =>
         {
             policy.AddAuthenticationSchemes(IdentityConstants.BearerScheme);
             policy.RequireAuthenticatedUser();

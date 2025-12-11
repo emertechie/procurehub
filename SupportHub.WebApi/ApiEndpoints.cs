@@ -21,6 +21,7 @@ public static class ApiEndpoints
                 [FromServices] IRequestHandler<ListStaff.Request, ListStaff.Response[]> handler,
                 CancellationToken token
             ) => handler.HandleAsync(new ListStaff.Request(), token))
+            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
             .WithName("GetStaff")
             .WithTags("Staff");
 
@@ -30,6 +31,7 @@ public static class ApiEndpoints
                 CancellationToken token) => await handler.HandleAsync(new GetStaff.Request(id), token) is var response
                 ? Results.Ok(response)
                 : Results.NotFound())
+            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
             .WithName("GetStaffById")
             .WithTags("Staff");
 
@@ -45,6 +47,7 @@ public static class ApiEndpoints
                     error => error.ToProblemDetails()
                 );
             })
+            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
             .WithName("CreateStaff")
             .WithTags("Staff")
             .Produces<object>(StatusCodes.Status201Created)
@@ -58,6 +61,7 @@ public static class ApiEndpoints
                 [FromServices] IRequestHandler<ListDepartments.Request, ListDepartments.Response[]> handler,
                 CancellationToken token
             ) => handler.HandleAsync(new ListDepartments.Request(), token))
+            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
             .WithName("GetDepartments")
             .WithTags("Departments");
 
@@ -68,6 +72,7 @@ public static class ApiEndpoints
                 await handler.HandleAsync(new GetDepartment.Request(id), token) is var response
                     ? Results.Ok(response)
                     : Results.NotFound())
+            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
             .WithName("GetDepartmentById")
             .WithTags("Departments");
 
@@ -80,6 +85,7 @@ public static class ApiEndpoints
                 var newId = await handler.HandleAsync(request, token);
                 return Results.Created($"/departments/{newId}", null);
             })
+            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
             .WithName("CreateDepartment")
             .WithTags("Departments");
     }
