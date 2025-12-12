@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using SupportHub.Data;
 using SupportHub.Infrastructure;
 
 namespace SupportHub.Features.Staff;

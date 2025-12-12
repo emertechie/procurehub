@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using SupportHub.Common;
 using SupportHub.Constants;
-using SupportHub.Data;
 using SupportHub.Infrastructure;
+using SupportHub.Models;
 
 namespace SupportHub.Features.Staff;
 

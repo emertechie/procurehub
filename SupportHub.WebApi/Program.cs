@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Identity;
+using SupportHub;
 using SupportHub.Constants;
 using SupportHub.Data;
 using SupportHub.Infrastructure;
+using SupportHub.Models;
 using SupportHub.ServiceDefaults;
 using SupportHub.WebApi;
 using SupportHub.WebApi.Authentication;

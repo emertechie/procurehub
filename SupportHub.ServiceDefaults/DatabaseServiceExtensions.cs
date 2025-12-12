@@ -1,7 +1,6 @@
 // SupportHub.Infrastructure/DatabaseServiceExtensions.cs
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using SupportHub.Data;
 
 namespace SupportHub.ServiceDefaults;
 
@@ -30,7 +29,8 @@ public static class DatabaseServiceExtensions
         string connectionString)
     {
         return services.AddSupportHubDatabase(options =>
-            options.UseSqlite(connectionString));
+            options.UseSqlite(connectionString, dbOptions =>
+                dbOptions.MigrationsAssembly("SupportHub")));
     }
 
     /*/// <summary>

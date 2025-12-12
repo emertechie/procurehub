@@ -1,4 +1,3 @@
-using SupportHub.Data;
 using SupportHub.Infrastructure;
 using SupportHub.Models;
 
