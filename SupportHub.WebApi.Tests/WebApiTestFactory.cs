@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -15,6 +16,16 @@ public class WebApiTestFactory(ITestOutputHelper outputHelper) : WebApplicationF
     
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.ConfigureAppConfiguration((context, config) =>
+        {
+            // Add test configuration for admin user
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["DevAdminUser:Email"] = "test-admin@supporthub.local",
+                ["DevAdminUser:Password"] = "TestAdmin123!"
+            });
+        });
+
         builder.ConfigureLogging(logging =>
         {
             logging.AddXUnit(outputHelper);

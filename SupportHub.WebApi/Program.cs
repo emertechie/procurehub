@@ -5,6 +5,7 @@ using SupportHub.Infrastructure;
 using SupportHub.ServiceDefaults;
 using SupportHub.WebApi;
 using SupportHub.WebApi.Authentication;
+using SupportHub.WebApi.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 RegisterServices(builder);
@@ -108,20 +109,19 @@ async Task ConfigureApplication(WebApplication app)
         app.MapOpenApi();
         
         using var scope = app.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        
+
         // Ensure DB created
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         dbContext.Database.EnsureCreated();
 
-        // Ensure roles created
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        foreach (var roleName in new[] { RoleNames.Admin, RoleNames.Staff })
-        {
-            if (!await roleManager.RoleExistsAsync(roleName))
-            {
-                await roleManager.CreateAsync(new IdentityRole(roleName));
-            }
-        }
+        // Seed database with roles and initial admin user
+        await DataSeeder.SeedAsync(
+            dbContext,
+            scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>(),
+            scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>(),
+            scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>(),
+            app.Configuration.GetRequiredString("DevAdminUser:Email"),
+            app.Configuration.GetRequiredString("DevAdminUser:Password"));
     }
 
     app.UseHttpsRedirection();

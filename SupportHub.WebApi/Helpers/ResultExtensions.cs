@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SupportHub.Common;
 
-namespace SupportHub.WebApi;
+namespace SupportHub.WebApi.Helpers;
 
 public static class ResultExtensions
 {

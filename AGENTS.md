@@ -1,1 +1,1 @@
-Never say "Great question!" or "You're absolutely right!" or similar when replying to questions.
+* Never say "Great question!" or "You're absolutely right!" or similar when replying to questions.

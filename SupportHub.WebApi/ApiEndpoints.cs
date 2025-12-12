@@ -4,6 +4,7 @@ using SupportHub.Constants;
 using SupportHub.Features.Departments;
 using SupportHub.Features.Staff;
 using SupportHub.Infrastructure;
+using SupportHub.WebApi.Helpers;
 
 namespace SupportHub.WebApi;
 
