@@ -48,7 +48,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
             options.Stores.MaxLengthForKeys = 128;
             options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
         })
-        .AddRoles<IdentityRole>()
+        .AddRoles<ApplicationRole>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
 
     // Add API Key authentication scheme (AddIdentityApiEndpoints already added Bearer token)
@@ -124,7 +124,7 @@ async Task ConfigureApplication(WebApplication app)
         await DataSeeder.SeedAsync(
             dbContext,
             scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>(),
-            scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>(),
+            scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>(),
             scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>(),
             app.Configuration.GetRequiredString("DevAdminUser:Email"),
             app.Configuration.GetRequiredString("DevAdminUser:Password"));

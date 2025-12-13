@@ -10,7 +10,7 @@ public sealed class DataSeeder
     public static async Task SeedAsync(
         ApplicationDbContext dbContext,
         UserManager<ApplicationUser> userManager,
-        RoleManager<IdentityRole> roleManager,
+        RoleManager<ApplicationRole> roleManager,
         ILogger<DataSeeder> logger,
         string adminEmail,
         string adminPassword)
@@ -23,7 +23,7 @@ public sealed class DataSeeder
     }
     
     private static async Task SeedRolesAsync(
-        RoleManager<IdentityRole> roleManager,
+        RoleManager<ApplicationRole> roleManager,
         ILogger<DataSeeder> logger)
     {
         var roles = new[] { RoleNames.Admin, RoleNames.Staff };
@@ -33,7 +33,7 @@ public sealed class DataSeeder
             if (!await roleManager.RoleExistsAsync(roleName))
             {
                 logger.LogWarning("Creating role '{RoleName}'", roleName);
-                await roleManager.CreateAsync(new IdentityRole(roleName));
+                await roleManager.CreateAsync(new ApplicationRole(roleName));
             }
         }
     }
