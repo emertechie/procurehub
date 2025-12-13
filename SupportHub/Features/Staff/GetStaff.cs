@@ -21,6 +21,7 @@ public static class GetStaff
         public Task<Response?> HandleAsync(Request request, CancellationToken token)
         {
             return dbContext.Staff
+                .AsNoTracking()
                 .Where(s => s.UserId == request.Id)
                 .Include(s => s.User)
                 .Include(s => s.Department)

@@ -17,6 +17,7 @@ public static class GetDepartment
         public Task<Response?> HandleAsync(Request request, CancellationToken token)
         {
             return dbContext.Departments
+                .AsNoTracking()
                 .Where(d => d.Id == request.id)
                 .Select(d => new Response(d.Id, d.Name!))
                 .FirstOrDefaultAsync(token);

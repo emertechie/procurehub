@@ -21,8 +21,9 @@ public static class ListStaff
         public Task<Response[]> HandleAsync(Request request, CancellationToken token)
         {
             return dbContext.Staff
-                .Include(s => s.User)
+                .AsNoTracking()
                 .Include(s => s.Department)
+                .Where(s => s.User.UserRoles.Any(ur => ur.Role.Name == "Staff"))
                 .Select(s => new Response(
                     s.UserId,
                     s.User.Email!,

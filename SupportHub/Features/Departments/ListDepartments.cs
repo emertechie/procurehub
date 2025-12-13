@@ -17,6 +17,7 @@ public static class ListDepartments
         public Task<Response[]> HandleAsync(Request request, CancellationToken token)
         {
             return dbContext.Departments
+                .AsNoTracking()
                 .Select(d => new Response(d.Id, d.Name!))
                 .ToArrayAsync(token);
         }
