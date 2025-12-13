@@ -1,6 +1,14 @@
 
 # Migrations
 
+## Generating migration
+
+Run command in the `SupportHub.WebApi` dir  
+
+```
+dotnet ef migrations add Test -p ../SupportHub
+```
+
 ## Generating migration SQL
 
 Usage: dotnet ef migrations script [arguments] [options]
