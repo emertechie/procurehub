@@ -12,6 +12,9 @@ namespace SupportHub.WebApi.Tests;
 public class WebApiTestFactory(ITestOutputHelper outputHelper) : WebApplicationFactory<Program>
 {
     private SqliteConnection? _connection;
+
+    public static readonly string AdminEmail = "test-admin@supporthub.local";
+    public static readonly string AdminPassword = "TestAdmin123!";
     
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -20,8 +23,8 @@ public class WebApiTestFactory(ITestOutputHelper outputHelper) : WebApplicationF
             // Add test configuration for admin user
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["DevAdminUser:Email"] = "test-admin@supporthub.local",
-                ["DevAdminUser:Password"] = "TestAdmin123!"
+                ["DevAdminUser:Email"] = AdminEmail,
+                ["DevAdminUser:Password"] = AdminPassword
             });
         });
 

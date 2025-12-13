@@ -99,6 +99,9 @@ void RegisterServices(WebApplicationBuilder appBuilder)
     });
 
     appBuilder.Services.AddRequestHandlers();
+    
+    // Filter that customizes the /register endpoint handling
+    appBuilder.Services.AddScoped<RegistrationFilter>();
 }
 
 async Task ConfigureApplication(WebApplication app)
@@ -137,5 +140,24 @@ async Task ConfigureApplication(WebApplication app)
     app.UseAuthorization();
 
     // Map Identity API endpoints (login, register, refresh, etc.)
-    app.MapIdentityApi<ApplicationUser>();
+    var identityEndpointsConventionBuilder = app.MapIdentityApi<ApplicationUser>();
+        
+    CustomizeRegistrationLogic(identityEndpointsConventionBuilder);
+}
+
+// Use an endpoint filter to customize the /register endpoint logic
+// (Only allow invited users and automatically create a Staff record)
+void CustomizeRegistrationLogic(IEndpointConventionBuilder endpointConventionBuilder)
+{
+    endpointConventionBuilder.Add(endpointBuilder =>
+    {
+        if (endpointBuilder is RouteEndpointBuilder { RoutePattern.RawText: "/register" } routeEndpoint)
+        {
+            endpointBuilder.FilterFactories.Add((context, next) => invocationContext =>
+            {
+                var filter = invocationContext.HttpContext.RequestServices.GetRequiredService<RegistrationFilter>();
+                return filter.InvokeAsync(invocationContext, next);
+            });
+        }
+    });
 }
