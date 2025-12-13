@@ -103,7 +103,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
     
     // Filter that customizes the /register endpoint handling
     appBuilder.Services.AddScoped<RegistrationFilter>();
-    appBuilder.Services.AddScoped<IRegistrationValidator, DummyRegistrationValidator>();
+    appBuilder.Services.AddScoped<IStaffRegistrationValidator, DummyStaffRegistrationValidator>();
 }
 
 async Task ConfigureApplication(WebApplication app)
@@ -143,7 +143,7 @@ async Task ConfigureApplication(WebApplication app)
 
     // Map Identity API endpoints (login, register, refresh, etc.)
     var identityEndpointsConventionBuilder = app.MapIdentityApi<ApplicationUser>();
-        
+
     CustomizeRegistrationLogic(identityEndpointsConventionBuilder);
 }
 

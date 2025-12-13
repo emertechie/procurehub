@@ -1,9 +1,7 @@
-
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
-using SupportHub.Constants;
+using SupportHub.Common;
 using SupportHub.Features.Staff.Registration;
-using SupportHub.Models;
+using SupportHub.Infrastructure;
 
 namespace SupportHub.WebApi;
 
@@ -11,77 +9,56 @@ namespace SupportHub.WebApi;
 
 public class RegistrationFilter(
     ApplicationDbContext dbContext,
-    UserManager<ApplicationUser> userManager,
-    IRegistrationValidator registrationValidator,
+    IStaffRegistrationValidator staffRegistrationValidator,
+    IRequestHandler<RegisterStaff.Request, Result<string>> registerStaffHandler,
     ILogger<RegistrationFilter> logger) : IEndpointFilter
 {
-
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
         // Get the registration request from the endpoint arguments
         var registration = context.GetArgument<RegisterRequest>(0);
 
-        var isRegistrationAllowed = await registrationValidator.IsRegistrationAllowed(registration.Email);
+        var cancellationToken = context.HttpContext.RequestAborted;
+
+        var isRegistrationAllowed = await staffRegistrationValidator.IsRegistrationAllowedAsync(registration.Email);
         if (!isRegistrationAllowed)
         {
-            logger.LogWarning("Registration attempt with unauthorized email: {Email}", registration.Email);
+            logger.LogWarning("Staff registration attempt with unauthorized email: {Email}", registration.Email);
             
             return Results.ValidationProblem(new Dictionary<string, string[]>
             {
-                { "Email", new[] { "This email is not authorized to register." } }
+                { "Email", ["This email is not authorized to register."] }
             });
         }
 
-        logger.LogInformation("Allowing registration for email: {Email}", registration.Email);
+        logger.LogInformation("Allowing registration for staff email: {Email}", registration.Email);
 
-        // Allow the registration to proceed
-        var result = await next(context);
+        // TODO: Known issue with email possibly being sent even if transaction failed.
+        // Will have to do deeper customization to solve (E.g. write to a queue table in the same transaction,
+        // or just completely replace the /register endpoint with own implementation). Not tackling in this sample repo.
 
-        // Microsoft.AspNetCore.Http.HttpResults.Results`2[Microsoft.AspNetCore.Http.HttpResults.Ok,Microsoft.AspNetCore.Http.HttpResults.ValidationProblem]
-        // If registration succeeded, create the Staff entity
-        if (result is Microsoft.AspNetCore.Http.HttpResults.Results<Microsoft.AspNetCore.Http.HttpResults.Ok, Microsoft.AspNetCore.Http.HttpResults.ValidationProblem>)
-        {
-            await CreateStaffEntityAsync(registration.Email);
-        }
-
-        return result;
-    }
-
-    private async Task CreateStaffEntityAsync(string email)
-    {
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
         try
         {
-            var user = await userManager.FindByEmailAsync(email);
-            if (user == null)
+            // Allow the ASP.Net user registration to proceed
+            var result = await next(context);
+
+            // If user registration succeeded, create the Staff entity
+            if (result is Microsoft.AspNetCore.Http.HttpResults.Results<Microsoft.AspNetCore.Http.HttpResults.Ok,
+                    Microsoft.AspNetCore.Http.HttpResults.ValidationProblem>)
             {
-                logger.LogWarning("User not found after registration: {Email}", email);
-                return;
+                await registerStaffHandler.HandleAsync(new RegisterStaff.Request(registration.Email), cancellationToken);
             }
 
-            var userId = await userManager.GetUserIdAsync(user);
+            await transaction.CommitAsync(cancellationToken);
 
-            // Assign Staff role
-            await userManager.AddToRoleAsync(user, RoleNames.Staff);
-
-            // Create linked Staff entity
-            var now = DateTime.UtcNow;
-            var staff = new Models.Staff
-            {
-                UserId = userId,
-                CreatedAt = now,
-                UpdatedAt = now,
-                EnabledAt = now
-            };
-
-            dbContext.Staff.Add(staff);
-            await dbContext.SaveChangesAsync();
-
-            logger.LogInformation("Created Staff entity for user {UserId}", userId);
+            return result;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to create Staff entity for email {Email}", email);
-            // Note: User account was already created. Consider cleanup or manual intervention.
+            logger.LogError(ex, "Error creating staff user with email {Email}", registration.Email);
+            await transaction.RollbackAsync(cancellationToken);
+            throw;
         }
     }
 }

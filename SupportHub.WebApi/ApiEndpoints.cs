@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using SupportHub.Common;
 using SupportHub.Constants;
 using SupportHub.Features.Departments;
 using SupportHub.Features.Staff;
 using SupportHub.Infrastructure;
-using SupportHub.WebApi.Helpers;
 
 namespace SupportHub.WebApi;
 
@@ -18,7 +16,6 @@ public static class ApiEndpoints
 
     private static void ConfigureStaffEndpoints(WebApplication app)
     {
-        // Staff
         app.MapGet("/staff", (
                 [FromServices] IRequestHandler<ListStaff.Request, ListStaff.Response[]> handler,
                 CancellationToken token
@@ -36,29 +33,10 @@ public static class ApiEndpoints
             .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
             .WithName("GetStaffById")
             .WithTags("Staff");
-
-        app.MapPost("/staff", async (
-                CreateStaff.Request request,
-                [FromServices] IRequestHandler<CreateStaff.Request, Result<string>> handler,
-                CancellationToken token
-            ) =>
-            {
-                var result = await handler.HandleAsync(request, token);
-                return result.Match(
-                    userId => Results.Created($"/staff/{userId}", new { userId }),
-                    error => error.ToProblemDetails()
-                );
-            })
-            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
-            .WithName("CreateStaff")
-            .WithTags("Staff")
-            .Produces<object>(StatusCodes.Status201Created)
-            .ProducesValidationProblem();
     }
 
     private static void ConfigureDepartmentEndpoints(WebApplication app)
     {
-        // Departments
         app.MapGet("/departments", (
                 [FromServices] IRequestHandler<ListDepartments.Request, ListDepartments.Response[]> handler,
                 CancellationToken token
