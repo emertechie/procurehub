@@ -3,7 +3,7 @@ namespace SupportHub.Features.Staff.Registration;
 public class DummyStaffRegistrationValidator : IStaffRegistrationValidator
 {
     // TODO: Move this to a database table or configuration
-    private readonly HashSet<string> _allowedEmails = new(StringComparer.OrdinalIgnoreCase)
+    public static readonly HashSet<string> AllowedEmails = new(StringComparer.OrdinalIgnoreCase)
     {
         "staff1@example.com",
         "staff2@example.com",
@@ -12,6 +12,6 @@ public class DummyStaffRegistrationValidator : IStaffRegistrationValidator
 
     public Task<bool> IsRegistrationAllowedAsync(string userEmail)
     {
-        return Task.FromResult(_allowedEmails.Contains(userEmail));
+        return Task.FromResult(AllowedEmails.Contains(userEmail));
     }
 }

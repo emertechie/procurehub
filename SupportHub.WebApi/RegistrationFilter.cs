@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity.Data;
 using SupportHub.Common;
 using SupportHub.Features.Staff.Registration;
@@ -41,18 +42,17 @@ public class RegistrationFilter(
         try
         {
             // Allow the ASP.Net user registration to proceed
-            var result = await next(context);
-
-            // If user registration succeeded, create the Staff entity
-            if (result is Microsoft.AspNetCore.Http.HttpResults.Results<Microsoft.AspNetCore.Http.HttpResults.Ok,
-                    Microsoft.AspNetCore.Http.HttpResults.ValidationProblem>)
+            var results = (Results<Ok, ValidationProblem>)(await next(context))!;
+            if (results.Result is not Ok)
             {
-                await registerStaffHandler.HandleAsync(new RegisterStaff.Request(registration.Email), cancellationToken);
+                return results;
             }
+
+            await registerStaffHandler.HandleAsync(new RegisterStaff.Request(registration.Email), cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
 
-            return result;
+            return results;
         }
         catch (Exception ex)
         {
