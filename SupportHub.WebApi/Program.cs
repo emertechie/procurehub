@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using SupportHub;
 using SupportHub.Constants;
 using SupportHub.Data;
+using SupportHub.Features.Staff.Registration;
 using SupportHub.Infrastructure;
 using SupportHub.Models;
 using SupportHub.ServiceDefaults;
@@ -102,6 +103,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
     
     // Filter that customizes the /register endpoint handling
     appBuilder.Services.AddScoped<RegistrationFilter>();
+    appBuilder.Services.AddScoped<IRegistrationValidator, DummyRegistrationValidator>();
 }
 
 async Task ConfigureApplication(WebApplication app)

@@ -2,33 +2,27 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using SupportHub.Constants;
+using SupportHub.Features.Staff.Registration;
 using SupportHub.Models;
 
 namespace SupportHub.WebApi;
 
-// TODO: extract handler to check if email allowed
 // TODO: use domain handler to create Staff record
 
 public class RegistrationFilter(
     ApplicationDbContext dbContext,
     UserManager<ApplicationUser> userManager,
+    IRegistrationValidator registrationValidator,
     ILogger<RegistrationFilter> logger) : IEndpointFilter
 {
-    // TODO: Move this to a database table or configuration
-    private static readonly HashSet<string> AllowedEmails = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "staff1@example.com",
-        "staff2@example.com",
-        "test@test.com"
-    };
 
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
         // Get the registration request from the endpoint arguments
         var registration = context.GetArgument<RegisterRequest>(0);
 
-        // Check if email is in allowed list
-        if (!AllowedEmails.Contains(registration.Email))
+        var isRegistrationAllowed = await registrationValidator.IsRegistrationAllowed(registration.Email);
+        if (!isRegistrationAllowed)
         {
             logger.LogWarning("Registration attempt with unauthorized email: {Email}", registration.Email);
             
