@@ -43,7 +43,11 @@ void RegisterServices(WebApplicationBuilder appBuilder)
     appBuilder.Services.AddSupportHubDatabaseWithSqlite(connectionString);
 
     // Configure Identity with API endpoints (automatically adds Bearer token authentication)
-    builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
+    builder.Services.AddIdentityApiEndpoints<ApplicationUser>(options =>
+        {
+            options.Stores.MaxLengthForKeys = 128;
+            options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
+        })
         .AddRoles<IdentityRole>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
 
