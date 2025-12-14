@@ -118,8 +118,28 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
         [Fact]
         public async Task Staff_member_cannot_create_another_staff_member()
         {
-            // TODO: ensures Admin role only
-            throw new NotImplementedException();
+            const string email1 = "staff1@example.com";
+            const string email2 = "staff2@example.com";
+            
+            // Log in as admin to be able to manage staff
+            await LoginAsAdminAsync();
+
+            // Admin creates Staff user
+            var newStaffReq1 = JsonContent.Create(new { email = email1, password = ValidStaffPassword });
+            var regResp1 = await Client.PostAsync("/staff", newStaffReq1, CancellationToken);
+            Assert.Equal(HttpStatusCode.Created, regResp1.StatusCode);
+            
+            // Log in as Staff member
+            await LoginAsync(email1, ValidStaffPassword);
+
+            // Try to create another staff member - should *fail*
+            var newStaffReq = JsonContent.Create(new { email = email2, password = ValidStaffPassword });
+            var regResp = await Client.PostAsync("/staff", newStaffReq, CancellationToken);
+            await regResp.AssertProblemDetailsAsync(
+                HttpStatusCode.Forbidden,
+                CancellationToken,
+                title: "Forbidden",
+                instance: "POST /staff");
         }
 
         [Fact]

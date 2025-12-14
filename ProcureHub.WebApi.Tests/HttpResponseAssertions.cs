@@ -13,7 +13,8 @@ public static class HttpResponseAssertions
             HttpStatusCode expectedStatus,
             CancellationToken cancellationToken = default,
             string? title = null,
-            string? detail = null)
+            string? detail = null,
+            string? instance = null)
         {
             Assert.Equal(expectedStatus, response.StatusCode);
             Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
@@ -30,6 +31,11 @@ public static class HttpResponseAssertions
             if (title != null)
             {
                 Assert.Equal(title, problemDetails.Title);
+            }
+
+            if (instance != null)
+            {
+                Assert.Equal(instance, problemDetails.Instance);
             }
 
             return problemDetails;
