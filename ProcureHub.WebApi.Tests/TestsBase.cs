@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
@@ -17,12 +18,14 @@ public abstract class TestsBase
 
     protected async Task LoginAsAdminAsync()
     {
-        var loginRequest = JsonContent.Create(new
-        {
-            email = WebApiTestFactory.AdminEmail,
-            password = WebApiTestFactory.AdminPassword
-        });
+        await LoginAsync(WebApiTestFactory.AdminEmail, WebApiTestFactory.AdminPassword);
+    }
+
+    protected async Task LoginAsync(string email, string password)
+    {
+        var loginRequest = JsonContent.Create(new { email, password });
         var loginResp = await Client.PostAsync("/login", loginRequest, CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, loginResp.StatusCode);
         var loginResult = await loginResp.Content.ReadFromJsonAsync<LoginResponse>(CancellationToken);
 
         Client.DefaultRequestHeaders.Authorization =  new AuthenticationHeaderValue("Bearer", loginResult!.AccessToken);
