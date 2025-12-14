@@ -13,8 +13,6 @@ public static class ListStaff
         int? DepartmentId,
         string? DepartmentName);
 
-    // TODO: validator
-
     public class Handler(ApplicationDbContext dbContext)
         : IRequestHandler<Request, Response[]>
     {

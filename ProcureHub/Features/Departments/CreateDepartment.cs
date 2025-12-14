@@ -7,8 +7,6 @@ public static class CreateDepartment
 {
     public record Request(string Name);
 
-    // TODO: validator
-
     public class Handler(ApplicationDbContext dbContext)
         : IRequestHandler<Request, int>
     {

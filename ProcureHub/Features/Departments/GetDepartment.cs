@@ -9,8 +9,6 @@ public static class GetDepartment
 
     public record Response(int Id, string Name);
 
-    // TODO: validator
-
     public class Handler(ApplicationDbContext dbContext)
         : IRequestHandler<Request, Response?>
     {
