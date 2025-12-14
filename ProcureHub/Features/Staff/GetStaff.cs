@@ -23,7 +23,6 @@ public static class GetStaff
             return dbContext.Staff
                 .AsNoTracking()
                 .Where(s => s.UserId == request.Id)
-                .Where(s => s.User.UserRoles.Any(ur => ur.Role.Name == "Staff"))
                 .Include(s => s.User)
                 .Include(s => s.Department)
                 .Select(s => new Response(

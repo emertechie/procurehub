@@ -2,12 +2,12 @@ using Microsoft.AspNetCore.Identity;
 using ProcureHub;
 using ProcureHub.Constants;
 using ProcureHub.Data;
-using ProcureHub.Features.Staff.Registration;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
 using ProcureHub.ServiceDefaults;
 using ProcureHub.WebApi;
 using ProcureHub.WebApi.Authentication;
+using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -92,18 +92,9 @@ void RegisterServices(WebApplicationBuilder appBuilder)
         {
             policy.RequireRole(RoleNames.Admin);
         });
-
-        options.AddPolicy(RolePolicyNames.StaffOrAdmin, policy =>
-        {
-            policy.RequireRole(RoleNames.Admin, RoleNames.Staff);
-        });
     });
 
     appBuilder.Services.AddRequestHandlers();
-    
-    // Filter that customizes the /register endpoint handling
-    appBuilder.Services.AddScoped<RegistrationFilter>();
-    appBuilder.Services.AddScoped<IStaffRegistrationValidator, DummyStaffRegistrationValidator>();
 }
 
 async Task ConfigureApplication(WebApplication app)
@@ -144,22 +135,22 @@ async Task ConfigureApplication(WebApplication app)
     // Map Identity API endpoints (login, register, refresh, etc.)
     var identityEndpointsConventionBuilder = app.MapIdentityApi<ApplicationUser>();
 
-    CustomizeRegistrationLogic(identityEndpointsConventionBuilder);
+    // NOTE: Crude approach for demo app to block self-registration. (Only admins can create / invite staff) 
+    BlockRegisterEndpoint(identityEndpointsConventionBuilder);
 }
 
-// Use an endpoint filter to customize the /register endpoint logic
-// (Only allow invited users and automatically create a Staff record)
-void CustomizeRegistrationLogic(IEndpointConventionBuilder endpointConventionBuilder)
+void BlockRegisterEndpoint(IEndpointConventionBuilder endpointConventionBuilder)
 {
     endpointConventionBuilder.Add(endpointBuilder =>
     {
-        if (endpointBuilder is RouteEndpointBuilder { RoutePattern.RawText: "/register" } routeEndpoint)
+        if (endpointBuilder is RouteEndpointBuilder { RoutePattern.RawText: "/register" } routeEndpointBuilder)
         {
-            endpointBuilder.FilterFactories.Add((context, next) => invocationContext =>
-            {
-                var filter = invocationContext.HttpContext.RequestServices.GetRequiredService<RegistrationFilter>();
-                return filter.InvokeAsync(invocationContext, next);
-            });
+            // Clear existing filters and replace with a blocking filter
+            routeEndpointBuilder.FilterFactories.Clear();
+
+            // Return 404 to hide the endpoint's existence
+            routeEndpointBuilder.FilterFactories.Add((context, next) =>
+                invocationContext => new ValueTask<object?>(Results.NotFound()));
         }
     });
 }

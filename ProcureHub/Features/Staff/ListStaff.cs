@@ -5,7 +5,7 @@ namespace ProcureHub.Features.Staff;
 
 public static class ListStaff
 {
-    public record Request();
+    public record Request(string? Email);
 
     public record Response(
         string Id,
@@ -20,11 +20,17 @@ public static class ListStaff
     {
         public Task<Response[]> HandleAsync(Request request, CancellationToken token)
         {
-            return dbContext.Staff
-                .AsNoTracking()
-                .Include(s => s.Department)
-                .Where(s => s.User.UserRoles.Any(ur => ur.Role.Name == "Staff"))
-                .Select(s => new Response(
+            var query = dbContext.Staff
+                .AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(request.Email))
+            {
+                // Note: emails always stored in lowercase
+                var lowerCasedEmail = request.Email.ToLowerInvariant();
+                query = query.Where(s => s.User.Email == lowerCasedEmail);    
+            }
+
+            return query.Select(s => new Response(
                     s.UserId,
                     s.User.Email!,
                     s.DepartmentId,

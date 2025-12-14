@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 
 namespace ProcureHub.WebApi.Tests;
@@ -25,7 +26,7 @@ public class AuthenticationTests(ITestOutputHelper testOutputHelper)
     }
 
     [Fact]
-    public async Task Cannot_register_with_an_unapproved_email()
+    public async Task Cannot_manually_register()
     {
         await LoginAsAdminAsync();
 
@@ -34,15 +35,10 @@ public class AuthenticationTests(ITestOutputHelper testOutputHelper)
         var staffList1 = await listStaffResp1.AssertSuccessAndReadJsonAsync<object[]>(CancellationToken);
         Assert.Empty(staffList1!);
 
-        // Try to register with unknown email -> should be rejected
-        var unauthorizedRegRequest = JsonContent.Create(new { email = "unknown@example.com", password = "Test1234!" });
+        // Try to register -> endpoint should not be available
+        var unauthorizedRegRequest = JsonContent.Create(new { email = "joe@example.com", password = "Test1234!" });
         var unauthorizedRegResp = await Client.PostAsync("/register", unauthorizedRegRequest, CancellationToken);
-
-        await unauthorizedRegResp.AssertValidationProblemAsync(CancellationToken,
-            errors: new Dictionary<string, string[]>
-            {
-                ["Email"] = ["This email is not authorized to register."]
-            });
+        Assert.Equal(HttpStatusCode.NotFound, unauthorizedRegResp.StatusCode);
     }
 
     private record LoginResponse(string AccessToken, string TokenType, int ExpiresIn, string RefreshToken);

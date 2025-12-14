@@ -1,8 +1,12 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using ProcureHub.Common;
 using ProcureHub.Constants;
 using ProcureHub.Features.Departments;
 using ProcureHub.Features.Staff;
 using ProcureHub.Infrastructure;
+using ProcureHub.WebApi.Constants;
+using ProcureHub.WebApi.Helpers;
 
 namespace ProcureHub.WebApi;
 
@@ -16,11 +20,28 @@ public static class ApiEndpoints
 
     private static void ConfigureStaffEndpoints(WebApplication app)
     {
+        app.MapPost("/staff", async (
+                CreateStaff.Request request,
+                [FromServices] IRequestHandler<CreateStaff.Request, Result<string>> handler,
+                CancellationToken token
+            ) =>
+            {
+                var result = await handler.HandleAsync(request, token);
+                return result.Match(
+                    onSuccess: userId => Results.Created($"/staff/{userId}", new { userId }),
+                    onFailure: error => error.ToProblemDetails()
+                );
+            })
+            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess, RolePolicyNames.AdminOnly)
+            .WithName("CreateStaff")
+            .WithTags("Staff");
+
         app.MapGet("/staff", (
                 [FromServices] IRequestHandler<ListStaff.Request, ListStaff.Response[]> handler,
+                string email,
                 CancellationToken token
-            ) => handler.HandleAsync(new ListStaff.Request(), token))
-            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
+            ) => handler.HandleAsync(new ListStaff.Request(email), token))
+            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess, RolePolicyNames.AdminOnly)
             .WithName("GetStaff")
             .WithTags("Staff");
 
@@ -37,12 +58,25 @@ public static class ApiEndpoints
 
     private static void ConfigureDepartmentEndpoints(WebApplication app)
     {
+        app.MapPost("/departments", async (
+                CreateDepartment.Request request,
+                [FromServices] IRequestHandler<CreateDepartment.Request, int> handler,
+                CancellationToken token
+            ) =>
+            {
+                var newId = await handler.HandleAsync(request, token);
+                return Results.Created($"/departments/{newId}", null);
+            })
+            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
+            .WithName("CreateDepartment")
+            .WithTags("Departments");
+
         app.MapGet("/departments", (
                 [FromServices] IRequestHandler<ListDepartments.Request, ListDepartments.Response[]> handler,
                 CancellationToken token
             ) => handler.HandleAsync(new ListDepartments.Request(), token))
             .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
-            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess, RolePolicyNames.StaffOrAdmin)
+            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
             .WithName("GetDepartments")
             .WithTags("Departments");
 
@@ -55,19 +89,6 @@ public static class ApiEndpoints
                     : Results.NotFound())
             .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
             .WithName("GetDepartmentById")
-            .WithTags("Departments");
-
-        app.MapPost("/departments", async (
-                CreateDepartment.Request request,
-                [FromServices] IRequestHandler<CreateDepartment.Request, int> handler,
-                CancellationToken token
-            ) =>
-            {
-                var newId = await handler.HandleAsync(request, token);
-                return Results.Created($"/departments/{newId}", null);
-            })
-            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
-            .WithName("CreateDepartment")
             .WithTags("Departments");
     }
 }
