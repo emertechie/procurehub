@@ -26,7 +26,7 @@ public sealed class DataSeeder
         RoleManager<ApplicationRole> roleManager,
         ILogger<DataSeeder> logger)
     {
-        var roles = new[] { RoleNames.Admin, RoleNames.Staff };
+        var roles = new[] { RoleNames.Admin, RoleNames.Requester, RoleNames.Approver };
         
         foreach (var roleName in roles)
         {
