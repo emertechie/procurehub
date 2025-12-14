@@ -64,7 +64,7 @@ public static class ApiEndpoints
                     ? Results.Ok(ApiDataResponse.From(response))
                     : Results.NotFound();
             })
-            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
+            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess, RolePolicyNames.AdminOnly)
             .WithName("GetStaffById")
             .WithTags("Staff");
     }

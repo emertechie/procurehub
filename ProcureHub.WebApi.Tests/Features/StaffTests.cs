@@ -112,6 +112,12 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
         Assert.Equal(email, info2!.Email);
     }
 
+    [Fact]
+    public async Task Staff_member_can_read_own_staff_record()
+    {
+        throw new NotImplementedException();
+    }
+
     public class RoleTests(ITestOutputHelper testOutputHelper)
         : TestsBase(testOutputHelper)
     {
@@ -145,15 +151,60 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
         [Fact]
         public async Task Staff_member_cannot_list_all_staff()
         {
-            // TODO: ensures Admin role only
-            throw new NotImplementedException();
+            const string email = "staff1@example.com";
+
+            // Log in as admin to be able to manage staff
+            await LoginAsAdminAsync();
+
+            // Admin creates Staff user
+            var newStaffReq = JsonContent.Create(new { email, password = ValidStaffPassword });
+            var regResp = await Client.PostAsync("/staff", newStaffReq, CancellationToken);
+            Assert.Equal(HttpStatusCode.Created, regResp.StatusCode);
+
+            // Log in as Staff member
+            await LoginAsync(email, ValidStaffPassword);
+
+            // Try to list all staff - should fail (don't have "Admin" role)
+            var listStaffResp = await Client.GetAsync("/staff", CancellationToken);
+            await listStaffResp.AssertProblemDetailsAsync(
+                HttpStatusCode.Forbidden,
+                CancellationToken,
+                title: "Forbidden",
+                instance: "GET /staff");
         }
 
         [Fact]
         public async Task Staff_member_cannot_get_other_staff_by_id()
         {
-            // TODO: ensures Admin role only
-            throw new NotImplementedException();
+            const string email1 = "staff1@example.com";
+            const string email2 = "staff2@example.com";
+
+            // Log in as admin to be able to manage staff
+            await LoginAsAdminAsync();
+
+            // Admin creates 2 Staff users
+            var newStaffReq1 = JsonContent.Create(new { email = email1, password = ValidStaffPassword });
+            var regResp1 = await Client.PostAsync("/staff", newStaffReq1, CancellationToken);
+            Assert.Equal(HttpStatusCode.Created, regResp1.StatusCode);
+
+            var newStaffReq2 = JsonContent.Create(new { email = email2, password = ValidStaffPassword });
+            var regResp2 = await Client.PostAsync("/staff", newStaffReq2, CancellationToken);
+            Assert.Equal(HttpStatusCode.Created, regResp2.StatusCode);
+
+            // Extract user 2's ID from Location header
+            var location = regResp2.Headers.Location?.ToString();
+            var user2Id = location!.Split('/').Last();
+
+            // Log in as Staff member 1
+            await LoginAsync(email1, ValidStaffPassword);
+
+            // Try to get staff member 2 by ID - should *fail*
+            var getStaffResp = await Client.GetAsync($"/staff/{user2Id}", CancellationToken);
+            await getStaffResp.AssertProblemDetailsAsync(
+                HttpStatusCode.Forbidden,
+                CancellationToken,
+                title: "Forbidden",
+                instance: $"GET /staff/{user2Id}");
         }
     }
 }
