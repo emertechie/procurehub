@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore;
+using ProcureHub.Common.Pagination;
 using ProcureHub.Infrastructure;
 
 namespace ProcureHub.Features.Staff;
 
 public static class ListStaff
 {
-    public record Request(string? Email);
+    public record Request(string? Email, int Page, int PageSize);
 
     public record Response(
         string Id,
@@ -14,12 +15,11 @@ public static class ListStaff
         string? DepartmentName);
 
     public class Handler(ApplicationDbContext dbContext)
-        : IRequestHandler<Request, Response[]>
+        : IRequestHandler<Request, PagedResult<Response>>
     {
-        public Task<Response[]> HandleAsync(Request request, CancellationToken token)
+        public Task<PagedResult<Response>> HandleAsync(Request request, CancellationToken token)
         {
-            var query = dbContext.Staff
-                .AsNoTracking();
+            var query = dbContext.Staff.AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(request.Email))
             {
@@ -28,12 +28,15 @@ public static class ListStaff
                 query = query.Where(s => s.User.Email == lowerCasedEmail);    
             }
 
-            return query.Select(s => new Response(
-                    s.UserId,
-                    s.User.Email!,
-                    s.DepartmentId,
-                    s.Department != null ? s.Department.Name : null))
-                .ToArrayAsync(token);
+            return query
+                .OrderBy(s => s.User.Email)
+                .ToPagedResultAsync(request.Page, request.PageSize,
+                    staff => new Response(
+                        staff.UserId,
+                        staff.User.Email!,
+                        staff.DepartmentId,
+                        staff.Department != null ? staff.Department.Name : null),
+                    token);
         }
     }
 }

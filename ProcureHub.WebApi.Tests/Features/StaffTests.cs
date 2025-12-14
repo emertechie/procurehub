@@ -1,6 +1,8 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
+using ProcureHub.Common.Pagination;
 using ProcureHub.Features.Staff;
+using ProcureHub.WebApi.ApiResponses;
 
 namespace ProcureHub.WebApi.Tests.Features;
 
@@ -24,8 +26,8 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
 
         // Search for new Staff by email -> Not found
         var listStaffResp1 = await Client.GetAsync($"/staff?email={newUserEmailMixedCase}", CancellationToken);
-        var staffList1 = await listStaffResp1.AssertSuccessAndReadJsonAsync<object[]>(CancellationToken);
-        Assert.Empty(staffList1!);
+        var staffList1 = await listStaffResp1.AssertSuccessAndReadJsonAsync<ApiPagedResponse<ListStaff.Response>>(CancellationToken);
+        Assert.Empty(staffList1!.Data);
 
         // Admin creates user
         var newStaffReq = JsonContent.Create(new { email = newUserEmailMixedCase, password = "Test1234!" });
@@ -39,47 +41,16 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
 
         // Search for new Staff by email -> Found
         var listStaffResp2 = await Client.GetAsync($"/staff?email={newUserEmailMixedCase}", CancellationToken);
-        var staffList2 = await listStaffResp2.AssertSuccessAndReadJsonAsync<ListStaff.Response[]>(CancellationToken);
-        var newStaff = Assert.Single(staffList2!);
+        var staffList2 = await listStaffResp2.AssertSuccessAndReadJsonAsync<ApiPagedResponse<ListStaff.Response>>(CancellationToken);
+        var newStaff = Assert.Single(staffList2!.Data);
         Assert.Equal(newUserId, newStaff.Id);
         Assert.Equal(newUserEmailLower, newStaff.Email);
         
         // Can get new Staff by ID
         var getStaffResp = await Client.GetAsync($"/staff/{newUserId}", CancellationToken);
-        var staffById = await getStaffResp.AssertSuccessAndReadJsonAsync<GetStaff.Response>(CancellationToken);
-        Assert.Equal(newUserId, staffById!.Id);
-        Assert.Equal(newUserEmailLower, staffById!.Email);
-    }
-
-    [Fact]
-    public async Task Staff_member_can_login()
-    {
-        throw new NotImplementedException();
-    }
-
-    public class RoleTests(ITestOutputHelper testOutputHelper)
-        : TestsBase(testOutputHelper)
-    {
-        [Fact]
-        public async Task Staff_member_cannot_create_another_staff_member()
-        {
-            // TODO: ensures Admin role only
-            throw new NotImplementedException();
-        }
-
-        [Fact]
-        public async Task Staff_member_cannot_list_all_staff()
-        {
-            // TODO: ensures Admin role only
-            throw new NotImplementedException();
-        }
-
-        [Fact]
-        public async Task Staff_member_cannot_get_other_staff_by_id()
-        {
-            // TODO: ensures Admin role only
-            throw new NotImplementedException();
-        }
+        var staffById = await getStaffResp.AssertSuccessAndReadJsonAsync<ApiDataResponse<GetStaff.Response>>(CancellationToken);
+        Assert.Equal(newUserId, staffById!.Data.Id);
+        Assert.Equal(newUserEmailLower, staffById!.Data.Email);
     }
 
     [Fact]
@@ -113,5 +84,36 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
         var staffList2 = await listStaffResp2.AssertSuccessAndReadJsonAsync<ListStaff.Response[]>(CancellationToken);
         var newStaff2 = Assert.Single(staffList2!);
         Assert.Equal(ValidStaffEmail, newStaff2.Email);
+    }
+
+    [Fact]
+    public async Task Staff_member_can_login()
+    {
+        throw new NotImplementedException();
+    }
+
+    public class RoleTests(ITestOutputHelper testOutputHelper)
+        : TestsBase(testOutputHelper)
+    {
+        [Fact]
+        public async Task Staff_member_cannot_create_another_staff_member()
+        {
+            // TODO: ensures Admin role only
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        public async Task Staff_member_cannot_list_all_staff()
+        {
+            // TODO: ensures Admin role only
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        public async Task Staff_member_cannot_get_other_staff_by_id()
+        {
+            // TODO: ensures Admin role only
+            throw new NotImplementedException();
+        }
     }
 }

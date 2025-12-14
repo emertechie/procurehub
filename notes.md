@@ -26,3 +26,19 @@ E.g. for migration of "AddStaffAndDepartment":
 ```
 dotnet ef database update AddStaffAndDepartment
 ```
+
+# Notable Code Elements
+
+## Pagination
+
+* ToPagedResultAsync -> extension on *ordered* querable type, since you need ordered query for proper pagination
+* ToPagedResultAsyncInternal -> Executing count and data query in parallel
+* Ideally EF Core would be able to support window queries to run single query that returns total count
+
+## API
+
+* ApiPagedResponse and ApiDataResponse -> to separate API shaped responses from domain ones
+
+## EF
+
+* Using `.AsNoTracking()` for read only queries to remove tracking overhead
