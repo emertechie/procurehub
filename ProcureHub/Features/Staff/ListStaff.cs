@@ -19,14 +19,9 @@ public static class ListStaff
     {
         public Task<PagedResult<Response>> HandleAsync(Request request, CancellationToken token)
         {
-            var query = dbContext.Staff.AsNoTracking();
-
-            if (!string.IsNullOrWhiteSpace(request.Email))
-            {
-                // Note: emails always stored in lowercase
-                var lowerCasedEmail = request.Email.ToLowerInvariant();
-                query = query.Where(s => s.User.Email == lowerCasedEmail);    
-            }
+            var query = dbContext.Staff
+                .AsNoTracking()
+                .Where(s => string.IsNullOrWhiteSpace(request.Email) || s.User.Email == request.Email.ToLowerInvariant());
 
             return query
                 .OrderBy(s => s.User.Email)
