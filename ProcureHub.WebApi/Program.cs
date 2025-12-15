@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using ProcureHub;
 using ProcureHub.Constants;
 using ProcureHub.Data;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
-using ProcureHub.ServiceDefaults;
 using ProcureHub.WebApi;
 using ProcureHub.WebApi.Authentication;
 using ProcureHub.WebApi.Constants;
@@ -24,6 +24,9 @@ return;
 
 void RegisterServices(WebApplicationBuilder appBuilder)
 {
+    // Add common Aspire services
+    builder.AddServiceDefaults();
+
     builder.Services.AddProblemDetails(options =>
     {
         options.CustomizeProblemDetails = context =>
@@ -41,7 +44,9 @@ void RegisterServices(WebApplicationBuilder appBuilder)
 
     var connectionString = appBuilder.Configuration.GetConnectionString("DefaultConnection") ??
                            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-    appBuilder.Services.AddProcureHubDatabaseWithSqlite(connectionString);
+    appBuilder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite(connectionString, dbOptions =>
+            dbOptions.MigrationsAssembly("ProcureHub")));
 
     // Configure Identity with API endpoints (automatically adds Bearer token authentication)
     builder.Services.AddIdentityApiEndpoints<ApplicationUser>(options =>

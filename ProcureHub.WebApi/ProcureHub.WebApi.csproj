@@ -19,6 +19,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\ProcureHub.ServiceDefaults\ProcureHub.ServiceDefaults.csproj" />
+      <ProjectReference Include="..\ProcureHub\ProcureHub.csproj" />
     </ItemGroup>
 
 </Project>
