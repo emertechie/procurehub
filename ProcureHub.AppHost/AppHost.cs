@@ -1,5 +1,9 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-builder.AddProject<Projects.ProcureHub_WebApi>("api");
+var api = builder.AddProject<Projects.ProcureHub_WebApi>("api");
+
+builder.AddViteApp("frontend", "../ProcureHub.WebApp")
+    .WithPnpm()
+    .WithReference(api);
 
 builder.Build().Run();
