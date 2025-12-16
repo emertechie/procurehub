@@ -4,7 +4,7 @@ using System.Net.Http.Json;
 
 namespace ProcureHub.WebApi.Tests;
 
-public abstract class TestsBase
+public abstract class TestsBase : IAsyncLifetime
 {
     protected readonly HttpClient Client;
 
@@ -15,6 +15,16 @@ public abstract class TestsBase
     }
 
     protected static CancellationToken CancellationToken => TestContext.Current.CancellationToken;
+
+    public async ValueTask InitializeAsync()
+    {
+        await WebApiTestFactory.ResetDatabaseAsync();
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
 
     protected async Task LoginAsAdminAsync()
     {
