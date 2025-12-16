@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -16,13 +17,15 @@ public abstract class DbTestsBase : IAsyncLifetime
     protected readonly HttpClient HttpClient;
     private readonly WebApiTestFactory _factory;
     private Respawner? _respawner;
+    private readonly string _connectionString;
 
     protected const string AdminEmail = "test-admin@procurehub.local";
     protected const string AdminPassword = "TestAdmin123!";
 
     protected DbTestsBase(ITestOutputHelper testOutputHelper)
     {
-        _factory = new WebApiTestFactory(testOutputHelper);
+        _connectionString = GetConnectionString();    
+        _factory = new WebApiTestFactory(testOutputHelper, _connectionString);
         HttpClient = _factory.CreateClient();
     }
 
@@ -56,10 +59,20 @@ public abstract class DbTestsBase : IAsyncLifetime
 
     private record LoginResponse(string AccessToken, string TokenType, int ExpiresIn, string RefreshToken);
     
+    private static string GetConnectionString()
+    {
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .Build();
+
+        return configuration.GetConnectionString("DefaultConnection") ??
+            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+    }
+
     private async Task ResetDatabaseAsync()
     {
-        var connectionString = WebApiTestFactory.GetConnectionString();
-        await using var connection = new NpgsqlConnection(connectionString);
+        await using var connection = new NpgsqlConnection(_connectionString);
         await connection.OpenAsync();
 
         if (_respawner == null)

@@ -1,19 +1,18 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace ProcureHub.WebApi.Tests;
 
-public class WebApiTestFactory(ITestOutputHelper outputHelper) : WebApplicationFactory<Program>
+public class WebApiTestFactory(ITestOutputHelper outputHelper, string connectionString)
+    : WebApplicationFactory<Program>
 {
-    private static string? _connectionString;
+    private static readonly Lock _lock = new();
     private static bool _databaseInitialized;
-    private static readonly object _lock = new();
-    
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         // Sent env to "Test" to skip seeding data in the API's Program.cs - since
@@ -33,7 +32,7 @@ public class WebApiTestFactory(ITestOutputHelper outputHelper) : WebApplicationF
 
             // Add Postgres database for tests
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(GetConnectionString())
+                options.UseNpgsql(connectionString)
                     .EnableSensitiveDataLogging());
 
             // Build service provider and create database
@@ -49,21 +48,5 @@ public class WebApiTestFactory(ITestOutputHelper outputHelper) : WebApplicationF
                 }
             }
         });
-    }
-
-    public static string GetConnectionString()
-    {
-        if (_connectionString != null)
-            return _connectionString;
-
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json")
-            .Build();
-
-        _connectionString = configuration.GetConnectionString("DefaultConnection") ??
-                            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
-        return _connectionString;
     }
 }
