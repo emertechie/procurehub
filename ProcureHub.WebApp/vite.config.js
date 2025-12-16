@@ -13,7 +13,7 @@ export default defineConfig({
     proxy: {
       // "api" is the name of the API in AppHost.cs.
       '/api': {
-        target: process.env.services__api__https__0 || process.env.services__api__http__0,
+        target: process.env.API_URL,
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '')
