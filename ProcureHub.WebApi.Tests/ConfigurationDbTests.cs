@@ -13,7 +13,7 @@ public class ConfigurationDbTests(ITestOutputHelper testOutputHelper)
     public async Task UseStatusCodePages_is_correctly_configured()
     {
         // Try fetch a non-existent endpoint
-        var notFoundResp = await Client.GetAsync("/does-not-exist", CancellationToken);
+        var notFoundResp = await HttpClient.GetAsync("/does-not-exist", CancellationToken);
 
         // Assert response is in ProblemDetails format, and not just an empty body 
         await notFoundResp.AssertProblemDetailsAsync(

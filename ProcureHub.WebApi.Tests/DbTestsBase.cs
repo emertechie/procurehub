@@ -13,7 +13,7 @@ namespace ProcureHub.WebApi.Tests;
 
 public abstract class DbTestsBase : IAsyncLifetime
 {
-    protected readonly HttpClient Client;
+    protected readonly HttpClient HttpClient;
     private readonly WebApiTestFactory _factory;
     private Respawner? _respawner;
 
@@ -23,7 +23,7 @@ public abstract class DbTestsBase : IAsyncLifetime
     protected DbTestsBase(ITestOutputHelper testOutputHelper)
     {
         _factory = new WebApiTestFactory(testOutputHelper);
-        Client = _factory.CreateClient();
+        HttpClient = _factory.CreateClient();
     }
 
     protected static CancellationToken CancellationToken => TestContext.Current.CancellationToken;
@@ -47,11 +47,11 @@ public abstract class DbTestsBase : IAsyncLifetime
     protected async Task LoginAsync(string email, string password)
     {
         var loginRequest = JsonContent.Create(new { email, password });
-        var loginResp = await Client.PostAsync("/login", loginRequest, CancellationToken);
+        var loginResp = await HttpClient.PostAsync("/login", loginRequest, CancellationToken);
         Assert.Equal(HttpStatusCode.OK, loginResp.StatusCode);
         var loginResult = await loginResp.Content.ReadFromJsonAsync<LoginResponse>(CancellationToken);
 
-        Client.DefaultRequestHeaders.Authorization =  new AuthenticationHeaderValue("Bearer", loginResult!.AccessToken);
+        HttpClient.DefaultRequestHeaders.Authorization =  new AuthenticationHeaderValue("Bearer", loginResult!.AccessToken);
     }
 
     private record LoginResponse(string AccessToken, string TokenType, int ExpiresIn, string RefreshToken);
