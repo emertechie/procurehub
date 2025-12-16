@@ -10,7 +10,7 @@ public class AuthenticationTests(ITestOutputHelper testOutputHelper)
     public async Task Can_login_as_admin_and_use_API()
     {
         // Login as the test admin (using credentials defined in WebApiTestFactory)
-        var loginRequest = JsonContent.Create(new { email = "test-admin@supporthub.local", password = "TestAdmin123!" });
+        var loginRequest = JsonContent.Create(new { email = "test-admin@procurehub.local", password = "TestAdmin123!" });
         var loginResp = await Client.PostAsync("/login", loginRequest, CancellationToken);
         Assert.Equal(System.Net.HttpStatusCode.OK, loginResp.StatusCode);
 

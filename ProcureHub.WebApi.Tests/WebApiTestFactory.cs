@@ -17,7 +17,7 @@ public class WebApiTestFactory(ITestOutputHelper outputHelper) : WebApplicationF
     private static bool _databaseInitialized;
     private static readonly object _lock = new();
 
-    public static readonly string AdminEmail = "test-admin@supporthub.local";
+    public static readonly string AdminEmail = "test-admin@procurehub.local";
     public static readonly string AdminPassword = "TestAdmin123!";
 
     public static async Task ResetDatabaseAsync()
