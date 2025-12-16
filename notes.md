@@ -27,6 +27,13 @@ E.g. for migration of "AddStaffAndDepartment":
 dotnet ef database update AddStaffAndDepartment
 ```
 
+# Aspire
+
+## Handy commands
+
+* Run `aspire do diagnostics` to check for potential issues.
+* Build one step, with debugging: `aspire do build-frontend --log-level debug`
+
 # Notable Code Elements
 
 ## Pagination
