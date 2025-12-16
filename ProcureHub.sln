@@ -6,10 +6,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcureHub.WebApi", "Procur
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcureHub", "ProcureHub\ProcureHub.csproj", "{127918A3-4AC2-4F64-B495-6BBC2A366584}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcureHub.ServiceDefaults", "ProcureHub.ServiceDefaults\ProcureHub.ServiceDefaults.csproj", "{6E48012C-B48C-4433-A088-2791D9E84538}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcureHub.AppHost", "ProcureHub.AppHost\ProcureHub.AppHost.csproj", "{2BD6CDAC-F0A8-46ED-9DCE-24665BB00072}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,30 +52,6 @@ Global
 		{127918A3-4AC2-4F64-B495-6BBC2A366584}.Release|x64.Build.0 = Release|Any CPU
 		{127918A3-4AC2-4F64-B495-6BBC2A366584}.Release|x86.ActiveCfg = Release|Any CPU
 		{127918A3-4AC2-4F64-B495-6BBC2A366584}.Release|x86.Build.0 = Release|Any CPU
-		{6E48012C-B48C-4433-A088-2791D9E84538}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6E48012C-B48C-4433-A088-2791D9E84538}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6E48012C-B48C-4433-A088-2791D9E84538}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{6E48012C-B48C-4433-A088-2791D9E84538}.Debug|x64.Build.0 = Debug|Any CPU
-		{6E48012C-B48C-4433-A088-2791D9E84538}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{6E48012C-B48C-4433-A088-2791D9E84538}.Debug|x86.Build.0 = Debug|Any CPU
-		{6E48012C-B48C-4433-A088-2791D9E84538}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6E48012C-B48C-4433-A088-2791D9E84538}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6E48012C-B48C-4433-A088-2791D9E84538}.Release|x64.ActiveCfg = Release|Any CPU
-		{6E48012C-B48C-4433-A088-2791D9E84538}.Release|x64.Build.0 = Release|Any CPU
-		{6E48012C-B48C-4433-A088-2791D9E84538}.Release|x86.ActiveCfg = Release|Any CPU
-		{6E48012C-B48C-4433-A088-2791D9E84538}.Release|x86.Build.0 = Release|Any CPU
-		{2BD6CDAC-F0A8-46ED-9DCE-24665BB00072}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2BD6CDAC-F0A8-46ED-9DCE-24665BB00072}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2BD6CDAC-F0A8-46ED-9DCE-24665BB00072}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{2BD6CDAC-F0A8-46ED-9DCE-24665BB00072}.Debug|x64.Build.0 = Debug|Any CPU
-		{2BD6CDAC-F0A8-46ED-9DCE-24665BB00072}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{2BD6CDAC-F0A8-46ED-9DCE-24665BB00072}.Debug|x86.Build.0 = Debug|Any CPU
-		{2BD6CDAC-F0A8-46ED-9DCE-24665BB00072}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2BD6CDAC-F0A8-46ED-9DCE-24665BB00072}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2BD6CDAC-F0A8-46ED-9DCE-24665BB00072}.Release|x64.ActiveCfg = Release|Any CPU
-		{2BD6CDAC-F0A8-46ED-9DCE-24665BB00072}.Release|x64.Build.0 = Release|Any CPU
-		{2BD6CDAC-F0A8-46ED-9DCE-24665BB00072}.Release|x86.ActiveCfg = Release|Any CPU
-		{2BD6CDAC-F0A8-46ED-9DCE-24665BB00072}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

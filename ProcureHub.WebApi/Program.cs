@@ -24,9 +24,6 @@ return;
 
 void RegisterServices(WebApplicationBuilder appBuilder)
 {
-    // Add common Aspire services
-    builder.AddServiceDefaults();
-
     builder.Services.AddProblemDetails(options =>
     {
         options.CustomizeProblemDetails = context =>
