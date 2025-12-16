@@ -37,16 +37,13 @@ public static class PagingExtensions
     {
         var itemsToSkip = (page - 1) * pageSize;
 
-        var totalCountTask = query.CountAsync(token);
+        var totalCount = await query.CountAsync(token);
 
-        var pageDataTask = query
+        var pageData = await query
             .Skip(itemsToSkip)
             .Take(pageSize)
             .ToArrayAsync(token);
 
-        // Execute count and page query in parallel
-        await Task.WhenAll(totalCountTask, pageDataTask);
-
-        return new PagedResult<T>(pageDataTask.Result, page, pageSize, totalCountTask.Result);
+        return new PagedResult<T>(pageData, page, pageSize, totalCount);
     }
 }
