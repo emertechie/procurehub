@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: dbpassword
       POSTGRES_DB: appdb
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
     restart: unless-stopped
 
   appdb_tests:
@@ -22,7 +22,7 @@ services:
       POSTGRES_PASSWORD: dbpassword
       POSTGRES_DB: appdb_tests
     volumes:
-      - pgdata_tests:/var/lib/postgresql/data
+      - pgdata_tests:/var/lib/postgresql
     restart: unless-stopped
 
 volumes:
