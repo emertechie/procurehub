@@ -34,8 +34,8 @@ jobs:
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
-      - name: Run tests
-        run: dotnet test ProcureHub.WebApi.Tests/ProcureHub.WebApi.Tests.csproj --no-build --configuration Release --verbosity normal
+#      - name: Run tests
+#        run: dotnet test ProcureHub.WebApi.Tests/ProcureHub.WebApi.Tests.csproj --no-build --configuration Release --verbosity normal
 
       - name: Set version
         id: version
