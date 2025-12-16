@@ -7,7 +7,7 @@ using ProcureHub.WebApi.ApiResponses;
 namespace ProcureHub.WebApi.Tests.Features;
 
 public class StaffTests(ITestOutputHelper testOutputHelper)
-    : TestsBase(testOutputHelper)
+    : DbTestsBase(testOutputHelper)
 {
     private const string ValidStaffEmail = "staff1@example.com";
     private const string ValidStaffPassword = "Test1234!";
@@ -96,7 +96,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
         // Confirm logged in as admin: 
         var infoResp1 = await Client.GetAsync("/manage/info", CancellationToken);
         var info1 = await infoResp1.AssertSuccessAndReadJsonAsync<InfoResponse>(CancellationToken);
-        Assert.Equal(WebApiTestFactory.AdminEmail, info1!.Email);
+        Assert.Equal(AdminEmail, info1!.Email);
         
         // Admin creates user
         var newStaffReq1 = JsonContent.Create(new { email, password });
