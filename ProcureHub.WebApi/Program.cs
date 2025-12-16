@@ -42,7 +42,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
     var connectionString = appBuilder.Configuration.GetConnectionString("DefaultConnection") ??
                            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
     appBuilder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseSqlite(connectionString, dbOptions =>
+        options.UseNpgsql(connectionString, dbOptions =>
             dbOptions.MigrationsAssembly("ProcureHub")));
 
     // Configure Identity with API endpoints (automatically adds Bearer token authentication)

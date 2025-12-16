@@ -1,16 +1,30 @@
 services:
-  postgres:
+  appdb:
     image: postgres:16
-    container_name: postgres-local
+    container_name: postgres_appdb
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: appuser
-      POSTGRES_PASSWORD: apppassword
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: dbpassword
       POSTGRES_DB: appdb
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
 
+  appdb_tests:
+    image: postgres:16
+    container_name: postgres_appdb_tests
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: dbpassword
+      POSTGRES_DB: appdb_tests
+    volumes:
+      - pgdata_tests:/var/lib/postgresql/data
+    restart: unless-stopped
+
 volumes:
   pgdata:
+  pgdata_tests:
