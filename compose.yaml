@@ -1,6 +1,6 @@
 services:
   appdb:
-    image: postgres:16
+    image: postgres:18
     container_name: postgres_appdb
     ports:
       - "5432:5432"
@@ -13,7 +13,7 @@ services:
     restart: unless-stopped
 
   appdb_tests:
-    image: postgres:16
+    image: postgres:18
     container_name: postgres_appdb_tests
     ports:
       - "5433:5432"
