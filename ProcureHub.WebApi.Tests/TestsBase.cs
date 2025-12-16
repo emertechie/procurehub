@@ -7,18 +7,19 @@ namespace ProcureHub.WebApi.Tests;
 public abstract class TestsBase : IAsyncLifetime
 {
     protected readonly HttpClient Client;
+    private readonly WebApiTestFactory _factory;
 
     protected TestsBase(ITestOutputHelper testOutputHelper)
     {
-        var factory = new WebApiTestFactory(testOutputHelper);
-        Client = factory.CreateClient();
+        _factory = new WebApiTestFactory(testOutputHelper);
+        Client = _factory.CreateClient();
     }
 
     protected static CancellationToken CancellationToken => TestContext.Current.CancellationToken;
 
     public async ValueTask InitializeAsync()
     {
-        await WebApiTestFactory.ResetDatabaseAsync();
+        await _factory.ResetDatabaseAsync();
     }
 
     public ValueTask DisposeAsync()

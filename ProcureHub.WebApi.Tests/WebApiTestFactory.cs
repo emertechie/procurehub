@@ -1,4 +1,6 @@
+using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -6,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using ProcureHub.Data;
+using ProcureHub.Models;
 using Respawn;
 
 namespace ProcureHub.WebApi.Tests;
@@ -20,7 +24,7 @@ public class WebApiTestFactory(ITestOutputHelper outputHelper) : WebApplicationF
     public static readonly string AdminEmail = "test-admin@procurehub.local";
     public static readonly string AdminPassword = "TestAdmin123!";
 
-    public static async Task ResetDatabaseAsync()
+    public async Task ResetDatabaseAsync()
     {
         var connectionString = GetConnectionString();
         await using var connection = new NpgsqlConnection(connectionString);
@@ -36,19 +40,15 @@ public class WebApiTestFactory(ITestOutputHelper outputHelper) : WebApplicationF
         }
 
         await _respawner.ResetAsync(connection);
+        
+        await SeedData();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureAppConfiguration((context, config) =>
-        {
-            // Add test configuration for admin user
-            config.AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["DevAdminUser:Email"] = AdminEmail,
-                ["DevAdminUser:Password"] = AdminPassword
-            });
-        });
+        // Sent env to "Test" to skip seeding data in the API's Program.cs - since
+        // any data seeded there is wiped out in the `ResetDatabaseAsync` call.
+        builder.UseEnvironment("Test");
 
         builder.ConfigureLogging(logging =>
         {
@@ -95,5 +95,17 @@ public class WebApiTestFactory(ITestOutputHelper outputHelper) : WebApplicationF
                             throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
         return _connectionString;
+    }
+    
+    private async Task SeedData()
+    {
+        using var scope = Services.CreateScope();
+
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>();
+
+        await DataSeeder.SeedAsync(dbContext, userManager, roleManager, logger, AdminEmail, AdminPassword);
     }
 }

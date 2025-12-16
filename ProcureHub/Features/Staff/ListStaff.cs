@@ -17,13 +17,13 @@ public static class ListStaff
     public class Handler(ApplicationDbContext dbContext)
         : IRequestHandler<Request, PagedResult<Response>>
     {
-        public Task<PagedResult<Response>> HandleAsync(Request request, CancellationToken token)
+        public async Task<PagedResult<Response>> HandleAsync(Request request, CancellationToken token)
         {
             var query = dbContext.Staff
                 .AsNoTracking()
                 .Where(s => string.IsNullOrWhiteSpace(request.Email) || s.User.Email == request.Email.ToLowerInvariant());
 
-            return query
+            return await query
                 .OrderBy(s => s.User.Email)
                 .ToPagedResultAsync(request.Page, request.PageSize,
                     staff => new Response(
