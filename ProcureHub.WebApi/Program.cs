@@ -66,11 +66,12 @@ void RegisterServices(WebApplicationBuilder appBuilder)
     // Configure Authorization with flexible policies
     builder.Services.AddAuthorization(options =>
     {
-        // Policy that accepts either Bearer token or API Key
+        // Policy that accepts either Bearer token, API Key, or Cookie
         options.AddPolicy(AuthorizationPolicyNames.ApiKeyOrUserAccess, policy =>
         {
             policy.AddAuthenticationSchemes(
                 IdentityConstants.BearerScheme,
+                IdentityConstants.ApplicationScheme,
                 ApiKeyAuthenticationOptions.DefaultScheme);
             policy.RequireAuthenticatedUser();
         });

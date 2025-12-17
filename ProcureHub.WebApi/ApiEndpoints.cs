@@ -21,6 +21,13 @@ public static class ApiEndpoints
         // TODO: remove this temp endpoint to test frontend API connection
         app.MapGet("/test", async () => Results.Ok(new { DateTime = DateTime.UtcNow })) ;
 
+        ConfigureAdditionalAuthEndpoints(app);
+        ConfigureStaffEndpoints(app);
+        ConfigureDepartmentEndpoints(app);
+    }
+
+    private static void ConfigureAdditionalAuthEndpoints(WebApplication app)
+    {
         app.MapGet("/me", async (ClaimsPrincipal user, ILogger<WebApplication> logger) =>
             {
                 if (!user.Identity?.IsAuthenticated ?? true)
@@ -33,12 +40,9 @@ public static class ApiEndpoints
 
                 return Results.Ok(new { id = userId, email });
             })
-            .RequireAuthorization(AuthorizationPolicyNames.UserOnly)
+            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
             .WithName("GetCurrentUser")
             .WithTags("Auth");
-
-        ConfigureStaffEndpoints(app);
-        ConfigureDepartmentEndpoints(app);
     }
 
     private static void ConfigureStaffEndpoints(WebApplication app)

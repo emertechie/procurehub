@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -24,7 +25,7 @@ public abstract class IntegrationTestsBase : IAsyncLifetime
 
     protected IntegrationTestsBase(ITestOutputHelper testOutputHelper)
     {
-        _connectionString = GetConnectionString();    
+        _connectionString = GetConnectionString();
         _factory = new WebApiTestFactory(testOutputHelper, _connectionString);
         HttpClient = _factory.CreateClient();
     }
