@@ -138,7 +138,14 @@ async Task ConfigureApplication(WebApplication app)
     // Map Identity API endpoints (login, register, refresh, etc.)
     var identityEndpointsConventionBuilder = app.MapIdentityApi<ApplicationUser>();
 
-    // NOTE: Crude approach for demo app to block self-registration. (Only admins can create / invite staff) 
+    // The `MapIdentityApi` call doesn't add a `/logout` endpoint so add one here:
+    app.MapPost("/logout", async (SignInManager<ApplicationUser> signInManager) =>
+    {
+        await signInManager.SignOutAsync();
+        return Results.Ok();
+    }).RequireAuthorization();
+
+    // NOTE: Crude approach for demo app to block self-registration. (Only admins can create / invite staff)
     BlockRegisterEndpoint(identityEndpointsConventionBuilder);
 }
 

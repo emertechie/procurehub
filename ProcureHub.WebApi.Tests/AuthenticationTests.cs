@@ -71,7 +71,36 @@ public class AuthenticationTests(ITestOutputHelper testOutputHelper)
         var staffResp = await HttpClient.GetAsync("/staff", CancellationToken);
         Assert.Equal(HttpStatusCode.OK, staffResp.StatusCode);
     }
-    
+
+    /// <summary>
+    /// Note: only implementing this for cookie-based auth. After logging out, a (short-lived) token
+    /// is still technically valid. 
+    /// </summary>
+    [Fact]
+    public async Task Logout_with_cookie_clears_authentication()
+    {
+        // Can't call /logout if not logged in
+        var unauthLogoutResp = await HttpClient.PostAsync("/logout", null, CancellationToken);
+        Assert.Equal(HttpStatusCode.Unauthorized, unauthLogoutResp.StatusCode);
+
+        // Login with cookie
+        var loginRequest = JsonContent.Create(new { email = "test-admin@procurehub.local", password = "TestAdmin123!" });
+        var loginResp = await HttpClient.PostAsync("/login?useCookies=true", loginRequest, CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, loginResp.StatusCode);
+
+        // Verify we can access protected endpoint with cookie
+        var meResp = await HttpClient.GetAsync("/me", CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, meResp.StatusCode);
+
+        // Logout
+        var logoutResp = await HttpClient.PostAsync("/logout", null, CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, logoutResp.StatusCode);
+
+        // After logout, cookie should be cleared and we should not be able to access protected endpoints
+        var meRespAfterLogout = await HttpClient.GetAsync("/me", CancellationToken);
+        Assert.Equal(HttpStatusCode.Unauthorized, meRespAfterLogout.StatusCode);
+    }
+
     private record LoginResponse(string AccessToken, string TokenType, int ExpiresIn, string RefreshToken);
     private record MeResponse(string Id, string Email);
 }
