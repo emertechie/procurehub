@@ -12,6 +12,9 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
     private const string ValidStaffEmail = "staff1@example.com";
     private const string ValidStaffPassword = "Test1234!";
 
+    /// <summary>
+    /// A helper that ensures tests are run for all possible staff endpoints
+    /// </summary>
     private static class TestHelper
     {
         public static async Task RunTestsForAllEndpointsAsync(
@@ -101,6 +104,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
             {
                 // ID not provided -> not possible to test this as it just maps to the "/staff" endpoint 
                 // var respInvalidEmail = await HttpClient.GetAsync("/staff/", CancellationToken);
+
                 // ReSharper disable once ConvertToLambdaExpression
                 return Task.CompletedTask;
             }
@@ -110,9 +114,28 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
     [Fact]
     public async Task Endpoint_authentication_tests()
     {
-        // TODO - ensure need to be logged in to access all staff endpoints
+        // Note: Not logging in as admin - to test unauth access.
+        // await LoginAsAdminAsync();
 
-        throw new NotImplementedException();
+        // Ensure need to be logged in to access all /staff endpoints
+        await TestHelper.RunTestsForAllEndpointsAsync(
+            createStaff: async () =>
+            {
+                var req = JsonContent.Create(new { email = ValidStaffEmail, password = ValidStaffPassword });
+                var resp = await HttpClient.PostAsync("/staff", req, CancellationToken);
+                Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
+            },
+            queryStaff: async () =>
+            {
+                var resp = await HttpClient.GetAsync($"/staff", CancellationToken);
+                Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
+            },
+            getStaffById: async () =>
+            {
+                var resp = await HttpClient.GetAsync("/staff/1", CancellationToken);
+                Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
+            }
+        );
     }
 
     /// <summary>
