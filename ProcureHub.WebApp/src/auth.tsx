@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import {redirect} from "@tanstack/react-router";
 
 type User = {
   id: string;
@@ -151,4 +152,15 @@ export function useAuth() {
     throw new Error("useAuth must be used within AuthProvider");
   }
   return ctx;
+}
+
+export function ensureAuthenticated(authContext: AuthContext, currentHref: string) {
+  if (!authContext.isAuthenticated) {
+    throw redirect({
+      to: '/login',
+      search: {
+        redirect: currentHref,
+      },
+    })
+  }
 }
