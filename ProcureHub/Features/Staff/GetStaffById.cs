@@ -1,11 +1,20 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Infrastructure;
 
 namespace ProcureHub.Features.Staff;
 
-public static class GetStaff
+public static class GetStaffById
 {
     public record Request(string Id);
+
+    public class RequestValidator : AbstractValidator<Request>
+    {
+        public RequestValidator()
+        {
+            RuleFor(r => r.Id).NotEmpty();
+        }
+    } 
 
     public record Response(
         string Id,

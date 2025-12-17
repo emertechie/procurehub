@@ -14,9 +14,6 @@ namespace ProcureHub.WebApi;
 
 public static class ApiEndpoints
 {
-    private const int DefaultPage = 1;
-    private const int DefaultPageSize = 10;
-        
     public static void Configure(WebApplication app)
     {
         // TODO: remove this temp endpoint to test frontend API connection
@@ -49,12 +46,14 @@ public static class ApiEndpoints
     private static void ConfigureStaffEndpoints(WebApplication app)
     {
         var group = app.MapGroup("")
-            .AddFluentValidationAutoValidation();
+            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess, RolePolicyNames.AdminOnly)
+            .AddFluentValidationAutoValidation()
+            .WithTags("Staff");
 
         group.MapPost("/staff", async (
                 [FromServices] IRequestHandler<CreateStaff.Request, Result<string>> handler,
-                CancellationToken token,
-                CreateStaff.Request request
+                [FromBody] CreateStaff.Request request,
+                CancellationToken token
             ) =>
             {
                 var result = await handler.HandleAsync(request, token);
@@ -63,38 +62,30 @@ public static class ApiEndpoints
                     onFailure: error => error.ToProblemDetails()
                 );
             })
-            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess, RolePolicyNames.AdminOnly)
-            .WithName("CreateStaff")
-            .WithTags("Staff");
+            .WithName("CreateStaff");
 
         group.MapGet("/staff", async (
-                [FromServices] IRequestHandler<ListStaff.Request, PagedResult<ListStaff.Response>> handler,
-                CancellationToken token,
-                string? email,
-                int page = DefaultPage,
-                int pageSize = DefaultPageSize
+                [FromServices] IRequestHandler<QueryStaff.Request, PagedResult<QueryStaff.Response>> handler,
+                [AsParameters] QueryStaff.Request request,
+                CancellationToken token
             ) =>
             {
-                var pagedResult = await handler.HandleAsync(new ListStaff.Request(email, page, pageSize), token);
+                var pagedResult = await handler.HandleAsync(request, token);
                 return ApiPagedResponse.From(pagedResult);
             })
-            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess, RolePolicyNames.AdminOnly)
-            .WithName("GetStaff")
-            .WithTags("Staff");
+            .WithName("QueryStaff");
 
         group.MapGet("/staff/{id}", async (
-                [FromServices] IRequestHandler<GetStaff.Request, GetStaff.Response?> handler,
+                [FromServices] IRequestHandler<GetStaffById.Request, GetStaffById.Response?> handler,
                 CancellationToken token,
                 string id) =>
             {
-                var response = await handler.HandleAsync(new GetStaff.Request(id), token);
+                var response = await handler.HandleAsync(new GetStaffById.Request(id), token);
                 return response is not null
                     ? Results.Ok(ApiDataResponse.From(response))
                     : Results.NotFound();
             })
-            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess, RolePolicyNames.AdminOnly)
-            .WithName("GetStaffById")
-            .WithTags("Staff");
+            .WithName("GetStaffById");
     }
 
     private static void ConfigureDepartmentEndpoints(WebApplication app)
