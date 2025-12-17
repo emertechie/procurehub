@@ -5,19 +5,22 @@ type User = {
   email: string;
 };
 
-type AuthContextValue = {
-  user: User | null;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-};
+export interface AuthContext {
+  loading: boolean
+  user: User | null
+  isAuthenticated: boolean
+  login: (email: string, password: string) => Promise<void>
+  register: (email: string, password: string) => Promise<void>
+  logout: () => Promise<void>
+}
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+const AuthContext = createContext<AuthContext | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const isAuthenticated = !!user
 
   useEffect(() => {
     let cancelled = false;
@@ -125,9 +128,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
-    void fetch("/api/logout", {
+    await fetch("/api/logout", {
       method: "POST",
       credentials: "include",
     }).catch(() => {
@@ -135,15 +138,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const value: AuthContextValue = {
-    user,
-    loading,
-    login,
-    register,
-    logout,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+      <AuthContext.Provider value={{ loading, isAuthenticated, user, register, login, logout }}>
+        {children}
+      </AuthContext.Provider>
+  )
 }
 
 export function useAuth() {

@@ -1,25 +1,24 @@
 import * as React from "react";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import {createFileRoute, redirect} from "@tanstack/react-router";
 import { useAuth } from "../auth";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
+    beforeLoad: ({ context, location }) => {
+        if (!context.auth.isAuthenticated) {
+            throw redirect({
+                to: '/login',
+                search: {
+                    redirect: location.href,
+                },
+            })
+        }
+    },
 });
 
 function DashboardPage() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
-
-  React.useEffect(() => {
-    if (!loading && !user) {
-      router.navigate({ to: "/login" });
-    }
-  }, [loading, user, router]);
-
-  if (loading) {
-    return <div className="p-4">Loading...</div>;
-  }
-
+  const { user } = useAuth();
+  
   if (!user) {
     return <div className="p-4">Redirecting to login...</div>;
   }
