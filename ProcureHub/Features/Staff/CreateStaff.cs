@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using ProcureHub.Common;
@@ -9,6 +10,15 @@ namespace ProcureHub.Features.Staff;
 public static class CreateStaff
 {
     public record Request(string Email, string Password);
+
+    public class RequestValidator : AbstractValidator<Request>
+    {
+        public RequestValidator()
+        {
+            RuleFor(r => r.Email).NotEmpty().EmailAddress();
+            RuleFor(r => r.Password).NotEmpty();
+        }
+    } 
 
     public class Handler(
         ApplicationDbContext dbContext,

@@ -8,6 +8,7 @@ using ProcureHub.Infrastructure;
 using ProcureHub.WebApi.ApiResponses;
 using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Helpers;
+using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 namespace ProcureHub.WebApi;
 
@@ -47,7 +48,10 @@ public static class ApiEndpoints
 
     private static void ConfigureStaffEndpoints(WebApplication app)
     {
-        app.MapPost("/staff", async (
+        var group = app.MapGroup("")
+            .AddFluentValidationAutoValidation();
+
+        group.MapPost("/staff", async (
                 [FromServices] IRequestHandler<CreateStaff.Request, Result<string>> handler,
                 CancellationToken token,
                 CreateStaff.Request request
@@ -63,7 +67,7 @@ public static class ApiEndpoints
             .WithName("CreateStaff")
             .WithTags("Staff");
 
-        app.MapGet("/staff", async (
+        group.MapGet("/staff", async (
                 [FromServices] IRequestHandler<ListStaff.Request, PagedResult<ListStaff.Response>> handler,
                 CancellationToken token,
                 string? email,
@@ -78,7 +82,7 @@ public static class ApiEndpoints
             .WithName("GetStaff")
             .WithTags("Staff");
 
-        app.MapGet("/staff/{id}", async (
+        group.MapGet("/staff/{id}", async (
                 [FromServices] IRequestHandler<GetStaff.Request, GetStaff.Response?> handler,
                 CancellationToken token,
                 string id) =>

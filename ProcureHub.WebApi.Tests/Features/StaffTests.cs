@@ -12,6 +12,42 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
     private const string ValidStaffEmail = "staff1@example.com";
     private const string ValidStaffPassword = "Test1234!";
 
+    [Fact]
+    public async Task Request_dto_validation()
+    {
+        // Log in as admin to be able to manage staff
+        await LoginAsAdminAsync();
+
+        // Creating Staff
+
+        // No email
+        var reqNoEmail = new CreateStaff.Request(null, ValidStaffPassword);
+        var respNoEmail = await HttpClient.PostAsync("/staff", JsonContent.Create(reqNoEmail), CancellationToken);
+        await respNoEmail.AssertValidationProblemAsync(CancellationToken,
+            errors: new Dictionary<string, string[]>
+            {
+                ["Email"] = ["'Email' must not be empty."]
+            });
+
+        // Not a valid email
+        var reqInvalidEmail = new CreateStaff.Request("not-an-email", ValidStaffPassword);
+        var respInvalidEmail = await HttpClient.PostAsync("/staff", JsonContent.Create(reqInvalidEmail), CancellationToken);
+        await respInvalidEmail.AssertValidationProblemAsync(CancellationToken,
+            errors: new Dictionary<string, string[]>
+            {
+                ["Email"] = ["'Email' is not a valid email address."]
+            });
+
+        // No password
+        var reqNoPwd = new CreateStaff.Request(ValidStaffEmail, null);
+        var respNoPwd = await HttpClient.PostAsync("/staff", JsonContent.Create(reqNoPwd), CancellationToken);
+        await respNoPwd.AssertValidationProblemAsync(CancellationToken,
+            errors: new Dictionary<string, string[]>
+            {
+                ["Password"] = ["'Password' must not be empty."]
+            });
+    }
+    
     /// <summary>
     /// Note: In a real-world system, this would use invite emails and a time-limited invite token.
     /// Keeping it simple here for demo.
@@ -113,13 +149,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
     }
 
     [Fact]
-    public async Task Staff_member_can_read_own_staff_record_by_id()
-    {
-        throw new NotImplementedException();
-    }
-    
-    [Fact]
-    public async Task Staff_member_cannot_get_other_staff_record_by_id()
+    public async Task Staff_member_can_only_read_own_staff_record()
     {
         const string email1 = "staff1@example.com";
         const string email2 = "staff2@example.com";
@@ -127,25 +157,28 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
         // Log in as admin to be able to manage staff
         await LoginAsAdminAsync();
 
-        // Admin creates 2 Staff users
+        // Admin creates Staff 1
         var newStaffReq1 = JsonContent.Create(new { email = email1, password = ValidStaffPassword });
         var regResp1 = await HttpClient.PostAsync("/staff", newStaffReq1, CancellationToken);
         Assert.Equal(HttpStatusCode.Created, regResp1.StatusCode);
-
+        var user1Id = regResp1.Headers.Location!.ToString().Split('/').Last();
+        
+        // Admin creates Staff 2
         var newStaffReq2 = JsonContent.Create(new { email = email2, password = ValidStaffPassword });
         var regResp2 = await HttpClient.PostAsync("/staff", newStaffReq2, CancellationToken);
         Assert.Equal(HttpStatusCode.Created, regResp2.StatusCode);
+        var user2Id = regResp2.Headers.Location!.ToString().Split('/').Last();
 
-        // Extract user 2's ID from Location header
-        var location = regResp2.Headers.Location?.ToString();
-        var user2Id = location!.Split('/').Last();
-
-        // Log in as Staff member 1
+        // Log in as Staff 1
         await LoginAsync(email1, ValidStaffPassword);
 
-        // Try to get staff member 2 by ID - should *fail*
-        var getStaffResp = await HttpClient.GetAsync($"/staff/{user2Id}", CancellationToken);
-        await getStaffResp.AssertProblemDetailsAsync(
+        // Try to get own staff record by ID - should succeed
+        var getStaff1Resp = await HttpClient.GetAsync($"/staff/{user1Id}", CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, getStaff1Resp.StatusCode);
+
+        // Try to get staff 2 record by ID - should fail
+        var getStaff2Resp = await HttpClient.GetAsync($"/staff/{user2Id}", CancellationToken);
+        await getStaff2Resp.AssertProblemDetailsAsync(
             HttpStatusCode.Forbidden,
             CancellationToken,
             title: "Forbidden",

@@ -1,14 +1,17 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub;
 using ProcureHub.Constants;
 using ProcureHub.Data;
+using ProcureHub.Features.Staff;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
 using ProcureHub.WebApi;
 using ProcureHub.WebApi.Authentication;
 using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Helpers;
+using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 RegisterServices(builder);
@@ -98,6 +101,12 @@ void RegisterServices(WebApplicationBuilder appBuilder)
     });
 
     appBuilder.Services.AddRequestHandlers();
+    
+    // Register all FluentValidation validators 
+    appBuilder.Services.AddValidatorsFromAssemblyContaining<CreateStaff.Request>();
+    
+    // Automatically run FluentValidation validators on ASP.Net Minimal APIs:
+    builder.Services.AddFluentValidationAutoValidation();
 }
 
 async Task ConfigureApplication(WebApplication app)
