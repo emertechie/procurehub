@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using ProcureHub.Common;
 using ProcureHub.Common.Pagination;
@@ -19,6 +20,22 @@ public static class ApiEndpoints
     {
         // TODO: remove this temp endpoint to test frontend API connection
         app.MapGet("/test", async () => Results.Ok(new { DateTime = DateTime.UtcNow })) ;
+
+        app.MapGet("/me", async (ClaimsPrincipal user, ILogger<WebApplication> logger) =>
+            {
+                if (!user.Identity?.IsAuthenticated ?? true)
+                {
+                    return Results.Unauthorized();
+                }
+
+                var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                var email = user.FindFirstValue(ClaimTypes.Email);
+
+                return Results.Ok(new { id = userId, email });
+            })
+            .RequireAuthorization(AuthorizationPolicyNames.UserOnly)
+            .WithName("GetCurrentUser")
+            .WithTags("Auth");
 
         ConfigureStaffEndpoints(app);
         ConfigureDepartmentEndpoints(app);

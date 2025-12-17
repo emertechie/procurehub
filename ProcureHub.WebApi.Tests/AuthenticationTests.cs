@@ -26,6 +26,14 @@ public class AuthenticationTests(ITestOutputHelper testOutputHelper)
     }
 
     [Fact]
+    public async Task Can_return_information_about_logged_in_user()
+    {
+        // TODO: test the /me endpoint
+        // Make sure not accessible if not logged in
+        throw new NotImplementedException();
+    }
+    
+    [Fact]
     public async Task Cannot_manually_register()
     {
         await LoginAsAdminAsync();
