@@ -85,7 +85,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
         // Policy for Bearer token only (for user-specific actions)
         options.AddPolicy(AuthorizationPolicyNames.UserOnly, policy =>
         {
-            policy.AddAuthenticationSchemes(IdentityConstants.BearerScheme);
+            policy.AddAuthenticationSchemes(IdentityConstants.ApplicationScheme);
             policy.RequireAuthenticatedUser();
         });
 
