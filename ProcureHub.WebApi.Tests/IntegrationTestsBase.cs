@@ -12,7 +12,7 @@ using Respawn;
 
 namespace ProcureHub.WebApi.Tests;
 
-public abstract class DbTestsBase : IAsyncLifetime
+public abstract class IntegrationTestsBase : IAsyncLifetime
 {
     protected readonly HttpClient HttpClient;
     private readonly WebApiTestFactory _factory;
@@ -22,7 +22,7 @@ public abstract class DbTestsBase : IAsyncLifetime
     protected const string AdminEmail = "test-admin@procurehub.local";
     protected const string AdminPassword = "TestAdmin123!";
 
-    protected DbTestsBase(ITestOutputHelper testOutputHelper)
+    protected IntegrationTestsBase(ITestOutputHelper testOutputHelper)
     {
         _connectionString = GetConnectionString();    
         _factory = new WebApiTestFactory(testOutputHelper, _connectionString);

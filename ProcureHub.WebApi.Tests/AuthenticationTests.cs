@@ -3,8 +3,8 @@ using System.Net.Http.Json;
 
 namespace ProcureHub.WebApi.Tests;
 
-public class AuthenticationDbTests(ITestOutputHelper testOutputHelper)
-    : DbTestsBase(testOutputHelper)
+public class AuthenticationTests(ITestOutputHelper testOutputHelper)
+    : IntegrationTestsBase(testOutputHelper)
 {
     [Fact]
     public async Task Can_login_as_admin_and_use_API()

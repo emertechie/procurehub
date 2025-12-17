@@ -5,7 +5,7 @@ using ProcureHub.Features.Departments;
 namespace ProcureHub.WebApi.Tests.Features;
 
 public class DepartmentTests(ITestOutputHelper testOutputHelper)
-    : DbTestsBase(testOutputHelper)
+    : IntegrationTestsBase(testOutputHelper)
 {
     [Fact]
     public async Task Can_create_and_fetch_department()

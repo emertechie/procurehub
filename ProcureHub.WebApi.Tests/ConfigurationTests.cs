@@ -3,8 +3,8 @@ using ProcureHub.WebApi.Tests.Features;
 
 namespace ProcureHub.WebApi.Tests;
 
-public class ConfigurationDbTests(ITestOutputHelper testOutputHelper)
-    : DbTestsBase(testOutputHelper)
+public class ConfigurationTests(ITestOutputHelper testOutputHelper)
+    : IntegrationTestsBase(testOutputHelper)
 {
     /// <summary>
     /// Verifies the use of `webApp.UseStatusCodePages` in API config.

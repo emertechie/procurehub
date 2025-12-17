@@ -7,7 +7,7 @@ using ProcureHub.WebApi.ApiResponses;
 namespace ProcureHub.WebApi.Tests.Features;
 
 public class StaffTests(ITestOutputHelper testOutputHelper)
-    : DbTestsBase(testOutputHelper)
+    : IntegrationTestsBase(testOutputHelper)
 {
     private const string ValidStaffEmail = "staff1@example.com";
     private const string ValidStaffPassword = "Test1234!";
