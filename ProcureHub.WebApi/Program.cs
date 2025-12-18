@@ -1,8 +1,6 @@
 using FluentValidation;
-
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
 using ProcureHub;
 using ProcureHub.Constants;
 using ProcureHub.Data;
@@ -13,7 +11,6 @@ using ProcureHub.WebApi;
 using ProcureHub.WebApi.Authentication;
 using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Helpers;
-
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 // Customize FluentValidation messages
@@ -51,8 +48,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
     var connectionString = appBuilder.Configuration.GetConnectionString("DefaultConnection") ??
                            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
     appBuilder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(connectionString, dbOptions =>
-            dbOptions.MigrationsAssembly("ProcureHub")));
+        options.UseNpgsql(connectionString, dbOptions => dbOptions.MigrationsAssembly("ProcureHub")));
 
     // Configure Identity with API endpoints (automatically adds Bearer token authentication)
     builder.Services.AddIdentityApiEndpoints<ApplicationUser>(options =>
@@ -86,10 +82,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
         });
 
         // Role-based policies
-        options.AddPolicy(RolePolicyNames.AdminOnly, policy =>
-        {
-            policy.RequireRole(RoleNames.Admin);
-        });
+        options.AddPolicy(RolePolicyNames.AdminOnly, policy => { policy.RequireRole(RoleNames.Admin); });
     });
 
     appBuilder.Services.AddRequestHandlers();
@@ -118,7 +111,7 @@ async Task ConfigureApplication(WebApplication app)
 
         // Ensure DB created
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        dbContext.Database.EnsureCreated();
+        await dbContext.Database.MigrateAsync();
 
         // Seed database with roles and initial admin user
         await DataSeeder.SeedAsync(
