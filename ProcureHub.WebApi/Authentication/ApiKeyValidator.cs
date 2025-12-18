@@ -1,5 +1,8 @@
 namespace ProcureHub.WebApi.Authentication;
 
+/// <summary>
+/// Not implemented yet.
+/// </summary>
 public class ApiKeyValidator : IApiKeyValidator
 {
     private readonly ILogger<ApiKeyValidator> _logger;

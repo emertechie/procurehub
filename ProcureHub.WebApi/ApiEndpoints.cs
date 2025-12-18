@@ -38,7 +38,7 @@ public static class ApiEndpoints
 
                 return Results.Ok(new { id = userId, email });
             })
-            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
+            .RequireAuthorization(AuthorizationPolicyNames.Authenticated)
             .WithName("GetCurrentUser")
             .WithTags("Auth");
     }
@@ -46,7 +46,7 @@ public static class ApiEndpoints
     private static void ConfigureStaffEndpoints(WebApplication app)
     {
         var group = app.MapGroup("")
-            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess, RolePolicyNames.AdminOnly)
+            .RequireAuthorization(AuthorizationPolicyNames.Authenticated, RolePolicyNames.AdminOnly)
             .AddFluentValidationAutoValidation()
             .WithTags("Staff");
 
@@ -99,7 +99,7 @@ public static class ApiEndpoints
                 var newId = await handler.HandleAsync(request, token);
                 return Results.Created($"/departments/{newId}", null);
             })
-            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
+            .RequireAuthorization(AuthorizationPolicyNames.Authenticated)
             .WithName("CreateDepartment")
             .WithTags("Departments");
 
@@ -107,8 +107,8 @@ public static class ApiEndpoints
                 [FromServices] IRequestHandler<ListDepartments.Request, ListDepartments.Response[]> handler,
                 CancellationToken token
             ) => await handler.HandleAsync(new ListDepartments.Request(), token))
-            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
-            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
+            .RequireAuthorization(AuthorizationPolicyNames.Authenticated)
+            .RequireAuthorization(AuthorizationPolicyNames.Authenticated)
             .WithName("GetDepartments")
             .WithTags("Departments");
 
@@ -119,7 +119,7 @@ public static class ApiEndpoints
                 await handler.HandleAsync(new GetDepartment.Request(id), token) is var response
                     ? Results.Ok(response)
                     : Results.NotFound())
-            .RequireAuthorization(AuthorizationPolicyNames.ApiKeyOrUserAccess)
+            .RequireAuthorization(AuthorizationPolicyNames.Authenticated)
             .WithName("GetDepartmentById")
             .WithTags("Departments");
     }
