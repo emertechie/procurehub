@@ -1,5 +1,7 @@
 using System.Security.Claims;
+
 using Microsoft.AspNetCore.Mvc;
+
 using ProcureHub.Common;
 using ProcureHub.Common.Pagination;
 using ProcureHub.Features.Departments;
@@ -8,6 +10,7 @@ using ProcureHub.Infrastructure;
 using ProcureHub.WebApi.ApiResponses;
 using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Helpers;
+
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 namespace ProcureHub.WebApi;
@@ -17,7 +20,7 @@ public static class ApiEndpoints
     public static void Configure(WebApplication app)
     {
         // TODO: remove this temp endpoint to test frontend API connection
-        app.MapGet("/test", async () => Results.Ok(new { DateTime = DateTime.UtcNow })) ;
+        app.MapGet("/test", async () => Results.Ok(new { DateTime = DateTime.UtcNow }));
 
         ConfigureAdditionalAuthEndpoints(app);
         ConfigureStaffEndpoints(app);

@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,11 +19,11 @@ public static class HttpResponseAssertions
         {
             Assert.Equal(expectedStatus, response.StatusCode);
             Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
-        
+
             var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>(cancellationToken);
             Assert.NotNull(problemDetails);
             Assert.Equal((int)expectedStatus, problemDetails.Status);
-        
+
             if (detail != null)
             {
                 Assert.Equal(detail, problemDetails.Detail);
@@ -79,7 +80,7 @@ public static class HttpResponseAssertions
     public static void AssertHasError(this HttpValidationProblemDetails problemDetails, string field, string? messageContains = null)
     {
         Assert.Contains(field, problemDetails.Errors.Keys);
-        
+
         if (messageContains != null)
         {
             var errorMessages = problemDetails.Errors[field];

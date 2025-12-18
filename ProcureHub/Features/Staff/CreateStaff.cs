@@ -1,6 +1,8 @@
 using FluentValidation;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+
 using ProcureHub.Common;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
@@ -18,7 +20,7 @@ public static class CreateStaff
             RuleFor(r => r.Email).NotEmpty().EmailAddress();
             RuleFor(r => r.Password).NotEmpty();
         }
-    } 
+    }
 
     public class Handler(
         ApplicationDbContext dbContext,
@@ -44,7 +46,7 @@ public static class CreateStaff
                     string.Join(", ", result.Errors.Select(e => e.Description)));
                 return Result.Failure<string>(UserCreationFailed(result.Errors));
             }
-            
+
             var userId = await userManager.GetUserIdAsync(user);
 
             // Create linked Staff entity
@@ -65,7 +67,7 @@ public static class CreateStaff
             return Result.Success(userId);
         }
     }
-    
+
     private static Error UserCreationFailed(IEnumerable<IdentityError> identityErrors)
     {
         var validationErrors = identityErrors

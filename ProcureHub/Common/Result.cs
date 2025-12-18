@@ -25,12 +25,12 @@ public class Result<T>
         _error = error;
     }
 
-    public T Value => IsSuccess 
-        ? _value! 
+    public T Value => IsSuccess
+        ? _value!
         : throw new InvalidOperationException("Cannot access value of a failed result");
 
-    public Error Error => IsFailure 
-        ? _error! 
+    public Error Error => IsFailure
+        ? _error!
         : throw new InvalidOperationException("Cannot access error of a successful result");
 
     public TResult Match<TResult>(

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+
 using ProcureHub.Constants;
 using ProcureHub.Models;
 
@@ -21,13 +22,13 @@ public sealed class DataSeeder
         // Seed initial admin user
         await SeedAdminUserAsync(dbContext, userManager, logger, adminEmail, adminPassword);
     }
-    
+
     private static async Task SeedRolesAsync(
         RoleManager<ApplicationRole> roleManager,
         ILogger<DataSeeder> logger)
     {
         var roles = new[] { RoleNames.Admin, RoleNames.Requester, RoleNames.Approver };
-        
+
         foreach (var roleName in roles)
         {
             if (!await roleManager.RoleExistsAsync(roleName))
@@ -37,7 +38,7 @@ public sealed class DataSeeder
             }
         }
     }
-    
+
     private static async Task SeedAdminUserAsync(ApplicationDbContext dbContext,
         UserManager<ApplicationUser> userManager,
         ILogger<DataSeeder> logger,
@@ -50,7 +51,7 @@ public sealed class DataSeeder
         {
             return; // Admin already exists
         }
-        
+
         // Create admin user
         var adminUser = new ApplicationUser
         {
@@ -58,17 +59,17 @@ public sealed class DataSeeder
             Email = adminEmail,
             EmailConfirmed = true
         };
-        
+
         logger.LogWarning("Creating default admin user with email '{Email}'", adminEmail);
         var result = await userManager.CreateAsync(adminUser, adminPassword);
         if (!result.Succeeded)
         {
             throw new Exception($"Failed to create admin user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
         }
-        
+
         // Assign Admin role
         await userManager.AddToRoleAsync(adminUser, RoleNames.Admin);
-        
+
         // Create linked Staff record
         var staff = new Staff
         {
@@ -77,7 +78,7 @@ public sealed class DataSeeder
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
-        
+
         dbContext.Staff.Add(staff);
         await dbContext.SaveChangesAsync();
     }

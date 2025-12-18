@@ -1,5 +1,7 @@
 using FluentValidation;
+
 using Microsoft.EntityFrameworkCore;
+
 using ProcureHub.Common.Pagination;
 using ProcureHub.Infrastructure;
 
@@ -18,7 +20,7 @@ public static class QueryStaff
             RuleFor(r => r.PageSize).InclusiveBetween(1, Paging.MaxPageSize);
         }
     }
-    
+
     public record Response(
         string Id,
         string Email,

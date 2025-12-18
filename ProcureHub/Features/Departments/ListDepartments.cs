@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+
 using ProcureHub.Infrastructure;
 
 namespace ProcureHub.Features.Departments;

@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace ProcureHub.Common.Pagination;
@@ -44,7 +45,7 @@ public static class PagingExtensions
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(page, 0);
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(pageSize, 0);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(pageSize, Paging.MaxPageSize);
-        
+
         var itemsToSkip = (page - 1) * pageSize;
 
         var totalCount = await query.CountAsync(token);

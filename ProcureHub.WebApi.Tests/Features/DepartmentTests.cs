@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
+
 using ProcureHub.Features.Departments;
 
 namespace ProcureHub.WebApi.Tests.Features;
@@ -24,14 +25,14 @@ public class DepartmentTests(ITestOutputHelper testOutputHelper)
         var location = createDeptResp.Headers.Location?.ToString();
         Assert.Matches(@"^/departments/\d+$", location);
         var newDepartmentId = int.Parse(location!.Split('/').Last());
-        
+
         // Assert department returned in list
         var listDeptsResp2 = await HttpClient.GetAsync("/departments", CancellationToken);
         var departments2 = await listDeptsResp2.AssertSuccessAndReadJsonAsync<ListDepartments.Response[]>(CancellationToken);
         Assert.Equal(
             new ListDepartments.Response[] { new(newDepartmentId, "New Department") },
             departments2);
-        
+
         // Assert can get department by ID
         var getDeptResp = await HttpClient.GetAsync($"/departments/{newDepartmentId}", CancellationToken);
         var department = await getDeptResp.AssertSuccessAndReadJsonAsync<GetDepartment.Response>(CancellationToken);
@@ -50,7 +51,7 @@ public class DepartmentTests(ITestOutputHelper testOutputHelper)
 
         throw new NotImplementedException();
     }
-    
+
     private Task CreateDepartment(string name)
         => HttpClient.PostAsync("/departments", JsonContent.Create(new CreateDepartment.Request(name)), CancellationToken);
 }

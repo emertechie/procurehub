@@ -1,6 +1,8 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
+
 using Microsoft.AspNetCore.Identity.Data;
+
 using ProcureHub.Features.Staff;
 using ProcureHub.WebApi.ApiResponses;
 
@@ -28,7 +30,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
             await getStaffById();
         }
     }
-    
+
     [Fact]
     public async Task Request_dto_validation()
     {
@@ -89,8 +91,8 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
                     errors: new Dictionary<string, string[]>
                     {
                         ["PageSize"] = ["'Page Size' must be between 1 and 100. Received 0."]
-                    });            
-                
+                    });
+
 
                 // Page size > 100
                 var respInvalidPageSize2 = await HttpClient.GetAsync($"/staff?pageSize=101", CancellationToken);
@@ -160,7 +162,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
         var newStaffReq = JsonContent.Create(new { email = newUserEmailMixedCase, password = "Test1234!" });
         var regResp = await HttpClient.PostAsync("/staff", newStaffReq, CancellationToken);
         Assert.Equal(HttpStatusCode.Created, regResp.StatusCode);
-        
+
         // Ensure Location header contains new user ID
         var location = regResp.Headers.Location?.ToString();
         Assert.Matches(@"^/staff/[0-9a-f-]+$", location);
@@ -172,7 +174,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
         var newStaff = Assert.Single(staffList2!.Data);
         Assert.Equal(newUserId, newStaff.Id);
         Assert.Equal(newUserEmailLower, newStaff.Email);
-        
+
         // Can get new Staff by ID
         var getStaffResp = await HttpClient.GetAsync($"/staff/{newUserId}", CancellationToken);
         var staffById = await getStaffResp.AssertSuccessAndReadJsonAsync<ApiDataResponse<GetStaffById.Response>>(CancellationToken);
@@ -185,15 +187,15 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
     {
         const string email = ValidStaffEmail;
         const string password = ValidStaffPassword;
-        
+
         // Log in as admin to be able to manage staff
         await LoginAsAdminAsync();
-        
+
         // Attempt 1: Admin creates user - should work
         var newStaffReq1 = JsonContent.Create(new { email, password });
         var regResp1 = await HttpClient.PostAsync("/staff", newStaffReq1, CancellationToken);
         Assert.Equal(HttpStatusCode.Created, regResp1.StatusCode);
-        
+
         // Attempt 2: Admin creates user - should *fail*
         var newStaffReq2 = JsonContent.Create(new { email, password });
         var regResp2 = await HttpClient.PostAsync("/staff", newStaffReq2, CancellationToken);
@@ -202,7 +204,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
             {
                 ["DuplicateUserName"] = [$"Username '{email}' is already taken."]
             });
-        
+
         // Assert only 1 Staff record created
         var listStaffResp2 = await HttpClient.GetAsync($"/staff?email={email}", CancellationToken);
         var staffList2 = await listStaffResp2.AssertSuccessAndReadJsonAsync<ApiPagedResponse<QueryStaff.Response>>(CancellationToken);
@@ -215,15 +217,15 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
     {
         const string email = ValidStaffEmail;
         const string password = ValidStaffPassword;
-        
+
         // Log in as admin to be able to manage staff
         await LoginAsAdminAsync();
-        
+
         // Confirm logged in as admin: 
         var infoResp1 = await HttpClient.GetAsync("/manage/info", CancellationToken);
         var info1 = await infoResp1.AssertSuccessAndReadJsonAsync<InfoResponse>(CancellationToken);
         Assert.Equal(AdminEmail, info1!.Email);
-        
+
         // Admin creates user
         var newStaffReq1 = JsonContent.Create(new { email, password });
         var regResp1 = await HttpClient.PostAsync("/staff", newStaffReq1, CancellationToken);
@@ -231,7 +233,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
 
         // Log in as Staff member
         await LoginAsync(email, password);
-        
+
         // Confirm logged in as staff: 
         var infoResp2 = await HttpClient.GetAsync("/manage/info", CancellationToken);
         var info2 = await infoResp2.AssertSuccessAndReadJsonAsync<InfoResponse>(CancellationToken);
@@ -252,7 +254,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
         var regResp1 = await HttpClient.PostAsync("/staff", newStaffReq1, CancellationToken);
         Assert.Equal(HttpStatusCode.Created, regResp1.StatusCode);
         var user1Id = regResp1.Headers.Location!.ToString().Split('/').Last();
-        
+
         // Admin creates Staff 2
         var newStaffReq2 = JsonContent.Create(new { email = email2, password = ValidStaffPassword });
         var regResp2 = await HttpClient.PostAsync("/staff", newStaffReq2, CancellationToken);
@@ -305,7 +307,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
     {
         const string email1 = "staff1@example.com";
         const string email2 = "staff2@example.com";
-            
+
         // Log in as admin to be able to manage staff
         await LoginAsAdminAsync();
 
@@ -313,7 +315,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
         var newStaffReq1 = JsonContent.Create(new { email = email1, password = ValidStaffPassword });
         var regResp1 = await HttpClient.PostAsync("/staff", newStaffReq1, CancellationToken);
         Assert.Equal(HttpStatusCode.Created, regResp1.StatusCode);
-            
+
         // Log in as Staff member
         await LoginAsync(email1, ValidStaffPassword);
 

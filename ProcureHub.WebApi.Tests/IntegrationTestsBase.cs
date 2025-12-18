@@ -1,14 +1,18 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using Npgsql;
+
 using ProcureHub.Data;
 using ProcureHub.Models;
+
 using Respawn;
 
 namespace ProcureHub.WebApi.Tests;
@@ -55,11 +59,11 @@ public abstract class IntegrationTestsBase : IAsyncLifetime
         Assert.Equal(HttpStatusCode.OK, loginResp.StatusCode);
         var loginResult = await loginResp.Content.ReadFromJsonAsync<LoginResponse>(CancellationToken);
 
-        HttpClient.DefaultRequestHeaders.Authorization =  new AuthenticationHeaderValue("Bearer", loginResult!.AccessToken);
+        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult!.AccessToken);
     }
 
     private record LoginResponse(string AccessToken, string TokenType, int ExpiresIn, string RefreshToken);
-    
+
     private static string GetConnectionString()
     {
         var configuration = new ConfigurationBuilder()
@@ -87,7 +91,7 @@ public abstract class IntegrationTestsBase : IAsyncLifetime
 
         await _respawner.ResetAsync(connection);
     }
-    
+
     private static async Task SeedData(IServiceProvider factoryServices)
     {
         using var scope = factoryServices.CreateScope();

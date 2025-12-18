@@ -1,5 +1,7 @@
 using FluentValidation;
+
 using Microsoft.EntityFrameworkCore;
+
 using ProcureHub.Infrastructure;
 
 namespace ProcureHub.Features.Staff;
@@ -14,7 +16,7 @@ public static class GetStaffById
         {
             RuleFor(r => r.Id).NotEmpty();
         }
-    } 
+    }
 
     public record Response(
         string Id,
