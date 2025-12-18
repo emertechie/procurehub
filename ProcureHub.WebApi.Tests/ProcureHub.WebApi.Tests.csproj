@@ -1,35 +1,36 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <IsPackable>false</IsPackable>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="coverlet.collector" Version="6.0.4" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.0" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
-        <PackageReference Include="Respawn" Version="7.0.0" />
-        <PackageReference Include="Xunit.DependencyInjection.Logging" Version="11.0.0" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
-        <PackageReference Include="xunit.v3" Version="3.2.1" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4"/>
+    <PackageReference Include="MartinCostello.Logging.XUnit.v3" Version="0.7.0"/>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.0"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0"/>
+    <PackageReference Include="Respawn" Version="7.0.0"/>
+    <PackageReference Include="Xunit.DependencyInjection.Logging" Version="11.0.0"/>
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4"/>
+    <PackageReference Include="xunit.v3" Version="3.2.1"/>
+  </ItemGroup>
 
-    <ItemGroup>
-        <Using Include="Xunit" />
-    </ItemGroup>
+  <ItemGroup>
+    <Using Include="Xunit"/>
+  </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\ProcureHub.WebApi\ProcureHub.WebApi.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ProcureHub.WebApi\ProcureHub.WebApi.csproj"/>
+  </ItemGroup>
 
-    <ItemGroup>
-      <None Update="appsettings.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
 </Project>

@@ -1,3 +1,4 @@
+using MartinCostello.Logging.XUnit;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -7,11 +8,13 @@ using Microsoft.Extensions.Logging;
 
 namespace ProcureHub.WebApi.Tests.Infrastructure;
 
-public class WebApiTestFactory(ITestOutputHelper outputHelper, string connectionString)
-    : WebApplicationFactory<Program>
+public class WebApiTestFactory(string connectionString)
+    : WebApplicationFactory<Program>, ITestOutputHelperAccessor
 {
     private static readonly Lock _lock = new();
     private static bool _databaseInitialized;
+
+    public ITestOutputHelper? OutputHelper { get; set; }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -19,7 +22,7 @@ public class WebApiTestFactory(ITestOutputHelper outputHelper, string connection
         // any data seeded there is wiped out in the `ResetDatabaseAsync` call.
         builder.UseEnvironment("Test");
 
-        builder.ConfigureLogging(logging => { logging.AddXUnit(outputHelper); });
+        builder.ConfigureLogging(logging => { logging.AddXUnit(this); });
 
         builder.ConfigureServices(services =>
         {

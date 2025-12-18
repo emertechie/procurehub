@@ -12,16 +12,18 @@ namespace ProcureHub.WebApi.Tests.Infrastructure;
 public abstract class IntegrationTestsBase : IAsyncLifetime
 {
     protected const string AdminEmail = "test-admin@procurehub.local";
+
     protected const string AdminPassword = "TestAdmin123!";
-    private readonly WebApiTestFactory _factory;
+
     private readonly IntegrationTestFixture _fixture;
     protected readonly HttpClient HttpClient;
 
     protected IntegrationTestsBase(ITestOutputHelper testOutputHelper, IntegrationTestFixture fixture)
     {
         _fixture = fixture;
-        _factory = new WebApiTestFactory(testOutputHelper, _fixture.ConnectionString);
-        HttpClient = _factory.CreateClient();
+
+        _fixture.WebApiTestFactory.OutputHelper = testOutputHelper;
+        HttpClient = _fixture.WebApiTestFactory.CreateClient();
     }
 
     protected static CancellationToken CancellationToken => TestContext.Current.CancellationToken;
@@ -29,7 +31,7 @@ public abstract class IntegrationTestsBase : IAsyncLifetime
     public async ValueTask InitializeAsync()
     {
         await _fixture.ResetDatabaseAsync();
-        await SeedData(_factory.Services);
+        await SeedData(_fixture.WebApiTestFactory.Services);
     }
 
     public ValueTask DisposeAsync()

@@ -11,8 +11,13 @@ public class IntegrationTestFixture : IAsyncLifetime
 
     public string ConnectionString { get; } = GetConnectionString();
 
+    public WebApiTestFactory WebApiTestFactory { get; private set; } = null!;
+
     public async ValueTask InitializeAsync()
     {
+        // Initialize the API host once for all tests
+        WebApiTestFactory = new WebApiTestFactory(ConnectionString);
+
         // Initialize the respawner once for all tests
         await using var connection = new NpgsqlConnection(ConnectionString);
         await connection.OpenAsync();
@@ -26,6 +31,7 @@ public class IntegrationTestFixture : IAsyncLifetime
 
     public ValueTask DisposeAsync()
     {
+        WebApiTestFactory?.Dispose();
         return ValueTask.CompletedTask;
     }
 
