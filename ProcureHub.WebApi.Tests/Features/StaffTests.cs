@@ -1,8 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-
 using Microsoft.AspNetCore.Identity.Data;
-
 using ProcureHub.Features.Staff;
 using ProcureHub.WebApi.ApiResponses;
 
@@ -14,130 +12,100 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
     private const string ValidStaffEmail = "staff1@example.com";
     private const string ValidStaffPassword = "Test1234!";
 
-    /// <summary>
-    /// A helper that ensures tests are run for all possible staff endpoints
-    /// </summary>
-    private static class TestHelper
-    {
-        public static async Task RunTestsForAllEndpointsAsync(
-            Func<Task> createStaff,
-            Func<Task> queryStaff,
-            Func<Task> getStaffById
-        )
-        {
-            await createStaff();
-            await queryStaff();
-            await getStaffById();
-        }
-    }
-
     [Fact]
-    public async Task Request_dto_validation()
+    public async Task Test_validation_for_all_endpoints()
     {
         // Log in as admin to be able to manage staff
         await LoginAsAdminAsync();
 
-        await TestHelper.RunTestsForAllEndpointsAsync(
-            createStaff: async () =>
-            {
-                // No email
-                var reqNoEmail = new CreateStaff.Request(null, ValidStaffPassword);
-                var respNoEmail = await HttpClient.PostAsync("/staff", JsonContent.Create(reqNoEmail), CancellationToken);
-                await respNoEmail.AssertValidationProblemAsync(CancellationToken,
-                    errors: new Dictionary<string, string[]>
-                    {
-                        ["Email"] = ["'Email' must not be empty."]
-                    });
+        await TestHelper.RunTestsForAllEndpointsAsync(config =>
+        {
+            config.CreateStaff = TestCreateStaffEndpoint;
+            config.QueryStaff = TestQueryStaffEndpoint;
+            config.GetStaffById = TestGetStaffByIdEndpoint;
+        });
 
-                // Not a valid email
-                var reqInvalidEmail = new CreateStaff.Request("not-an-email", ValidStaffPassword);
-                var respInvalidEmail = await HttpClient.PostAsync("/staff", JsonContent.Create(reqInvalidEmail), CancellationToken);
-                await respInvalidEmail.AssertValidationProblemAsync(CancellationToken,
-                    errors: new Dictionary<string, string[]>
-                    {
-                        ["Email"] = ["'Email' is not a valid email address."]
-                    });
+        async Task TestCreateStaffEndpoint()
+        {
+            // No email
+            var reqNoEmail = new CreateStaff.Request(null, ValidStaffPassword);
+            var respNoEmail = await HttpClient.PostAsync("/staff", JsonContent.Create(reqNoEmail), CancellationToken);
+            await respNoEmail.AssertValidationProblemAsync(CancellationToken,
+                errors: new Dictionary<string, string[]> { ["Email"] = ["'Email' must not be empty."] });
 
-                // No password
-                var reqNoPwd = new CreateStaff.Request(ValidStaffEmail, null);
-                var respNoPwd = await HttpClient.PostAsync("/staff", JsonContent.Create(reqNoPwd), CancellationToken);
-                await respNoPwd.AssertValidationProblemAsync(CancellationToken,
-                    errors: new Dictionary<string, string[]>
-                    {
-                        ["Password"] = ["'Password' must not be empty."]
-                    });
-            },
-            queryStaff: async () =>
-            {
-                // Not a valid email
-                var respInvalidEmail = await HttpClient.GetAsync("/staff?email=not-an-email", CancellationToken);
-                await respInvalidEmail.AssertValidationProblemAsync(CancellationToken,
-                    errors: new Dictionary<string, string[]>
-                    {
-                        ["Email"] = ["'Email' is not a valid email address."]
-                    });
+            // Not a valid email
+            var reqInvalidEmail = new CreateStaff.Request("not-an-email", ValidStaffPassword);
+            var respInvalidEmail =
+                await HttpClient.PostAsync("/staff", JsonContent.Create(reqInvalidEmail), CancellationToken);
+            await respInvalidEmail.AssertValidationProblemAsync(CancellationToken,
+                errors: new Dictionary<string, string[]> { ["Email"] = ["'Email' is not a valid email address."] });
 
-                // Page < 1
-                var respInvalidPage = await HttpClient.GetAsync($"/staff?page=0", CancellationToken);
-                await respInvalidPage.AssertValidationProblemAsync(CancellationToken,
-                    errors: new Dictionary<string, string[]>
-                    {
-                        ["Page"] = ["'Page' must be greater than or equal to '1'."]
-                    });
+            // No password
+            var reqNoPwd = new CreateStaff.Request(ValidStaffEmail, null);
+            var respNoPwd = await HttpClient.PostAsync("/staff", JsonContent.Create(reqNoPwd), CancellationToken);
+            await respNoPwd.AssertValidationProblemAsync(CancellationToken,
+                errors: new Dictionary<string, string[]> { ["Password"] = ["'Password' must not be empty."] });
+        }
 
-                // Page size < 1
-                var respInvalidPageSize1 = await HttpClient.GetAsync($"/staff?pageSize=0", CancellationToken);
-                await respInvalidPageSize1.AssertValidationProblemAsync(CancellationToken,
-                    errors: new Dictionary<string, string[]>
-                    {
-                        ["PageSize"] = ["'Page Size' must be between 1 and 100. Received 0."]
-                    });
+        async Task TestQueryStaffEndpoint()
+        {
+            // Not a valid email
+            var respInvalidEmail = await HttpClient.GetAsync("/staff?email=not-an-email", CancellationToken);
+            await respInvalidEmail.AssertValidationProblemAsync(CancellationToken,
+                errors: new Dictionary<string, string[]> { ["Email"] = ["'Email' is not a valid email address."] });
 
+            // Page < 1
+            var respInvalidPage = await HttpClient.GetAsync("/staff?page=0", CancellationToken);
+            await respInvalidPage.AssertValidationProblemAsync(CancellationToken,
+                errors: new Dictionary<string, string[]> { ["Page"] = ["'Page' must be greater than or equal to '1'."] });
 
-                // Page size > 100
-                var respInvalidPageSize2 = await HttpClient.GetAsync($"/staff?pageSize=101", CancellationToken);
-                await respInvalidPageSize2.AssertValidationProblemAsync(CancellationToken,
-                    errors: new Dictionary<string, string[]>
-                    {
-                        ["PageSize"] = ["'Page Size' must be between 1 and 100. Received 101."]
-                    });
-            },
-            getStaffById: () =>
-            {
-                // ID not provided -> not possible to test this as it just maps to the "/staff" endpoint 
-                // var respInvalidEmail = await HttpClient.GetAsync("/staff/", CancellationToken);
+            // Page size < 1
+            var respInvalidPageSize1 = await HttpClient.GetAsync("/staff?pageSize=0", CancellationToken);
+            await respInvalidPageSize1.AssertValidationProblemAsync(CancellationToken,
+                errors: new Dictionary<string, string[]> { ["PageSize"] = ["'Page Size' must be between 1 and 100. Received 0."] });
 
-                // ReSharper disable once ConvertToLambdaExpression
-                return Task.CompletedTask;
-            }
-        );
+            // Page size > 100
+            var respInvalidPageSize2 = await HttpClient.GetAsync("/staff?pageSize=101", CancellationToken);
+            await respInvalidPageSize2.AssertValidationProblemAsync(CancellationToken,
+                errors: new Dictionary<string, string[]> { ["PageSize"] = ["'Page Size' must be between 1 and 100. Received 101."] });
+        }
+
+        Task TestGetStaffByIdEndpoint()
+        {
+            // ID not provided -> not possible to test this as it just maps to the "/staff" endpoint 
+            // var respInvalidEmail = await HttpClient.GetAsync("/staff/", CancellationToken);
+
+            // ReSharper disable once ConvertToLambdaExpression
+            return Task.CompletedTask;
+        }
     }
 
     [Fact]
-    public async Task Endpoint_authentication_tests()
+    public async Task Test_authentication_for_all_endpoints()
     {
         // Note: Not logging in as admin - to test unauth access.
         // await LoginAsAdminAsync();
 
-        // Ensure need to be logged in to access all /staff endpoints
-        await TestHelper.RunTestsForAllEndpointsAsync(
-            createStaff: async () =>
+        // Ensure you need to be authenticated to access all /staff endpoints
+        await TestHelper.RunTestsForAllEndpointsAsync(config =>
+        {
+            config.CreateStaff = async () =>
             {
                 var req = JsonContent.Create(new { email = ValidStaffEmail, password = ValidStaffPassword });
                 var resp = await HttpClient.PostAsync("/staff", req, CancellationToken);
                 Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
-            },
-            queryStaff: async () =>
+            };
+            config.QueryStaff = async () =>
             {
-                var resp = await HttpClient.GetAsync($"/staff", CancellationToken);
+                var resp = await HttpClient.GetAsync("/staff", CancellationToken);
                 Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
-            },
-            getStaffById: async () =>
+            };
+            config.GetStaffById = async () =>
             {
                 var resp = await HttpClient.GetAsync("/staff/1", CancellationToken);
                 Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
-            }
-        );
+            };
+        });
     }
 
     /// <summary>
@@ -273,7 +241,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
         await getStaff2Resp.AssertProblemDetailsAsync(
             HttpStatusCode.Forbidden,
             CancellationToken,
-            title: "Forbidden",
+            "Forbidden",
             instance: $"GET /staff/{user2Id}");
     }
 
@@ -298,7 +266,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
         await listStaffResp.AssertProblemDetailsAsync(
             HttpStatusCode.Forbidden,
             CancellationToken,
-            title: "Forbidden",
+            "Forbidden",
             instance: "GET /staff");
     }
 
@@ -325,7 +293,32 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
         await regResp.AssertProblemDetailsAsync(
             HttpStatusCode.Forbidden,
             CancellationToken,
-            title: "Forbidden",
+            "Forbidden",
             instance: "POST /staff");
+    }
+
+    /// <summary>
+    /// A helper that ensures tests are run for all possible staff endpoints
+    /// </summary>
+    private static class TestHelper
+    {
+        private static readonly Func<Task> notImplemented = () => throw new NotImplementedException();
+
+        public static async Task RunTestsForAllEndpointsAsync(Action<AllTestsConfig> configure)
+        {
+            var config = new AllTestsConfig();
+            configure(config);
+
+            await config.CreateStaff();
+            await config.QueryStaff();
+            await config.GetStaffById();
+        }
+
+        public class AllTestsConfig
+        {
+            public Func<Task> CreateStaff { get; set; } = notImplemented;
+            public Func<Task> QueryStaff { get; set; } = notImplemented;
+            public Func<Task> GetStaffById { get; set; } = notImplemented;
+        }
     }
 }
