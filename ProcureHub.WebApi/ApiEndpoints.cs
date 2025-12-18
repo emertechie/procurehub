@@ -1,7 +1,5 @@
 using System.Security.Claims;
-
 using Microsoft.AspNetCore.Mvc;
-
 using ProcureHub.Common;
 using ProcureHub.Common.Pagination;
 using ProcureHub.Features.Departments;
@@ -10,7 +8,6 @@ using ProcureHub.Infrastructure;
 using ProcureHub.WebApi.ApiResponses;
 using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Helpers;
-
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 namespace ProcureHub.WebApi;
@@ -29,7 +26,7 @@ public static class ApiEndpoints
 
     private static void ConfigureAdditionalAuthEndpoints(WebApplication app)
     {
-        app.MapGet("/me", async (ClaimsPrincipal user, ILogger<WebApplication> logger) =>
+        app.MapGet("/me", async (ClaimsPrincipal user) =>
             {
                 if (!user.Identity?.IsAuthenticated ?? true)
                 {
@@ -61,8 +58,8 @@ public static class ApiEndpoints
             {
                 var result = await handler.HandleAsync(request, token);
                 return result.Match(
-                    onSuccess: userId => Results.Created($"/staff/{userId}", new { userId }),
-                    onFailure: error => error.ToProblemDetails()
+                    newUserId => Results.Created($"/staff/{newUserId}", new { userId = newUserId }),
+                    error => error.ToProblemDetails()
                 );
             })
             .WithName("CreateStaff");
