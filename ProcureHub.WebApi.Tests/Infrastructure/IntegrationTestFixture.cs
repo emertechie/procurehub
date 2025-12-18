@@ -17,16 +17,6 @@ public class IntegrationTestFixture : IAsyncLifetime
     {
         // Initialize the API host once for all tests
         WebApiTestHost = new WebApiTestHost(ConnectionString);
-
-        // Initialize the respawner once for all tests
-        await using var connection = new NpgsqlConnection(ConnectionString);
-        await connection.OpenAsync();
-
-        _respawner = await Respawner.CreateAsync(connection, new RespawnerOptions
-        {
-            DbAdapter = DbAdapter.Postgres,
-            SchemasToInclude = ["public"]
-        });
     }
 
     public ValueTask DisposeAsync()
@@ -37,13 +27,19 @@ public class IntegrationTestFixture : IAsyncLifetime
 
     public async Task ResetDatabaseAsync()
     {
-        if (_respawner == null)
-        {
-            throw new InvalidOperationException("Respawner not initialized");
-        }
-
         await using var connection = new NpgsqlConnection(ConnectionString);
         await connection.OpenAsync();
+
+        if (_respawner == null)
+        {
+            _respawner = await Respawner.CreateAsync(connection, new RespawnerOptions
+            {
+                DbAdapter = DbAdapter.Postgres,
+                SchemasToInclude = ["public"],
+                TablesToIgnore = ["__EFMigrationsHistory"]
+            });
+        }
+
         await _respawner.ResetAsync(connection);
     }
 

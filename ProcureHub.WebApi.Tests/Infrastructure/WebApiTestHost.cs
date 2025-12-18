@@ -32,7 +32,7 @@ public class WebApiTestHost(string connectionString)
 
             // Add Postgres database for tests
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(connectionString)
+                options.UseNpgsql(connectionString, options => options.MigrationsAssembly("ProcureHub"))
                     .EnableSensitiveDataLogging());
 
             // Build service provider and create database
@@ -43,7 +43,7 @@ public class WebApiTestHost(string connectionString)
                     var sp = services.BuildServiceProvider();
                     using var scope = sp.CreateScope();
                     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                    db.Database.EnsureCreated();
+                    db.Database.Migrate();
                     _databaseInitialized = true;
                 }
             }
