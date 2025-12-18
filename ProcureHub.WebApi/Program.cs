@@ -13,6 +13,9 @@ using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Helpers;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
+// Customize FluentValidation messages
+ValidatorOptions.Global.LanguageManager = new CustomLanguageManager();
+
 var builder = WebApplication.CreateBuilder(args);
 RegisterServices(builder);
 

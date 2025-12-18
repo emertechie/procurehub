@@ -88,7 +88,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
                 await respInvalidPageSize1.AssertValidationProblemAsync(CancellationToken,
                     errors: new Dictionary<string, string[]>
                     {
-                        ["PageSize"] = ["'Page Size' must be between 1 and 100. You entered 0."]
+                        ["PageSize"] = ["'Page Size' must be between 1 and 100. Received 0."]
                     });            
                 
 
@@ -97,7 +97,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper)
                 await respInvalidPageSize2.AssertValidationProblemAsync(CancellationToken,
                     errors: new Dictionary<string, string[]>
                     {
-                        ["PageSize"] = ["'Page Size' must be between 1 and 100. You entered 101."]
+                        ["PageSize"] = ["'Page Size' must be between 1 and 100. Received 101."]
                     });
             },
             getStaffById: () =>
