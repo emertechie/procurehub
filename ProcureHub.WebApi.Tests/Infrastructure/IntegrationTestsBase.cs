@@ -1,36 +1,26 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
-using Npgsql;
-
 using ProcureHub.Data;
 using ProcureHub.Models;
 
-using Respawn;
-
-namespace ProcureHub.WebApi.Tests;
+namespace ProcureHub.WebApi.Tests.Infrastructure;
 
 public abstract class IntegrationTestsBase : IAsyncLifetime
 {
-    protected readonly HttpClient HttpClient;
-    private readonly WebApiTestFactory _factory;
-    private Respawner? _respawner;
-    private readonly string _connectionString;
-
     protected const string AdminEmail = "test-admin@procurehub.local";
     protected const string AdminPassword = "TestAdmin123!";
+    private readonly WebApiTestFactory _factory;
+    private readonly IntegrationTestFixture _fixture;
+    protected readonly HttpClient HttpClient;
 
-    protected IntegrationTestsBase(ITestOutputHelper testOutputHelper)
+    protected IntegrationTestsBase(ITestOutputHelper testOutputHelper, IntegrationTestFixture fixture)
     {
-        _connectionString = GetConnectionString();
-        _factory = new WebApiTestFactory(testOutputHelper, _connectionString);
+        _fixture = fixture;
+        _factory = new WebApiTestFactory(testOutputHelper, _fixture.ConnectionString);
         HttpClient = _factory.CreateClient();
     }
 
@@ -38,7 +28,7 @@ public abstract class IntegrationTestsBase : IAsyncLifetime
 
     public async ValueTask InitializeAsync()
     {
-        await ResetDatabaseAsync();
+        await _fixture.ResetDatabaseAsync();
         await SeedData(_factory.Services);
     }
 
@@ -62,36 +52,6 @@ public abstract class IntegrationTestsBase : IAsyncLifetime
         HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult!.AccessToken);
     }
 
-    private record LoginResponse(string AccessToken, string TokenType, int ExpiresIn, string RefreshToken);
-
-    private static string GetConnectionString()
-    {
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json")
-            .Build();
-
-        return configuration.GetConnectionString("DefaultConnection") ??
-            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-    }
-
-    private async Task ResetDatabaseAsync()
-    {
-        await using var connection = new NpgsqlConnection(_connectionString);
-        await connection.OpenAsync();
-
-        if (_respawner == null)
-        {
-            _respawner = await Respawner.CreateAsync(connection, new RespawnerOptions
-            {
-                DbAdapter = DbAdapter.Postgres,
-                SchemasToInclude = ["public"]
-            });
-        }
-
-        await _respawner.ResetAsync(connection);
-    }
-
     private static async Task SeedData(IServiceProvider factoryServices)
     {
         using var scope = factoryServices.CreateScope();
@@ -103,4 +63,6 @@ public abstract class IntegrationTestsBase : IAsyncLifetime
 
         await DataSeeder.SeedAsync(dbContext, userManager, roleManager, logger, AdminEmail, AdminPassword);
     }
+
+    private record LoginResponse(string AccessToken, string TokenType, int ExpiresIn, string RefreshToken);
 }

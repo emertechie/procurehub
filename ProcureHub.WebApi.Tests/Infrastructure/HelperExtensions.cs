@@ -1,15 +1,31 @@
 using System.Net;
 using System.Net.Http.Json;
-
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ProcureHub.WebApi.Tests;
+namespace ProcureHub.WebApi.Tests.Infrastructure;
 
-public static class HttpResponseAssertions
+public static class HelperExtensions
 {
+    public static void AssertHasError(this HttpValidationProblemDetails problemDetails, string field, string? messageContains = null)
+    {
+        Assert.Contains(field, problemDetails.Errors.Keys);
+
+        if (messageContains != null)
+        {
+            var errorMessages = problemDetails.Errors[field];
+            Assert.Contains(errorMessages, msg => msg.Contains(messageContains, StringComparison.OrdinalIgnoreCase));
+        }
+    }
+
     extension(HttpResponseMessage response)
     {
+        public Task<T?> AssertSuccessAndReadJsonAsync<T>(CancellationToken token)
+        {
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            return response.Content.ReadFromJsonAsync<T>(token);
+        }
+
         public async Task<ProblemDetails> AssertProblemDetailsAsync(
             HttpStatusCode expectedStatus,
             CancellationToken cancellationToken = default,
@@ -74,17 +90,6 @@ public static class HttpResponseAssertions
             }
 
             return problemDetails;
-        }
-    }
-
-    public static void AssertHasError(this HttpValidationProblemDetails problemDetails, string field, string? messageContains = null)
-    {
-        Assert.Contains(field, problemDetails.Errors.Keys);
-
-        if (messageContains != null)
-        {
-            var errorMessages = problemDetails.Errors[field];
-            Assert.Contains(errorMessages, msg => msg.Contains(messageContains, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

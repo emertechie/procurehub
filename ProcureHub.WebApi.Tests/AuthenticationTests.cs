@@ -1,14 +1,13 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-
-using ProcureHub.Features.Staff;
-using ProcureHub.WebApi.ApiResponses;
+using ProcureHub.WebApi.Tests.Infrastructure;
 
 namespace ProcureHub.WebApi.Tests;
 
-public class AuthenticationTests(ITestOutputHelper testOutputHelper)
-    : IntegrationTestsBase(testOutputHelper)
+[Collection("Integration Tests")]
+public class AuthenticationTests(ITestOutputHelper testOutputHelper, IntegrationTestFixture fixture)
+    : IntegrationTestsBase(testOutputHelper, fixture)
 {
     /// <summary>
     /// For demo purposes, just not allowing manual registration.
@@ -75,7 +74,7 @@ public class AuthenticationTests(ITestOutputHelper testOutputHelper)
 
     /// <summary>
     /// Note: only implementing this for cookie-based auth. After logging out, a (short-lived) token
-    /// is still technically valid. 
+    /// is still technically valid.
     /// </summary>
     [Fact]
     public async Task Logout_with_cookie_clears_authentication()
@@ -103,5 +102,6 @@ public class AuthenticationTests(ITestOutputHelper testOutputHelper)
     }
 
     private record LoginResponse(string AccessToken, string TokenType, int ExpiresIn, string RefreshToken);
+
     private record MeResponse(string Id, string Email);
 }

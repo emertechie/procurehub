@@ -3,11 +3,13 @@ using System.Net.Http.Json;
 using Microsoft.AspNetCore.Identity.Data;
 using ProcureHub.Features.Staff;
 using ProcureHub.WebApi.ApiResponses;
+using ProcureHub.WebApi.Tests.Infrastructure;
 
 namespace ProcureHub.WebApi.Tests.Features;
 
-public class StaffTests(ITestOutputHelper testOutputHelper)
-    : IntegrationTestsBase(testOutputHelper)
+[Collection("Integration Tests")]
+public class StaffTests(ITestOutputHelper testOutputHelper, IntegrationTestFixture fixture)
+    : IntegrationTestsBase(testOutputHelper, fixture)
 {
     private const string ValidStaffEmail = "staff1@example.com";
     private const string ValidStaffPassword = "Test1234!";

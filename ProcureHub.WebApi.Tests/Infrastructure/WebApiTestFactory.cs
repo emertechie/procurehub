@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 
-namespace ProcureHub.WebApi.Tests;
+namespace ProcureHub.WebApi.Tests.Infrastructure;
 
 public class WebApiTestFactory(ITestOutputHelper outputHelper, string connectionString)
     : WebApplicationFactory<Program>
@@ -19,10 +19,7 @@ public class WebApiTestFactory(ITestOutputHelper outputHelper, string connection
         // any data seeded there is wiped out in the `ResetDatabaseAsync` call.
         builder.UseEnvironment("Test");
 
-        builder.ConfigureLogging(logging =>
-        {
-            logging.AddXUnit(outputHelper);
-        });
+        builder.ConfigureLogging(logging => { logging.AddXUnit(outputHelper); });
 
         builder.ConfigureServices(services =>
         {

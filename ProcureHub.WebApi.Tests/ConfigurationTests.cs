@@ -1,11 +1,11 @@
 using System.Net;
-
-using ProcureHub.WebApi.Tests.Features;
+using ProcureHub.WebApi.Tests.Infrastructure;
 
 namespace ProcureHub.WebApi.Tests;
 
-public class ConfigurationTests(ITestOutputHelper testOutputHelper)
-    : IntegrationTestsBase(testOutputHelper)
+[Collection("Integration Tests")]
+public class ConfigurationTests(ITestOutputHelper testOutputHelper, IntegrationTestFixture fixture)
+    : IntegrationTestsBase(testOutputHelper, fixture)
 {
     /// <summary>
     /// Verifies the use of `webApp.UseStatusCodePages` in API config.
@@ -20,6 +20,6 @@ public class ConfigurationTests(ITestOutputHelper testOutputHelper)
         await notFoundResp.AssertProblemDetailsAsync(
             HttpStatusCode.NotFound,
             CancellationToken,
-            title: "Not Found");
+            "Not Found");
     }
 }

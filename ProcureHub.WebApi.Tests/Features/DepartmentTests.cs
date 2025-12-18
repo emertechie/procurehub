@@ -2,11 +2,13 @@
 using System.Net.Http.Json;
 
 using ProcureHub.Features.Departments;
+using ProcureHub.WebApi.Tests.Infrastructure;
 
 namespace ProcureHub.WebApi.Tests.Features;
 
-public class DepartmentTests(ITestOutputHelper testOutputHelper)
-    : IntegrationTestsBase(testOutputHelper)
+[Collection("Integration Tests")]
+public class DepartmentTests(ITestOutputHelper testOutputHelper, IntegrationTestFixture fixture)
+    : IntegrationTestsBase(testOutputHelper, fixture)
 {
     [Fact]
     public async Task Can_create_and_fetch_department()
