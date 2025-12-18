@@ -20,11 +20,11 @@ public class StaffTests(ITestOutputHelper testOutputHelper, IntegrationTestFixtu
         // Log in as admin to be able to manage staff
         await LoginAsAdminAsync();
 
-        await TestHelper.RunTestsForAllEndpointsAsync(config =>
+        await TestHelper.RunTestsForAllAsync<AllStaffEndpoints>(configure =>
         {
-            config.CreateStaff = TestCreateStaffEndpoint;
-            config.QueryStaff = TestQueryStaffEndpoint;
-            config.GetStaffById = TestGetStaffByIdEndpoint;
+            configure.CreateStaff = TestCreateStaffEndpoint;
+            configure.QueryStaff = TestQueryStaffEndpoint;
+            configure.GetStaffById = TestGetStaffByIdEndpoint;
         });
 
         async Task TestCreateStaffEndpoint()
@@ -83,26 +83,26 @@ public class StaffTests(ITestOutputHelper testOutputHelper, IntegrationTestFixtu
     }
 
     [Fact]
-    public async Task Test_authentication_for_all_endpoints()
+    public async Task Ensure_authentication_required_for_all_endpoints()
     {
         // Note: Not logging in as admin - to test unauth access.
         // await LoginAsAdminAsync();
 
         // Ensure you need to be authenticated to access all /staff endpoints
-        await TestHelper.RunTestsForAllEndpointsAsync(config =>
+        await TestHelper.RunTestsForAllAsync<AllStaffEndpoints>(configure =>
         {
-            config.CreateStaff = async () =>
+            configure.CreateStaff = async () =>
             {
                 var req = JsonContent.Create(new { email = ValidStaffEmail, password = ValidStaffPassword });
                 var resp = await HttpClient.PostAsync("/staff", req, CancellationToken);
                 Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
             };
-            config.QueryStaff = async () =>
+            configure.QueryStaff = async () =>
             {
                 var resp = await HttpClient.GetAsync("/staff", CancellationToken);
                 Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
             };
-            config.GetStaffById = async () =>
+            configure.GetStaffById = async () =>
             {
                 var resp = await HttpClient.GetAsync("/staff/1", CancellationToken);
                 Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
@@ -211,7 +211,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper, IntegrationTestFixtu
     }
 
     [Fact]
-    public async Task Staff_member_can_only_read_own_staff_record()
+    public async Task Staff_members_cannot_access_staff_endpoints()
     {
         const string email1 = "staff1@example.com";
         const string email2 = "staff2@example.com";
@@ -220,107 +220,68 @@ public class StaffTests(ITestOutputHelper testOutputHelper, IntegrationTestFixtu
         await LoginAsAdminAsync();
 
         // Admin creates Staff 1
-        var newStaffReq1 = JsonContent.Create(new { email = email1, password = ValidStaffPassword });
-        var regResp1 = await HttpClient.PostAsync("/staff", newStaffReq1, CancellationToken);
-        Assert.Equal(HttpStatusCode.Created, regResp1.StatusCode);
-        var user1Id = regResp1.Headers.Location!.ToString().Split('/').Last();
+        var newStaff1ReqAdmin = JsonContent.Create(new { email = email1, password = ValidStaffPassword });
+        var createResp1Admin = await HttpClient.PostAsync("/staff", newStaff1ReqAdmin, CancellationToken);
+        Assert.Equal(HttpStatusCode.Created, createResp1Admin.StatusCode);
+        var user1Id = createResp1Admin.Headers.Location!.ToString().Split('/').Last();
 
-        // Admin creates Staff 2
-        var newStaffReq2 = JsonContent.Create(new { email = email2, password = ValidStaffPassword });
-        var regResp2 = await HttpClient.PostAsync("/staff", newStaffReq2, CancellationToken);
-        Assert.Equal(HttpStatusCode.Created, regResp2.StatusCode);
-        var user2Id = regResp2.Headers.Location!.ToString().Split('/').Last();
+        // Admin creates Staff 1
+        var newStaff2ReqAdmin = JsonContent.Create(new { email = email2, password = ValidStaffPassword });
+        var createResp2Admin = await HttpClient.PostAsync("/staff", newStaff2ReqAdmin, CancellationToken);
+        Assert.Equal(HttpStatusCode.Created, createResp2Admin.StatusCode);
+        var user2Id = createResp2Admin.Headers.Location!.ToString().Split('/').Last();
 
         // Log in as Staff 1
         await LoginAsync(email1, ValidStaffPassword);
 
-        // Try to get own staff record by ID - should succeed
-        var getStaff1Resp = await HttpClient.GetAsync($"/staff/{user1Id}", CancellationToken);
-        Assert.Equal(HttpStatusCode.OK, getStaff1Resp.StatusCode);
-
-        // Try to get staff 2 record by ID - should fail
-        var getStaff2Resp = await HttpClient.GetAsync($"/staff/{user2Id}", CancellationToken);
-        await getStaff2Resp.AssertProblemDetailsAsync(
-            HttpStatusCode.Forbidden,
-            CancellationToken,
-            "Forbidden",
-            instance: $"GET /staff/{user2Id}");
-    }
-
-    [Fact]
-    public async Task Staff_member_cannot_list_all_staff()
-    {
-        const string email = "staff1@example.com";
-
-        // Log in as admin to be able to manage staff
-        await LoginAsAdminAsync();
-
-        // Admin creates Staff user
-        var newStaffReq = JsonContent.Create(new { email, password = ValidStaffPassword });
-        var regResp = await HttpClient.PostAsync("/staff", newStaffReq, CancellationToken);
-        Assert.Equal(HttpStatusCode.Created, regResp.StatusCode);
-
-        // Log in as Staff member
-        await LoginAsync(email, ValidStaffPassword);
-
-        // Try to list all staff - should fail (don't have "Admin" role)
-        var listStaffResp = await HttpClient.GetAsync("/staff", CancellationToken);
-        await listStaffResp.AssertProblemDetailsAsync(
-            HttpStatusCode.Forbidden,
-            CancellationToken,
-            "Forbidden",
-            instance: "GET /staff");
-    }
-
-    [Fact]
-    public async Task Staff_member_cannot_create_another_staff_member()
-    {
-        const string email1 = "staff1@example.com";
-        const string email2 = "staff2@example.com";
-
-        // Log in as admin to be able to manage staff
-        await LoginAsAdminAsync();
-
-        // Admin creates Staff user
-        var newStaffReq1 = JsonContent.Create(new { email = email1, password = ValidStaffPassword });
-        var regResp1 = await HttpClient.PostAsync("/staff", newStaffReq1, CancellationToken);
-        Assert.Equal(HttpStatusCode.Created, regResp1.StatusCode);
-
-        // Log in as Staff member
-        await LoginAsync(email1, ValidStaffPassword);
-
-        // Try to create another staff member - should *fail*
-        var newStaffReq = JsonContent.Create(new { email = email2, password = ValidStaffPassword });
-        var regResp = await HttpClient.PostAsync("/staff", newStaffReq, CancellationToken);
-        await regResp.AssertProblemDetailsAsync(
-            HttpStatusCode.Forbidden,
-            CancellationToken,
-            "Forbidden",
-            instance: "POST /staff");
-    }
-
-    /// <summary>
-    /// A helper that ensures tests are run for all possible staff endpoints
-    /// </summary>
-    private static class TestHelper
-    {
-        private static readonly Func<Task> notImplemented = () => throw new NotImplementedException();
-
-        public static async Task RunTestsForAllEndpointsAsync(Action<AllTestsConfig> configure)
+        await TestHelper.RunTestsForAllAsync<AllStaffEndpoints>(configure =>
         {
-            var config = new AllTestsConfig();
-            configure(config);
+            configure.CreateStaff = async () =>
+            {
+                // Staff 1 tries to create another staff member - should fail
+                var newStaffReq = JsonContent.Create(new { email = ValidStaffEmail, password = ValidStaffPassword });
+                var createResp = await HttpClient.PostAsync("/staff", newStaffReq, CancellationToken);
+                await createResp.AssertProblemDetailsAsync(
+                    HttpStatusCode.Forbidden,
+                    CancellationToken,
+                    "Forbidden",
+                    instance: "POST /staff");
+            };
+            configure.QueryStaff = async () =>
+            {
+                // Try to query all staff - should fail
+                var queryStaffResp = await HttpClient.GetAsync("/staff", CancellationToken);
+                await queryStaffResp.AssertProblemDetailsAsync(
+                    HttpStatusCode.Forbidden,
+                    CancellationToken,
+                    "Forbidden",
+                    instance: "GET /staff");
+            };
+            configure.GetStaffById = async () =>
+            {
+                // Try to get own staff record by ID - should fail
+                var getStaff1Resp = await HttpClient.GetAsync($"/staff/{user1Id}", CancellationToken);
+                await getStaff1Resp.AssertProblemDetailsAsync(
+                    HttpStatusCode.Forbidden,
+                    CancellationToken,
+                    "Forbidden",
+                    instance: $"GET /staff/{user1Id}");
 
-            await config.CreateStaff();
-            await config.QueryStaff();
-            await config.GetStaffById();
-        }
+                // Try to get staff 2 record by ID - should fail
+                var getStaff2Resp = await HttpClient.GetAsync($"/staff/{user2Id}", CancellationToken);
+                await getStaff2Resp.AssertProblemDetailsAsync(
+                    HttpStatusCode.Forbidden,
+                    CancellationToken,
+                    "Forbidden",
+                    instance: $"GET /staff/{user2Id}");
+            };
+        });
+    }
 
-        public class AllTestsConfig
-        {
-            public Func<Task> CreateStaff { get; set; } = notImplemented;
-            public Func<Task> QueryStaff { get; set; } = notImplemented;
-            public Func<Task> GetStaffById { get; set; } = notImplemented;
-        }
+    private class AllStaffEndpoints
+    {
+        public Func<Task> CreateStaff { get; set; } = null!;
+        public Func<Task> QueryStaff { get; set; } = null!;
+        public Func<Task> GetStaffById { get; set; } = null!;
     }
 }
