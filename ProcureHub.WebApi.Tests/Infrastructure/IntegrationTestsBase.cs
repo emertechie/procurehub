@@ -22,8 +22,8 @@ public abstract class IntegrationTestsBase : IAsyncLifetime
     {
         _fixture = fixture;
 
-        _fixture.WebApiTestFactory.OutputHelper = testOutputHelper;
-        HttpClient = _fixture.WebApiTestFactory.CreateClient();
+        _fixture.WebApiTestHost.OutputHelper = testOutputHelper;
+        HttpClient = _fixture.WebApiTestHost.CreateClient();
     }
 
     protected static CancellationToken CancellationToken => TestContext.Current.CancellationToken;
@@ -31,7 +31,7 @@ public abstract class IntegrationTestsBase : IAsyncLifetime
     public async ValueTask InitializeAsync()
     {
         await _fixture.ResetDatabaseAsync();
-        await SeedData(_fixture.WebApiTestFactory.Services);
+        await SeedData(_fixture.WebApiTestHost.Services);
     }
 
     public ValueTask DisposeAsync()
