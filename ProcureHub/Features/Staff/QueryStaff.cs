@@ -1,7 +1,5 @@
 using FluentValidation;
-
 using Microsoft.EntityFrameworkCore;
-
 using ProcureHub.Common.Pagination;
 using ProcureHub.Infrastructure;
 
@@ -24,6 +22,8 @@ public static class QueryStaff
     public record Response(
         string Id,
         string Email,
+        string FirstName,
+        string LastName,
         int? DepartmentId,
         string? DepartmentName);
 
@@ -34,16 +34,19 @@ public static class QueryStaff
         {
             var query = dbContext.Staff
                 .AsNoTracking()
-                .Where(s => string.IsNullOrWhiteSpace(request.Email) || s.User.Email == request.Email.ToLowerInvariant());
+                .Where(s => string.IsNullOrWhiteSpace(request.Email) ||
+                            s.User.Email == request.Email.ToLowerInvariant());
 
             return await query
                 .OrderBy(s => s.User.Email)
                 .ToPagedResultAsync(
-                    staff => new Response(
-                        staff.UserId,
-                        staff.User.Email!,
-                        staff.DepartmentId,
-                        staff.Department != null ? staff.Department.Name : null),
+                    s => new Response(
+                        s.UserId,
+                        s.User.Email!,
+                        s.FirstName!,
+                        s.LastName!,
+                        s.DepartmentId,
+                        s.Department != null ? s.Department.Name : null),
                     request.Page,
                     request.PageSize,
                     token);

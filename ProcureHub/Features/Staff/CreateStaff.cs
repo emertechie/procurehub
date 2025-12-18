@@ -1,8 +1,6 @@
 using FluentValidation;
-
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-
 using ProcureHub.Common;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
@@ -11,7 +9,7 @@ namespace ProcureHub.Features.Staff;
 
 public static class CreateStaff
 {
-    public record Request(string Email, string Password);
+    public record Request(string Email, string Password, string FirstName, string LastName);
 
     public class RequestValidator : AbstractValidator<Request>
     {
@@ -19,6 +17,8 @@ public static class CreateStaff
         {
             RuleFor(r => r.Email).NotEmpty().EmailAddress();
             RuleFor(r => r.Password).NotEmpty();
+            RuleFor(r => r.FirstName).NotEmpty();
+            RuleFor(r => r.LastName).NotEmpty();
         }
     }
 
@@ -54,6 +54,8 @@ public static class CreateStaff
             var staff = new Models.Staff
             {
                 UserId = userId,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
                 CreatedAt = now,
                 UpdatedAt = now,
                 EnabledAt = now
@@ -66,21 +68,21 @@ public static class CreateStaff
 
             return Result.Success(userId);
         }
-    }
 
-    private static Error UserCreationFailed(IEnumerable<IdentityError> identityErrors)
-    {
-        var validationErrors = identityErrors
-            .GroupBy(e => e.Code)
-            .ToDictionary(
-                g => g.Key,
-                g => g.Select(e => e.Description).ToArray()
+        private static Error UserCreationFailed(IEnumerable<IdentityError> identityErrors)
+        {
+            var validationErrors = identityErrors
+                .GroupBy(e => e.Code)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(e => e.Description).ToArray()
+                );
+
+            return Error.Validation(
+                "Staff.UserCreationFailed",
+                "Failed to create staff user account",
+                validationErrors
             );
-
-        return Error.Validation(
-            "Staff.UserCreationFailed",
-            "Failed to create staff user account",
-            validationErrors
-        );
+        }
     }
 }

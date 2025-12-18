@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -14,6 +13,14 @@ public class Staff
     public string UserId { get; set; }
 
     public ApplicationUser User { get; set; }
+
+    [Required]
+    [MaxLength(200)]
+    public string? FirstName { get; set; }
+
+    [Required]
+    [MaxLength(200)]
+    public string? LastName { get; set; }
 
     public int? DepartmentId { get; set; }
 
@@ -42,6 +49,7 @@ public class StaffEntityTypeConfiguration : IEntityTypeConfiguration<Staff>
             .HasOne(s => s.Department)
             .WithMany(d => d.Staff)
             .HasForeignKey(s => s.DepartmentId)
-            .OnDelete(DeleteBehavior.Restrict); ;
+            .OnDelete(DeleteBehavior.Restrict);
+        ;
     }
 }

@@ -1,7 +1,5 @@
 using FluentValidation;
-
 using Microsoft.EntityFrameworkCore;
-
 using ProcureHub.Infrastructure;
 
 namespace ProcureHub.Features.Staff;
@@ -21,6 +19,8 @@ public static class GetStaffById
     public record Response(
         string Id,
         string Email,
+        string FirstName,
+        string LastName,
         int? DepartmentId,
         string? DepartmentName);
 
@@ -37,6 +37,8 @@ public static class GetStaffById
                 .Select(s => new Response(
                     s.UserId,
                     s.User.Email!,
+                    s.FirstName!,
+                    s.LastName!,
                     s.DepartmentId,
                     s.Department != null ? s.Department.Name : null))
                 .FirstOrDefaultAsync(token);

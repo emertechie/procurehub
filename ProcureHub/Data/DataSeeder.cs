@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-
 using ProcureHub.Constants;
 using ProcureHub.Models;
 
@@ -64,7 +63,8 @@ public sealed class DataSeeder
         var result = await userManager.CreateAsync(adminUser, adminPassword);
         if (!result.Succeeded)
         {
-            throw new Exception($"Failed to create admin user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            throw new Exception(
+                $"Failed to create admin user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
         }
 
         // Assign Admin role
@@ -74,6 +74,8 @@ public sealed class DataSeeder
         var staff = new Staff
         {
             UserId = adminUser.Id,
+            FirstName = "Admin",
+            LastName = "User",
             EnabledAt = DateTime.UtcNow,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

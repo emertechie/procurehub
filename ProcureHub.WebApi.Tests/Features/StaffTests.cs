@@ -14,6 +14,8 @@ public class StaffTests(ITestOutputHelper testOutputHelper, IntegrationTestFixtu
     private const string ValidStaffEmail = "staff1@example.com";
     private const string ValidStaffPassword = "Test1234!";
 
+    private static readonly CreateStaff.Request ValidCreateRequest = new(ValidStaffEmail, ValidStaffPassword, "Staff", "User");
+
     [Fact]
     public async Task Test_validation_for_all_endpoints()
     {
@@ -30,20 +32,19 @@ public class StaffTests(ITestOutputHelper testOutputHelper, IntegrationTestFixtu
         async Task TestCreateStaffEndpoint()
         {
             // No email
-            var reqNoEmail = new CreateStaff.Request(null, ValidStaffPassword);
+            var reqNoEmail = ValidCreateRequest with { Email = null! };
             var respNoEmail = await HttpClient.PostAsync("/staff", JsonContent.Create(reqNoEmail), CancellationToken);
             await respNoEmail.AssertValidationProblemAsync(CancellationToken,
                 errors: new Dictionary<string, string[]> { ["Email"] = ["'Email' must not be empty."] });
 
             // Not a valid email
-            var reqInvalidEmail = new CreateStaff.Request("not-an-email", ValidStaffPassword);
-            var respInvalidEmail =
-                await HttpClient.PostAsync("/staff", JsonContent.Create(reqInvalidEmail), CancellationToken);
+            var reqInvalidEmail = ValidCreateRequest with { Email = "not-an-email" };
+            var respInvalidEmail = await HttpClient.PostAsync("/staff", JsonContent.Create(reqInvalidEmail), CancellationToken);
             await respInvalidEmail.AssertValidationProblemAsync(CancellationToken,
                 errors: new Dictionary<string, string[]> { ["Email"] = ["'Email' is not a valid email address."] });
 
             // No password
-            var reqNoPwd = new CreateStaff.Request(ValidStaffEmail, null);
+            var reqNoPwd = ValidCreateRequest with { Password = null! };
             var respNoPwd = await HttpClient.PostAsync("/staff", JsonContent.Create(reqNoPwd), CancellationToken);
             await respNoPwd.AssertValidationProblemAsync(CancellationToken,
                 errors: new Dictionary<string, string[]> { ["Password"] = ["'Password' must not be empty."] });
@@ -93,7 +94,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper, IntegrationTestFixtu
         {
             configure.CreateStaff = async () =>
             {
-                var req = JsonContent.Create(new { email = ValidStaffEmail, password = ValidStaffPassword });
+                var req = JsonContent.Create(ValidCreateRequest);
                 var resp = await HttpClient.PostAsync("/staff", req, CancellationToken);
                 Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
             };
@@ -121,6 +122,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper, IntegrationTestFixtu
         await LoginAsAdminAsync();
 
         var newUserEmailMixedCase = "Staff1@Example.COM";
+        var newUserEmailMixedCase2 = "STAFF1@example.com";
         var newUserEmailLower = newUserEmailMixedCase.ToLowerInvariant();
 
         // Search for new Staff by email -> No result
@@ -129,8 +131,8 @@ public class StaffTests(ITestOutputHelper testOutputHelper, IntegrationTestFixtu
         Assert.Empty(staffList1!.Data);
 
         // Admin creates Staff user
-        var newStaffReq = JsonContent.Create(new { email = newUserEmailMixedCase, password = "Test1234!" });
-        var regResp = await HttpClient.PostAsync("/staff", newStaffReq, CancellationToken);
+        var newStaffReq = ValidCreateRequest with { Email = newUserEmailMixedCase };
+        var regResp = await HttpClient.PostAsync("/staff", JsonContent.Create(newStaffReq), CancellationToken);
         Assert.Equal(HttpStatusCode.Created, regResp.StatusCode);
 
         // Ensure Location header contains new user ID
@@ -139,7 +141,7 @@ public class StaffTests(ITestOutputHelper testOutputHelper, IntegrationTestFixtu
         var newUserId = location!.Split('/').Last();
 
         // Search for new Staff by email -> Found
-        var listStaffResp2 = await HttpClient.GetAsync($"/staff?email={newUserEmailMixedCase}", CancellationToken);
+        var listStaffResp2 = await HttpClient.GetAsync($"/staff?email={newUserEmailMixedCase2}", CancellationToken);
         var staffList2 = await listStaffResp2.AssertSuccessAndReadJsonAsync<ApiPagedResponse<QueryStaff.Response>>(CancellationToken);
         var newStaff = Assert.Single(staffList2!.Data);
         Assert.Equal(newUserId, newStaff.Id);
@@ -161,14 +163,14 @@ public class StaffTests(ITestOutputHelper testOutputHelper, IntegrationTestFixtu
         // Log in as admin to be able to manage staff
         await LoginAsAdminAsync();
 
+        var newStaffReq = ValidCreateRequest with { Email = email, Password = password };
+
         // Attempt 1: Admin creates user - should work
-        var newStaffReq1 = JsonContent.Create(new { email, password });
-        var regResp1 = await HttpClient.PostAsync("/staff", newStaffReq1, CancellationToken);
+        var regResp1 = await HttpClient.PostAsync("/staff", JsonContent.Create(newStaffReq), CancellationToken);
         Assert.Equal(HttpStatusCode.Created, regResp1.StatusCode);
 
-        // Attempt 2: Admin creates user - should *fail*
-        var newStaffReq2 = JsonContent.Create(new { email, password });
-        var regResp2 = await HttpClient.PostAsync("/staff", newStaffReq2, CancellationToken);
+        // Attempt 2: Admin tries to create user with same email - should fail
+        var regResp2 = await HttpClient.PostAsync("/staff", JsonContent.Create(newStaffReq), CancellationToken);
         await regResp2.AssertValidationProblemAsync(CancellationToken,
             errors: new Dictionary<string, string[]>
             {
@@ -185,9 +187,6 @@ public class StaffTests(ITestOutputHelper testOutputHelper, IntegrationTestFixtu
     [Fact]
     public async Task Staff_member_can_login()
     {
-        const string email = ValidStaffEmail;
-        const string password = ValidStaffPassword;
-
         // Log in as admin to be able to manage staff
         await LoginAsAdminAsync();
 
@@ -197,17 +196,16 @@ public class StaffTests(ITestOutputHelper testOutputHelper, IntegrationTestFixtu
         Assert.Equal(AdminEmail, info1!.Email);
 
         // Admin creates user
-        var newStaffReq1 = JsonContent.Create(new { email, password });
-        var regResp1 = await HttpClient.PostAsync("/staff", newStaffReq1, CancellationToken);
+        var regResp1 = await HttpClient.PostAsync("/staff", JsonContent.Create(ValidCreateRequest), CancellationToken);
         Assert.Equal(HttpStatusCode.Created, regResp1.StatusCode);
 
         // Log in as Staff member
-        await LoginAsync(email, password);
+        await LoginAsync(ValidCreateRequest.Email, ValidCreateRequest.Password);
 
         // Confirm logged in as staff: 
         var infoResp2 = await HttpClient.GetAsync("/manage/info", CancellationToken);
         var info2 = await infoResp2.AssertSuccessAndReadJsonAsync<InfoResponse>(CancellationToken);
-        Assert.Equal(email, info2!.Email);
+        Assert.Equal(ValidCreateRequest.Email, info2!.Email);
     }
 
     [Fact]
@@ -220,14 +218,14 @@ public class StaffTests(ITestOutputHelper testOutputHelper, IntegrationTestFixtu
         await LoginAsAdminAsync();
 
         // Admin creates Staff 1
-        var newStaff1ReqAdmin = JsonContent.Create(new { email = email1, password = ValidStaffPassword });
-        var createResp1Admin = await HttpClient.PostAsync("/staff", newStaff1ReqAdmin, CancellationToken);
+        var newStaff1ReqAdmin = ValidCreateRequest with { Email = email1 };
+        var createResp1Admin = await HttpClient.PostAsync("/staff", JsonContent.Create(newStaff1ReqAdmin), CancellationToken);
         Assert.Equal(HttpStatusCode.Created, createResp1Admin.StatusCode);
         var user1Id = createResp1Admin.Headers.Location!.ToString().Split('/').Last();
 
         // Admin creates Staff 1
-        var newStaff2ReqAdmin = JsonContent.Create(new { email = email2, password = ValidStaffPassword });
-        var createResp2Admin = await HttpClient.PostAsync("/staff", newStaff2ReqAdmin, CancellationToken);
+        var newStaff2ReqAdmin = ValidCreateRequest with { Email = email2 };
+        var createResp2Admin = await HttpClient.PostAsync("/staff", JsonContent.Create(newStaff2ReqAdmin), CancellationToken);
         Assert.Equal(HttpStatusCode.Created, createResp2Admin.StatusCode);
         var user2Id = createResp2Admin.Headers.Location!.ToString().Split('/').Last();
 
@@ -239,8 +237,8 @@ public class StaffTests(ITestOutputHelper testOutputHelper, IntegrationTestFixtu
             configure.CreateStaff = async () =>
             {
                 // Staff 1 tries to create another staff member - should fail
-                var newStaffReq = JsonContent.Create(new { email = ValidStaffEmail, password = ValidStaffPassword });
-                var createResp = await HttpClient.PostAsync("/staff", newStaffReq, CancellationToken);
+                var newStaffReq = ValidCreateRequest;
+                var createResp = await HttpClient.PostAsync("/staff", JsonContent.Create(newStaffReq), CancellationToken);
                 await createResp.AssertProblemDetailsAsync(
                     HttpStatusCode.Forbidden,
                     CancellationToken,
