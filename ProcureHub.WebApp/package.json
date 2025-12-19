@@ -6,7 +6,12 @@
     "dev": "API_URL=http://localhost:5140 vite --port 3000",
     "build": "vite build && tsc --noEmit",
     "preview": "vite preview",
-    "start": "vite"
+    "start": "vite",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
