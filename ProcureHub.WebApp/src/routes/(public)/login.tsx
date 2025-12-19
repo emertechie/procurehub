@@ -1,26 +1,25 @@
 import * as React from "react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useAuth } from "../auth";
-import { Button } from "../components/ui/button";
+import { useAuth } from "@/features/auth/hooks";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "../components/ui/card";
-import { Input } from "../components/ui/input";
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
-export const Route = createFileRoute("/register")({
-  component: RegisterPage,
+export const Route = createFileRoute("/(public)/login")({
+  component: LoginPage,
 });
 
-function RegisterPage() {
-  const { user, register } = useAuth();
+function LoginPage() {
+  const { user, login } = useAuth();
   const router = useRouter();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [confirmPassword, setConfirmPassword] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -33,18 +32,14 @@ function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
     setSubmitting(true);
     try {
-      await register(email, password);
+      await login(email, password);
       router.navigate({ to: "/dashboard" });
     } catch (err: any) {
       setError(
         err?.response?.data?.message ??
-          "Unable to register. Please check your details."
+          "Unable to login. Please check your details."
       );
     } finally {
       setSubmitting(false);
@@ -55,9 +50,9 @@ function RegisterPage() {
     <div className="flex min-h-[70vh] items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Create an account</CardTitle>
+          <CardTitle>Sign in</CardTitle>
           <CardDescription>
-            Register for a new ProcureHub account to access the portal.
+            Enter your email and password to access your ProcureHub account.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -82,22 +77,9 @@ function RegisterPage() {
               <Input
                 id="password"
                 type="password"
-                autoComplete="new-password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-medium" htmlFor="confirmPassword">
-                Confirm password
-              </label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
             </div>
@@ -105,7 +87,7 @@ function RegisterPage() {
               <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
             )}
             <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? "Creating account..." : "Create account"}
+              {submitting ? "Signing in..." : "Sign in"}
             </Button>
           </form>
         </CardContent>

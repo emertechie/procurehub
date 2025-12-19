@@ -1,8 +1,9 @@
 import * as React from "react";
 import {Link, Outlet, createRootRouteWithContext} from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import {AuthContext, useAuth} from "../auth";
-import { Button } from "../components/ui/button";
+import type { AuthContext } from "@/features/auth/types";
+import { useAuth } from "@/features/auth/hooks";
+import { Button } from "@/components/ui/button";
 
 interface MyRouterContext {
     auth: AuthContext

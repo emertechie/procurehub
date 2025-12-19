@@ -1,10 +1,6 @@
 import axios from 'redaxios'
 
-export type PostType = {
-  id: string
-  title: string
-  body: string
-}
+import type { PostType } from './types'
 
 export class PostNotFoundError extends Error {}
 

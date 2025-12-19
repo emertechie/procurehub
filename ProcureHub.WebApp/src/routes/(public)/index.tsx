@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router'
 import * as React from 'react'
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute('/(public)/')({
   component: HomeComponent,
 })
 

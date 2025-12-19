@@ -4,7 +4,7 @@ import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import { Providers } from "./providers";
 import "./styles.css";
-import {useAuth} from "@/auth";
+import {useAuth} from "@/features/auth/hooks";
 
 // Set up a Router instance
 const router = createRouter({

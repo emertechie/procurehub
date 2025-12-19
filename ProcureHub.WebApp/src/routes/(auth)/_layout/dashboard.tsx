@@ -1,12 +1,9 @@
 import * as React from "react";
-import {createFileRoute, redirect} from "@tanstack/react-router";
-import {useAuth, ensureAuthenticated} from "@/auth";
+import {createFileRoute} from "@tanstack/react-router";
+import {useAuth} from "@/features/auth/hooks";
 
-export const Route = createFileRoute("/dashboard")({
+export const Route = createFileRoute("/(auth)/_layout/dashboard")({
   component: DashboardPage,
-    beforeLoad: ({ context, location }) => {
-        ensureAuthenticated(context.auth, location.href);
-    },
 });
 
 function DashboardPage() {
