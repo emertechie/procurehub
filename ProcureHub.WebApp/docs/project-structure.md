@@ -26,7 +26,7 @@ src/
 │  ├─ auth/
 │  │  ├─ api.ts           # login, logout, refresh
 │  │  ├─ hooks.ts         # useAuth, useCurrentUser
-│  │  ├─ store.ts         # auth state (Zustand, etc.)
+│  │  ├─ provider.ts
 │  │  └─ types.ts
 │  │
 │  ├─ users/

@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import { redirect } from '@tanstack/react-router'
 
-import { AuthContext } from './store'
+import { AuthContext } from './provider'
 import type { AuthContext as AuthContextValue } from './types'
 
 export function useAuth() {
