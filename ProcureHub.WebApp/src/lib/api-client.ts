@@ -41,5 +41,5 @@ export async function apiClient<T>(
 
   // Handle empty responses
   const text = await res.text()
-  return text ? JSON.parse(text) : null
+  return text ? (JSON.parse(text) as T) : (null as T)
 }
