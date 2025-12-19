@@ -44,7 +44,7 @@ function RegisterPage() {
     } catch (err: any) {
       setError(
         err?.response?.data?.message ??
-          "Unable to register. Please check your details."
+          "Unable to register. Please check your details.",
       );
     } finally {
       setSubmitting(false);

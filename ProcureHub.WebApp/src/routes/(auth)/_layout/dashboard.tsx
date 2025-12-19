@@ -1,6 +1,6 @@
 import * as React from "react";
-import {createFileRoute} from "@tanstack/react-router";
-import {useAuth} from "@/features/auth/hooks";
+import { createFileRoute } from "@tanstack/react-router";
+import { useAuth } from "@/features/auth/hooks";
 
 export const Route = createFileRoute("/(auth)/_layout/dashboard")({
   component: DashboardPage,
@@ -8,7 +8,7 @@ export const Route = createFileRoute("/(auth)/_layout/dashboard")({
 
 function DashboardPage() {
   const { user } = useAuth();
-  
+
   if (!user) {
     return <div className="p-4">Redirecting to login...</div>;
   }

@@ -4,7 +4,7 @@ import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import { Providers } from "./providers";
 import "./styles.css";
-import {useAuth} from "@/features/auth/hooks";
+import { useAuth } from "@/features/auth/hooks";
 
 // Set up a Router instance
 const router = createRouter({
@@ -24,8 +24,8 @@ declare module "@tanstack/react-router" {
 }
 
 function InnerApp() {
-  const auth = useAuth()
-  return <RouterProvider router={router} context={{ auth }} />
+  const auth = useAuth();
+  return <RouterProvider router={router} context={{ auth }} />;
 }
 
 function App() {
@@ -33,7 +33,7 @@ function App() {
     <Providers>
       <InnerApp />
     </Providers>
-  )
+  );
 }
 
 const rootElement = document.getElementById("app")!;

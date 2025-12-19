@@ -1,5 +1,5 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from '@/features/auth/provider';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "@/features/auth/provider";
 
 const queryClient = new QueryClient();
 

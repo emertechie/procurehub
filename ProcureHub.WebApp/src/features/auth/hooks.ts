@@ -1,15 +1,15 @@
-import { useContext } from 'react'
-import { redirect } from '@tanstack/react-router'
+import { useContext } from "react";
+import { redirect } from "@tanstack/react-router";
 
-import { AuthContext } from './provider'
-import type { AuthContext as AuthContextValue } from './types'
+import { AuthContext } from "./provider";
+import type { AuthContext as AuthContextValue } from "./types";
 
 export function useAuth() {
-  const ctx = useContext(AuthContext)
+  const ctx = useContext(AuthContext);
   if (!ctx) {
-    throw new Error('useAuth must be used within AuthProvider')
+    throw new Error("useAuth must be used within AuthProvider");
   }
-  return ctx
+  return ctx;
 }
 
 export function ensureAuthenticated(
@@ -18,10 +18,10 @@ export function ensureAuthenticated(
 ) {
   if (!authContext.isAuthenticated) {
     throw redirect({
-      to: '/login',
+      to: "/login",
       search: {
         redirect: currentHref,
       },
-    })
+    });
   }
 }

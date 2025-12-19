@@ -1,61 +1,68 @@
-import { createContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useEffect, useState, type ReactNode } from "react";
 
-import { fetchCurrentUser, loginWithCredentials, logoutFromSession, registerWithCredentials } from './api'
-import type { AuthContext as AuthContextValue, AuthUser } from './types'
+import {
+  fetchCurrentUser,
+  loginWithCredentials,
+  logoutFromSession,
+  registerWithCredentials,
+} from "./api";
+import type { AuthContext as AuthContextValue, AuthUser } from "./types";
 
-export const AuthContext = createContext<AuthContextValue | undefined>(undefined)
+export const AuthContext = createContext<AuthContextValue | undefined>(
+  undefined,
+);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let cancelled = false
+    let cancelled = false;
 
     const loadUser = async () => {
       try {
-        const data = await fetchCurrentUser()
+        const data = await fetchCurrentUser();
         if (!cancelled) {
-          setUser(data)
+          setUser(data);
         }
       } catch {
         if (!cancelled) {
-          setUser(null)
+          setUser(null);
         }
       } finally {
         if (!cancelled) {
-          setLoading(false)
+          setLoading(false);
         }
       }
-    }
+    };
 
-    loadUser()
+    loadUser();
 
     return () => {
-      cancelled = true
-    }
-  }, [])
+      cancelled = true;
+    };
+  }, []);
 
   const login = async (email: string, password: string) => {
-    const nextUser = await loginWithCredentials(email, password)
+    const nextUser = await loginWithCredentials(email, password);
     if (nextUser) {
-      setUser(nextUser)
+      setUser(nextUser);
     }
-  }
+  };
 
   const register = async (email: string, password: string) => {
-    const nextUser = await registerWithCredentials(email, password)
+    const nextUser = await registerWithCredentials(email, password);
     if (nextUser) {
-      setUser(nextUser)
+      setUser(nextUser);
     }
-  }
+  };
 
   const logout = async () => {
-    setUser(null)
-    await logoutFromSession()
-  }
+    setUser(null);
+    await logoutFromSession();
+  };
 
-  const isAuthenticated = !!user
+  const isAuthenticated = !!user;
 
   return (
     <AuthContext.Provider
@@ -63,6 +70,5 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     >
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
-

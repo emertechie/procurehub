@@ -39,7 +39,7 @@ function LoginPage() {
     } catch (err: any) {
       setError(
         err?.response?.data?.message ??
-          "Unable to login. Please check your details."
+          "Unable to login. Please check your details.",
       );
     } finally {
       setSubmitting(false);
