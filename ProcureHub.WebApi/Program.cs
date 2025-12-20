@@ -43,7 +43,10 @@ void RegisterServices(WebApplicationBuilder appBuilder)
 
     // Add services to the container.
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-    appBuilder.Services.AddOpenApi();
+    appBuilder.Services.AddOpenApi(options =>
+    {
+        options.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi3_1;
+    });
 
     var connectionString = appBuilder.Configuration.GetConnectionString("DefaultConnection") ??
                            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -106,6 +109,11 @@ async Task ConfigureApplication(WebApplication app)
     if (app.Environment.IsDevelopment())
     {
         app.MapOpenApi();
+
+        app.UseSwaggerUI(options =>
+        {
+            options.SwaggerEndpoint("/openapi/v1.json", "v1");
+        });
 
         using var scope = app.Services.CreateScope();
 
