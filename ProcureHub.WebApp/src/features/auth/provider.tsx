@@ -1,7 +1,7 @@
 import React from "react";
 import { createContext, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/procurehub-api/api-client";
+import { api } from "@/lib/api/client";
 import type { AuthContext as AuthContextValue } from "./types";
 
 export const AuthContext = createContext<AuthContextValue | undefined>(
@@ -41,23 +41,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const login = async (email: string, password: string) => {
-    await loginMutation.mutateAsync({
+  const login = (email: string, password: string) => {
+    loginMutation.mutate({
       params: {
         query: { useCookies: true },
       },
       body: { email, password },
     });
+    return {
+      success: loginMutation.isSuccess,
+      isPending: loginMutation.isPending,
+      error: loginMutation.error,
+    };
   };
 
-  const register = async (email: string, password: string) => {
-    await registerMutation.mutateAsync({
+  const register = (email: string, password: string) => {
+    registerMutation.mutate({
       body: { email, password },
     });
+    return {
+      success: registerMutation.isSuccess,
+      isPending: registerMutation.isPending,
+      error: registerMutation.error,
+    };
   };
 
-  const logout = async () => {
-    await logoutMutation.mutateAsync({});
+  const logout = () => {
+    logoutMutation.mutate({});
+    return {
+      success: logoutMutation.isSuccess,
+      isPending: logoutMutation.isPending,
+    };
   };
 
   const isAuthenticated = !!user;
