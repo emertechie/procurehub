@@ -20,4 +20,11 @@ export default defineConfig([
     language: "css/css",
     extends: ["css/recommended"],
   },
+  {
+    settings: {
+      react: {
+        version: "detect",
+      },
+    },
+  },
 ]);
