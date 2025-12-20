@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 
 import { ensureAuthenticated } from "@/features/auth/hooks";
