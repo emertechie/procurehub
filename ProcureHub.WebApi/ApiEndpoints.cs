@@ -62,7 +62,9 @@ public static class ApiEndpoints
                     error => error.ToProblemDetails()
                 );
             })
-            .WithName("CreateStaff");
+            .WithName("CreateStaff")
+            .Produces<string>(StatusCodes.Status201Created)
+            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
 
         group.MapGet("/staff", async (
                 [FromServices] IRequestHandler<QueryStaff.Request, PagedResult<QueryStaff.Response>> handler,
@@ -73,7 +75,8 @@ public static class ApiEndpoints
                 var pagedResult = await handler.HandleAsync(request, token);
                 return ApiPagedResponse.From(pagedResult);
             })
-            .WithName("QueryStaff");
+            .WithName("QueryStaff")
+            .Produces<ApiPagedResponse<QueryStaff.Response>>(StatusCodes.Status200OK);
 
         group.MapGet("/staff/{id}", async (
                 [FromServices] IRequestHandler<GetStaffById.Request, GetStaffById.Response?> handler,
@@ -85,7 +88,9 @@ public static class ApiEndpoints
                     ? Results.Ok(ApiDataResponse.From(response))
                     : Results.NotFound();
             })
-            .WithName("GetStaffById");
+            .WithName("GetStaffById")
+            .Produces<GetStaffById.Response>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
     }
 
     private static void ConfigureDepartmentEndpoints(WebApplication app)
