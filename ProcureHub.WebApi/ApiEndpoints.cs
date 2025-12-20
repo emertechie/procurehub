@@ -47,6 +47,7 @@ public static class ApiEndpoints
     {
         var group = app.MapGroup("")
             .RequireAuthorization(AuthorizationPolicyNames.Authenticated, RolePolicyNames.AdminOnly)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
             .AddFluentValidationAutoValidation()
             .WithTags("Staff");
 
@@ -64,7 +65,7 @@ public static class ApiEndpoints
             })
             .WithName("CreateStaff")
             .Produces<string>(StatusCodes.Status201Created)
-            .Produces<ProblemDetails>(StatusCodes.Status400BadRequest);
+            .ProducesValidationProblem(StatusCodes.Status400BadRequest);
 
         group.MapGet("/staff", async (
                 [FromServices] IRequestHandler<QueryStaff.Request, PagedResult<QueryStaff.Response>> handler,

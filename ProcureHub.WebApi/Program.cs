@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 using ProcureHub;
 using ProcureHub.Constants;
 using ProcureHub.Data;
@@ -43,10 +44,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
 
     // Add services to the container.
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-    appBuilder.Services.AddOpenApi(options =>
-    {
-        options.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi3_1;
-    });
+    appBuilder.Services.AddOpenApi(options => { options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1; });
 
     var connectionString = appBuilder.Configuration.GetConnectionString("DefaultConnection") ??
                            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -110,10 +108,7 @@ async Task ConfigureApplication(WebApplication app)
     {
         app.MapOpenApi();
 
-        app.UseSwaggerUI(options =>
-        {
-            options.SwaggerEndpoint("/openapi/v1.json", "v1");
-        });
+        app.UseSwaggerUI(options => { options.SwaggerEndpoint("/openapi/v1.json", "v1"); });
 
         using var scope = app.Services.CreateScope();
 
@@ -137,8 +132,33 @@ async Task ConfigureApplication(WebApplication app)
     app.UseAuthentication();
     app.UseAuthorization();
 
+    ConfigureIdentityApiEndpoints(app);
+}
+
+void ConfigureIdentityApiEndpoints(WebApplication app)
+{
     // Map Identity API endpoints (login, register, refresh, etc.)
-    var identityEndpointsConventionBuilder = app.MapIdentityApi<ApplicationUser>();
+    var identityEndpointsConventionBuilder = app.MapIdentityApi<ApplicationUser>()
+        .AddOpenApiOperationTransformer(async (operation, context, _) =>
+        {
+            // Transform /login endpoint to document the ProblemHttpResult 401 response which is
+            // not included by default. See: https://github.com/dotnet/aspnetcore/issues/52424
+            if (context.Description is { HttpMethod: "POST", RelativePath: "login" })
+            {
+                operation.Responses ??= new OpenApiResponses();
+                operation.Responses.TryAdd("401", new OpenApiResponse
+                {
+                    Description = "Unauthorized",
+                    Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        ["application/problem+json"] = new()
+                        {
+                            Schema = new OpenApiSchemaReference("ProblemDetails", context.Document)
+                        }
+                    }
+                });
+            }
+        });
 
     // The `MapIdentityApi` call doesn't add a `/logout` endpoint so add one here:
     app.MapPost("/logout", async (SignInManager<ApplicationUser> signInManager) =>
