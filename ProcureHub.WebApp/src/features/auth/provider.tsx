@@ -1,66 +1,63 @@
-import React from 'react';
-import { createContext, useEffect, useState, type ReactNode } from "react";
-
-import {
-  fetchCurrentUser,
-  loginWithCredentials,
-  logoutFromSession,
-  registerWithCredentials,
-} from "./api";
-import type { AuthContext as AuthContextValue, AuthUser } from "./types";
+import React from "react";
+import { createContext, type ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/procurehub-api/api-client";
+import type { AuthContext as AuthContextValue } from "./types";
 
 export const AuthContext = createContext<AuthContextValue | undefined>(
   undefined,
 );
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    let cancelled = false;
+  // Current user query
+  const { data: user = null, isLoading: loading } = api.useQuery(
+    "get",
+    "/me",
+    undefined,
+    {
+      retry: false,
+    },
+  );
 
-    const loadUser = async () => {
-      try {
-        const data = await fetchCurrentUser();
-        if (!cancelled) {
-          setUser(data);
-        }
-      } catch {
-        if (!cancelled) {
-          setUser(null);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    };
+  const currentUserQueryKey = ["get", "/me"];
 
-    loadUser();
+  const loginMutation = api.useMutation("post", "/login", {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: currentUserQueryKey });
+    },
+  });
 
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const registerMutation = api.useMutation("post", "/register", {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: currentUserQueryKey });
+    },
+  });
+
+  const logoutMutation = api.useMutation("post", "/logout", {
+    onSuccess: () => {
+      queryClient.setQueryData(currentUserQueryKey, null);
+    },
+  });
 
   const login = async (email: string, password: string) => {
-    const nextUser = await loginWithCredentials(email, password);
-    if (nextUser) {
-      setUser(nextUser);
-    }
+    await loginMutation.mutateAsync({
+      params: {
+        query: { useCookies: true },
+      },
+      body: { email, password },
+    });
   };
 
   const register = async (email: string, password: string) => {
-    const nextUser = await registerWithCredentials(email, password);
-    if (nextUser) {
-      setUser(nextUser);
-    }
+    await registerMutation.mutateAsync({
+      body: { email, password },
+    });
   };
 
   const logout = async () => {
-    setUser(null);
-    await logoutFromSession();
+    await logoutMutation.mutateAsync({});
   };
 
   const isAuthenticated = !!user;
