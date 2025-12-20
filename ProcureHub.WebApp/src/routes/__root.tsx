@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type { AuthContext } from "@/features/auth/types";
-import { useAuth } from "@/features/auth/hooks";
+import { useAuth, useLogoutMutation } from "@/features/auth/hooks";
 import { Button } from "@/components/ui/button";
 
 interface MyRouterContext {
@@ -19,6 +19,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
 function RootComponent() {
   const auth = useAuth();
+  const logoutMutation = useLogoutMutation();
 
   return (
     <>
@@ -60,7 +61,7 @@ function RootComponent() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => auth.logout()}
+                  onClick={() => logoutMutation.mutate({})}
                 >
                   Sign out
                 </Button>

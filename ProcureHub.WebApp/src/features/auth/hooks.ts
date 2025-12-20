@@ -1,8 +1,9 @@
 import { useContext } from "react";
 import { redirect } from "@tanstack/react-router";
-
+import { useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "./provider";
 import type { AuthContext as AuthContextValue } from "./types";
+import { api } from "@/lib/api/client";
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
@@ -24,4 +25,33 @@ export function ensureAuthenticated(
       },
     });
   }
+}
+
+const userQueryKey = ["get", "/me"];
+
+export function useLoginMutation() {
+  const queryClient = useQueryClient();
+  return api.useMutation("post", "/login", {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: userQueryKey });
+    },
+  });
+}
+
+export function useRegisterMutation() {
+  const queryClient = useQueryClient();
+  return api.useMutation("post", "/register", {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: userQueryKey });
+    },
+  });
+}
+
+export function useLogoutMutation() {
+  const queryClient = useQueryClient();
+  return api.useMutation("post", "/logout", {
+    onSuccess: () => {
+      queryClient.setQueryData(userQueryKey, null);
+    },
+  });
 }

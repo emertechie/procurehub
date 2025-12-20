@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useAuth } from "@/features/auth/hooks";
+import { useAuth, useRegisterMutation } from "@/features/auth/hooks";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,13 +16,12 @@ export const Route = createFileRoute("/(public)/register")({
 });
 
 function RegisterPage() {
-  const { user, register } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
-  const [submitting, setSubmitting] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [passwordError, setPasswordError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (user) {
@@ -30,25 +29,19 @@ function RegisterPage() {
     }
   }, [user, router]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const registerMutation = useRegisterMutation();
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setPasswordError(null);
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setPasswordError("Passwords do not match.");
       return;
     }
-    setSubmitting(true);
-    try {
-      await register(email, password);
-      router.navigate({ to: "/dashboard" });
-    } catch (err: any) {
-      setError(
-        err?.response?.data?.message ??
-          "Unable to register. Please check your details.",
-      );
-    } finally {
-      setSubmitting(false);
-    }
+
+    registerMutation.mutate({
+      body: { email, password },
+    });
   };
 
   return (
@@ -101,11 +94,21 @@ function RegisterPage() {
                 required
               />
             </div>
-            {error && (
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            {(passwordError || registerMutation.error) && (
+              <p className="text-sm text-red-600 dark:text-red-400">
+                {passwordError ||
+                  registerMutation.error?.title ||
+                  "An error occurred during registration"}
+              </p>
             )}
-            <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? "Creating account..." : "Create account"}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={registerMutation.isPending}
+            >
+              {registerMutation.isPending
+                ? "Creating account..."
+                : "Create account"}
             </Button>
           </form>
         </CardContent>

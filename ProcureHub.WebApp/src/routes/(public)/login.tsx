@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useAuth } from "@/features/auth/hooks";
+import { useAuth, useLoginMutation } from "@/features/auth/hooks";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,34 +16,28 @@ export const Route = createFileRoute("/(public)/login")({
 });
 
 function LoginPage() {
-  const { user, login } = useAuth();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [submitting, setSubmitting] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    if (user) {
+    if (isAuthenticated) {
       router.navigate({ to: "/dashboard" });
     }
-  }, [user, router]);
+  }, [isAuthenticated, router]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const loginMutation = useLoginMutation();
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSubmitting(true);
-    try {
-      await login(email, password);
-      router.navigate({ to: "/dashboard" });
-    } catch (err: any) {
-      setError(
-        err?.response?.data?.message ??
-          "Unable to login. Please check your details.",
-      );
-    } finally {
-      setSubmitting(false);
-    }
+
+    loginMutation.mutate({
+      params: {
+        query: { useCookies: true },
+      },
+      body: { email, password },
+    });
   };
 
   return (
@@ -83,11 +77,18 @@ function LoginPage() {
                 required
               />
             </div>
-            {error && (
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            {loginMutation.error && (
+              <p className="text-sm text-red-600 dark:text-red-400">
+                {loginMutation.error.title ||
+                  "An error occurred during sign in"}
+              </p>
             )}
-            <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? "Signing in..." : "Sign in"}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loginMutation.isPending}
+            >
+              {loginMutation.isPending ? "Signing in..." : "Sign in"}
             </Button>
           </form>
         </CardContent>
