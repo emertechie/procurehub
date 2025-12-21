@@ -13,8 +13,8 @@ import { Route as publicIndexRouteImport } from './routes/(public)/index'
 import { Route as publicRegisterRouteImport } from './routes/(public)/register'
 import { Route as publicLoginRouteImport } from './routes/(public)/login'
 import { Route as publicAboutRouteImport } from './routes/(public)/about'
-import { Route as authLayoutRouteRouteImport } from './routes/(auth)/_layout/route'
-import { Route as authLayoutDashboardRouteImport } from './routes/(auth)/_layout/dashboard'
+import { Route as authAppLayoutRouteRouteImport } from './routes/(auth)/_app-layout/route'
+import { Route as authAppLayoutDashboardRouteImport } from './routes/(auth)/_app-layout/dashboard'
 
 const publicIndexRoute = publicIndexRouteImport.update({
   id: '/(public)/',
@@ -36,14 +36,14 @@ const publicAboutRoute = publicAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const authLayoutRouteRoute = authLayoutRouteRouteImport.update({
-  id: '/(auth)/_layout',
+const authAppLayoutRouteRoute = authAppLayoutRouteRouteImport.update({
+  id: '/(auth)/_app-layout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const authLayoutDashboardRoute = authLayoutDashboardRouteImport.update({
+const authAppLayoutDashboardRoute = authAppLayoutDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => authLayoutRouteRoute,
+  getParentRoute: () => authAppLayoutRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -51,23 +51,23 @@ export interface FileRoutesByFullPath {
   '/login': typeof publicLoginRoute
   '/register': typeof publicRegisterRoute
   '/': typeof publicIndexRoute
-  '/dashboard': typeof authLayoutDashboardRoute
+  '/dashboard': typeof authAppLayoutDashboardRoute
 }
 export interface FileRoutesByTo {
   '/about': typeof publicAboutRoute
   '/login': typeof publicLoginRoute
   '/register': typeof publicRegisterRoute
   '/': typeof publicIndexRoute
-  '/dashboard': typeof authLayoutDashboardRoute
+  '/dashboard': typeof authAppLayoutDashboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/(auth)/_layout': typeof authLayoutRouteRouteWithChildren
+  '/(auth)/_app-layout': typeof authAppLayoutRouteRouteWithChildren
   '/(public)/about': typeof publicAboutRoute
   '/(public)/login': typeof publicLoginRoute
   '/(public)/register': typeof publicRegisterRoute
   '/(public)/': typeof publicIndexRoute
-  '/(auth)/_layout/dashboard': typeof authLayoutDashboardRoute
+  '/(auth)/_app-layout/dashboard': typeof authAppLayoutDashboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -76,16 +76,16 @@ export interface FileRouteTypes {
   to: '/about' | '/login' | '/register' | '/' | '/dashboard'
   id:
     | '__root__'
-    | '/(auth)/_layout'
+    | '/(auth)/_app-layout'
     | '/(public)/about'
     | '/(public)/login'
     | '/(public)/register'
     | '/(public)/'
-    | '/(auth)/_layout/dashboard'
+    | '/(auth)/_app-layout/dashboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  authLayoutRouteRoute: typeof authLayoutRouteRouteWithChildren
+  authAppLayoutRouteRoute: typeof authAppLayoutRouteRouteWithChildren
   publicAboutRoute: typeof publicAboutRoute
   publicLoginRoute: typeof publicLoginRoute
   publicRegisterRoute: typeof publicRegisterRoute
@@ -122,37 +122,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof publicAboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(auth)/_layout': {
-      id: '/(auth)/_layout'
+    '/(auth)/_app-layout': {
+      id: '/(auth)/_app-layout'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof authLayoutRouteRouteImport
+      preLoaderRoute: typeof authAppLayoutRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(auth)/_layout/dashboard': {
-      id: '/(auth)/_layout/dashboard'
+    '/(auth)/_app-layout/dashboard': {
+      id: '/(auth)/_app-layout/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
-      preLoaderRoute: typeof authLayoutDashboardRouteImport
-      parentRoute: typeof authLayoutRouteRoute
+      preLoaderRoute: typeof authAppLayoutDashboardRouteImport
+      parentRoute: typeof authAppLayoutRouteRoute
     }
   }
 }
 
-interface authLayoutRouteRouteChildren {
-  authLayoutDashboardRoute: typeof authLayoutDashboardRoute
+interface authAppLayoutRouteRouteChildren {
+  authAppLayoutDashboardRoute: typeof authAppLayoutDashboardRoute
 }
 
-const authLayoutRouteRouteChildren: authLayoutRouteRouteChildren = {
-  authLayoutDashboardRoute: authLayoutDashboardRoute,
+const authAppLayoutRouteRouteChildren: authAppLayoutRouteRouteChildren = {
+  authAppLayoutDashboardRoute: authAppLayoutDashboardRoute,
 }
 
-const authLayoutRouteRouteWithChildren = authLayoutRouteRoute._addFileChildren(
-  authLayoutRouteRouteChildren,
-)
+const authAppLayoutRouteRouteWithChildren =
+  authAppLayoutRouteRoute._addFileChildren(authAppLayoutRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  authLayoutRouteRoute: authLayoutRouteRouteWithChildren,
+  authAppLayoutRouteRoute: authAppLayoutRouteRouteWithChildren,
   publicAboutRoute: publicAboutRoute,
   publicLoginRoute: publicLoginRoute,
   publicRegisterRoute: publicRegisterRoute,

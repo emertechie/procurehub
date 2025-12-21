@@ -60,7 +60,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
-export const Route = createFileRoute("/(auth)/_layout")({
+export const Route = createFileRoute("/(auth)/_app-layout")({
   component: AuthenticatedLayout,
   beforeLoad: ({ context, location }) => {
     ensureAuthenticated(context.auth, location.href);
