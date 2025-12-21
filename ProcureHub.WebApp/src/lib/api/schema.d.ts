@@ -682,9 +682,9 @@ export interface components {
             isMachineRemembered: boolean;
         };
         User: {
-            id?: string;
-            email?: string;
-            roles?: string[];
+            id: string;
+            email: string;
+            roles: string[];
         };
     };
     responses: never;
