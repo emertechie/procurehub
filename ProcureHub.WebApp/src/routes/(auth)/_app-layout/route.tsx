@@ -1,14 +1,8 @@
 import React from "react";
-import {
-  Link,
-  Outlet,
-  createFileRoute,
-  useNavigate,
-} from "@tanstack/react-router";
+import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import {
   BadgeCheck,
   Bell,
-  ChevronRight,
   ChevronsUpDown,
   ClipboardList,
   FileText,
@@ -61,10 +55,10 @@ import {
 } from "@/components/ui/sidebar";
 
 export const Route = createFileRoute("/(auth)/_app-layout")({
-  component: AuthenticatedLayout,
   beforeLoad: ({ context, location }) => {
     ensureAuthenticated(context.auth, location.href);
   },
+  component: AuthenticatedLayout,
 });
 
 const navigation = {
@@ -110,12 +104,24 @@ const navigation = {
 
 function AuthenticatedLayout() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const logoutMutation = useLogoutMutation();
 
-  const handleLogout = async () => {
-    await logoutMutation.mutateAsync({});
-    navigate({ to: "/login" });
+  const handleLogout = () => {
+    logoutMutation.mutate({});
+
+    logoutMutation.mutate(
+      {},
+      {
+        onSuccess: () => {
+          // Can't use `router.invalidate()` and then `navigate({ to: "/login" })` because
+          // the auth context update happens in a React re-render cycle, which occurs AFTER
+          // `beforeLoad` above has already evaluated with stale context. So the user would
+          // stay on this route but (eventually) be in a logged-out state.
+          // So using hard redirect instead.
+          window.location.href = "/login";
+        },
+      },
+    );
   };
 
   const userInitials = user?.email

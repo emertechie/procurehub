@@ -52,6 +52,7 @@ export function useLogoutMutation() {
   return api.useMutation("post", "/logout", {
     onSuccess: () => {
       queryClient.setQueryData(userQueryKey, null);
+      queryClient.removeQueries({ queryKey: userQueryKey });
     },
   });
 }
