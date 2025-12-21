@@ -10,7 +10,8 @@ public static class Endpoints
     {
         app.MapGet("/me", async (
                 ClaimsPrincipal user,
-                UserManager<ApplicationUser> userManager) =>
+                UserManager<ApplicationUser> userManager,
+                ILogger<WebApplication> logger) =>
             {
                 if (!user.Identity?.IsAuthenticated ?? true)
                 {
@@ -18,16 +19,34 @@ public static class Endpoints
                 }
 
                 var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    logger.LogWarning("No name claim value found");
+                    return Results.Unauthorized();
+                }
+
                 var email = user.FindFirstValue(ClaimTypes.Email);
+                if (string.IsNullOrEmpty(email))
+                {
+                    logger.LogWarning("No email claim value found");
+                    return Results.Unauthorized();
+                }
 
                 // Get user's roles
                 var appUser = await userManager.FindByIdAsync(userId);
-                var roles = appUser != null ? await userManager.GetRolesAsync(appUser) : [];
+                if (appUser == null)
+                {
+                    logger.LogWarning("No user found by ID");
+                    return Results.Unauthorized();
+                }
 
-                return Results.Ok(new { id = userId, email, roles });
+                var roles = await userManager.GetRolesAsync(appUser);
+
+                return Results.Ok(new User { Id = userId, Email = email, Roles = roles.ToArray() });
             })
             .RequireAuthorization(AuthorizationPolicyNames.Authenticated)
             .WithName("GetCurrentUser")
-            .WithTags("Auth");
+            .WithTags("Auth")
+            .Produces<User>();
     }
 }
