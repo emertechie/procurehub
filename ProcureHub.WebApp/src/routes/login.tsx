@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
-export const Route = createFileRoute("/(public)/login")({
+export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 

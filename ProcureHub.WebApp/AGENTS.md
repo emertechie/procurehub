@@ -1,5 +1,10 @@
 - In all interactions, plans, and commit messages, be extremely concise and sacrifice grammar for the sake of concision.
 - Prefer to use TanStack Query instead of raw fetch calls, when it makes sense
+- Always run prettier to format new or updated files
+
+# React
+
+- When using JSX, always add a `import * as React from "react";` line at top of file
 
 # API calls
 
