@@ -65,7 +65,7 @@ public static class ApiEndpoints
             })
             .WithName("CreateStaff")
             .Produces<string>(StatusCodes.Status201Created)
-            .ProducesValidationProblem(StatusCodes.Status400BadRequest);
+            .ProducesValidationProblem();
 
         group.MapGet("/staff", async (
                 [FromServices] IRequestHandler<QueryStaff.Request, PagedResult<QueryStaff.Response>> handler,
@@ -77,7 +77,7 @@ public static class ApiEndpoints
                 return ApiPagedResponse.From(pagedResult);
             })
             .WithName("QueryStaff")
-            .Produces<ApiPagedResponse<QueryStaff.Response>>(StatusCodes.Status200OK);
+            .Produces<ApiPagedResponse<QueryStaff.Response>>();
 
         group.MapGet("/staff/{id}", async (
                 [FromServices] IRequestHandler<GetStaffById.Request, GetStaffById.Response?> handler,
@@ -90,7 +90,7 @@ public static class ApiEndpoints
                     : Results.NotFound();
             })
             .WithName("GetStaffById")
-            .Produces<GetStaffById.Response>(StatusCodes.Status200OK)
+            .Produces<GetStaffById.Response>()
             .Produces(StatusCodes.Status404NotFound);
     }
 
