@@ -19,9 +19,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const isAuthenticated = !!user;
+  const roles = user?.roles ?? [];
+  const hasRole = (requiredRole: string) => roles.includes(requiredRole);
 
   return (
-    <AuthContext.Provider value={{ loading, isAuthenticated, user }}>
+    <AuthContext.Provider value={{ loading, isAuthenticated, user, hasRole }}>
       {children}
     </AuthContext.Provider>
   );
