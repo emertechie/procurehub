@@ -1,7 +1,9 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Common.Pagination;
 using ProcureHub.Infrastructure;
+using ProcureHub.Models;
 
 namespace ProcureHub.Features.Users;
 
@@ -27,15 +29,17 @@ public static class QueryUsers
         int? DepartmentId,
         string? DepartmentName);
 
-    public class Handler(ApplicationDbContext dbContext)
+    public class Handler(ApplicationDbContext dbContext, UserManager<User> userManager)
         : IRequestHandler<Request, PagedResult<Response>>
     {
         public async Task<PagedResult<Response>> HandleAsync(Request request, CancellationToken token)
         {
+            var normalizedEmail = userManager.NormalizeEmail(request.Email);
+
             var query = dbContext.Users
                 .AsNoTracking()
                 .Where(s => string.IsNullOrWhiteSpace(request.Email) ||
-                            s.Email == request.Email.ToLowerInvariant());
+                            s.NormalizedEmail == normalizedEmail);
 
             return await query
                 .OrderBy(s => s.Email)
