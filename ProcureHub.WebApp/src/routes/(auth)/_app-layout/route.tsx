@@ -8,8 +8,8 @@ import {
   FileText,
   Home,
   LogOut,
+  Package,
   Settings,
-  ShoppingCart,
   Users,
   CheckCircle,
 } from "lucide-react";
@@ -143,7 +143,7 @@ function AuthenticatedLayout() {
               <SidebarMenuButton size="lg" asChild>
                 <Link to="/dashboard">
                   <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                    <ShoppingCart className="size-4" />
+                    <Package className="size-4" />
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">ProcureHub</span>
