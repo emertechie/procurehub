@@ -1,4 +1,6 @@
-namespace ProcureHub.WebApi.Tests.Infrastructure;
+using ProcureHub.WebApi.Tests.Infrastructure.Xunit;
+
+namespace ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
 
 /// <summary>
 /// Automatically resets the database before each test. Derives from HttpClientBase to provide HttpClient instance.

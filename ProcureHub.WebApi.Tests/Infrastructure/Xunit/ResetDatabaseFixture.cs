@@ -1,4 +1,6 @@
-namespace ProcureHub.WebApi.Tests.Infrastructure;
+using ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
+
+namespace ProcureHub.WebApi.Tests.Infrastructure.Xunit;
 
 public class ResetDatabaseFixture(ApiTestHostFixture hostFixture) : IAsyncLifetime
 {

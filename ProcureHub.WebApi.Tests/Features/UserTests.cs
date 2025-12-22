@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity.Data;
 using ProcureHub.Features.Users;
 using ProcureHub.WebApi.ApiResponses;
 using ProcureHub.WebApi.Tests.Infrastructure;
+using ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
+using ProcureHub.WebApi.Tests.Infrastructure.Xunit;
 
 namespace ProcureHub.WebApi.Tests.Features;
 

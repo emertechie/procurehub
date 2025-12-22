@@ -2,6 +2,8 @@
 using System.Net.Http.Json;
 using ProcureHub.Features.Departments;
 using ProcureHub.WebApi.Tests.Infrastructure;
+using ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
+using ProcureHub.WebApi.Tests.Infrastructure.Xunit;
 
 namespace ProcureHub.WebApi.Tests.Features;
 
