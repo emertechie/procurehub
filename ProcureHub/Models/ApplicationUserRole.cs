@@ -6,8 +6,9 @@ namespace ProcureHub.Models;
 
 public class ApplicationUserRole : IdentityUserRole<string>
 {
-    public virtual User User { get; set; }
-    public virtual ApplicationRole Role { get; set; }
+    public virtual User User { get; set; } = null!;
+
+    public virtual ApplicationRole Role { get; set; } = null!;
 }
 
 public class ApplicationRole : IdentityRole
@@ -20,7 +21,7 @@ public class ApplicationRole : IdentityRole
     {
     }
 
-    public virtual ICollection<ApplicationUserRole> UserRoles { get; set; }
+    public virtual ICollection<ApplicationUserRole>? UserRoles { get; set; }
 }
 
 public class ApplicationRoleEntityTypeConfiguration : IEntityTypeConfiguration<ApplicationRole>

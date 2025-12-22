@@ -7,15 +7,15 @@ namespace ProcureHub.Models;
 
 public class User : IdentityUser
 {
-    public virtual ICollection<ApplicationUserRole> UserRoles { get; set; }
+    public virtual ICollection<ApplicationUserRole>? UserRoles { get; set; }
 
     [Required]
     [MaxLength(200)]
-    public string? FirstName { get; set; }
+    public string FirstName { get; set; } = null!;
 
     [Required]
     [MaxLength(200)]
-    public string? LastName { get; set; }
+    public string LastName { get; set; } = null!;
 
     public int? DepartmentId { get; set; }
 
