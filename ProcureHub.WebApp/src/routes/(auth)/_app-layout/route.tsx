@@ -309,7 +309,7 @@ function AuthenticatedLayout() {
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4">
+        <div className="flex flex-1 flex-col gap-4 py-4 px-6">
           <Outlet />
         </div>
       </SidebarInset>
