@@ -45,9 +45,9 @@ public class AuthenticationTests(ITestOutputHelper testOutputHelper, Integration
         Assert.NotEmpty(meResult!.Id);
         Assert.Equal("test-admin@procurehub.local", meResult!.Email);
 
-        // Make sure can call the /staff endpoint
-        var staffResp = await HttpClient.GetAsync("/staff", CancellationToken);
-        Assert.Equal(HttpStatusCode.OK, staffResp.StatusCode);
+        // Make sure can call the /users endpoint
+        var usersResp = await HttpClient.GetAsync("/users", CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, usersResp.StatusCode);
     }
 
     [Fact]
@@ -67,9 +67,9 @@ public class AuthenticationTests(ITestOutputHelper testOutputHelper, Integration
         Assert.NotEmpty(meResult.Id);
         Assert.Equal("test-admin@procurehub.local", meResult.Email);
 
-        // Make sure can call the /staff endpoint with cookie
-        var staffResp = await HttpClient.GetAsync("/staff", CancellationToken);
-        Assert.Equal(HttpStatusCode.OK, staffResp.StatusCode);
+        // Make sure can call the /users endpoint with cookie
+        var usersResp = await HttpClient.GetAsync("/users", CancellationToken);
+        Assert.Equal(HttpStatusCode.OK, usersResp.StatusCode);
     }
 
     /// <summary>

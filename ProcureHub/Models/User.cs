@@ -5,14 +5,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ProcureHub.Models;
 
-public class Staff
+public class User : IdentityUser
 {
-    [Key]
-    [PersonalData]
-    // ReSharper disable once EntityFramework.ModelValidation.UnlimitedStringLength
-    public string UserId { get; set; }
-
-    public ApplicationUser User { get; set; }
+    public virtual ICollection<ApplicationUserRole> UserRoles { get; set; }
 
     [Required]
     [MaxLength(200)]
@@ -35,19 +30,22 @@ public class Staff
     public DateTime? DeletedAt { get; set; }
 }
 
-public class StaffEntityTypeConfiguration : IEntityTypeConfiguration<Staff>
+public class UserEntityTypeConfiguration : IEntityTypeConfiguration<User>
 {
-    public void Configure(EntityTypeBuilder<Staff> builder)
+    public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder
-            .HasOne(s => s.User)
-            .WithOne()
-            .HasForeignKey<Staff>(s => s.UserId)
+        builder.ToTable("Users");
+
+        // Each User can have many entries in the UserRole join table
+        builder.HasMany(e => e.UserRoles)
+            .WithOne(e => e.User)
+            .HasForeignKey(ur => ur.UserId)
+            .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .HasOne(s => s.Department)
-            .WithMany(d => d.Staff)
+            .WithMany(d => d.Users)
             .HasForeignKey(s => s.DepartmentId)
             .OnDelete(DeleteBehavior.Restrict);
         ;

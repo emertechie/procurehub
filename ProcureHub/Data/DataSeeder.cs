@@ -9,7 +9,7 @@ public sealed class DataSeeder
 {
     public static async Task SeedAsync(
         ApplicationDbContext dbContext,
-        UserManager<ApplicationUser> userManager,
+        UserManager<User> userManager,
         RoleManager<ApplicationRole> roleManager,
         ILogger<DataSeeder> logger,
         string adminEmail,
@@ -39,7 +39,7 @@ public sealed class DataSeeder
     }
 
     private static async Task SeedAdminUserAsync(ApplicationDbContext dbContext,
-        UserManager<ApplicationUser> userManager,
+        UserManager<User> userManager,
         ILogger<DataSeeder> logger,
         string adminEmail,
         string adminPassword)
@@ -52,11 +52,17 @@ public sealed class DataSeeder
         }
 
         // Create admin user
-        var adminUser = new ApplicationUser
+        var now = DateTime.UtcNow;
+        var adminUser = new User
         {
             UserName = adminEmail,
             Email = adminEmail,
-            EmailConfirmed = true
+            EmailConfirmed = true,
+            FirstName = "Admin",
+            LastName = "User",
+            EnabledAt = now,
+            CreatedAt = now,
+            UpdatedAt = now
         };
 
         logger.LogWarning("Creating default admin user with email '{Email}'", adminEmail);
@@ -69,19 +75,5 @@ public sealed class DataSeeder
 
         // Assign Admin role
         await userManager.AddToRoleAsync(adminUser, RoleNames.Admin);
-
-        // Create linked Staff record
-        var staff = new Staff
-        {
-            UserId = adminUser.Id,
-            FirstName = "Admin",
-            LastName = "User",
-            EnabledAt = DateTime.UtcNow,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-
-        dbContext.Staff.Add(staff);
-        await dbContext.SaveChangesAsync();
     }
 }

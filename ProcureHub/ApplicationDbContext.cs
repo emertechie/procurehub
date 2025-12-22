@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-
 using ProcureHub.Models;
 
 namespace ProcureHub;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-    : IdentityDbContext<ApplicationUser, ApplicationRole, string, IdentityUserClaim<string>, ApplicationUserRole, IdentityUserLogin<string>, IdentityRoleClaim<string>, IdentityUserToken<string>>(options)
+    : IdentityDbContext<User, ApplicationRole, string, IdentityUserClaim<string>, ApplicationUserRole,
+        IdentityUserLogin<string>, IdentityRoleClaim<string>, IdentityUserToken<string>>(options)
 {
-    public DbSet<Staff> Staff { get; set; }
+    // public DbSet<Staff> Staff { get; set; }
 
     public DbSet<Department> Departments { get; set; }
 

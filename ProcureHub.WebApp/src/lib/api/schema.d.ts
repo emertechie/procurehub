@@ -544,30 +544,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/staff": {
+    "/users": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["QueryStaff"];
+        get: operations["QueryUsers"];
         put?: never;
-        post: operations["CreateStaff"];
+        post: operations["CreateUsers"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/staff/{id}": {
+    "/users/{id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["GetStaffById"];
+        get: operations["GetUserById"];
         put?: never;
         post?: never;
         delete?: never;
@@ -799,7 +799,7 @@ export interface operations {
             };
         };
     };
-    QueryStaff: {
+    QueryUsers: {
         parameters: {
             query?: {
                 Email?: string;
@@ -832,7 +832,7 @@ export interface operations {
             };
         };
     };
-    CreateStaff: {
+    CreateUsers: {
         parameters: {
             query?: never;
             header?: never;
@@ -874,7 +874,7 @@ export interface operations {
             };
         };
     };
-    GetStaffById: {
+    GetUserById: {
         parameters: {
             query?: never;
             header?: never;

@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
-using ProcureHub.Models;
 
 namespace ProcureHub.WebApi.Features.Auth;
 
@@ -10,7 +9,7 @@ public static class Endpoints
     {
         app.MapGet("/me", async (
                 ClaimsPrincipal user,
-                UserManager<ApplicationUser> userManager,
+                UserManager<Models.User> userManager,
                 ILogger<WebApplication> logger) =>
             {
                 if (!user.Identity?.IsAuthenticated ?? true)

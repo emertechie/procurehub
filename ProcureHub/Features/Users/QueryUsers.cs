@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using ProcureHub.Common.Pagination;
 using ProcureHub.Infrastructure;
 
-namespace ProcureHub.Features.Staff;
+namespace ProcureHub.Features.Users;
 
-public static class QueryStaff
+public static class QueryUsers
 {
     public record Request(string? Email, int? Page, int? PageSize);
 
@@ -32,17 +32,17 @@ public static class QueryStaff
     {
         public async Task<PagedResult<Response>> HandleAsync(Request request, CancellationToken token)
         {
-            var query = dbContext.Staff
+            var query = dbContext.Users
                 .AsNoTracking()
                 .Where(s => string.IsNullOrWhiteSpace(request.Email) ||
-                            s.User.Email == request.Email.ToLowerInvariant());
+                            s.Email == request.Email.ToLowerInvariant());
 
             return await query
-                .OrderBy(s => s.User.Email)
+                .OrderBy(s => s.Email)
                 .ToPagedResultAsync(
                     s => new Response(
-                        s.UserId,
-                        s.User.Email!,
+                        s.Id,
+                        s.Email!,
                         s.FirstName!,
                         s.LastName!,
                         s.DepartmentId,

@@ -1,65 +1,65 @@
 using Microsoft.AspNetCore.Mvc;
 using ProcureHub.Common;
 using ProcureHub.Common.Pagination;
-using ProcureHub.Features.Staff;
+using ProcureHub.Features.Users;
 using ProcureHub.Infrastructure;
 using ProcureHub.WebApi.ApiResponses;
 using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Helpers;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
-namespace ProcureHub.WebApi.Features.Staff;
+namespace ProcureHub.WebApi.Features.Users;
 
 public static class Endpoints
 {
-    public static void ConfigureStaffEndpoints(this WebApplication app)
+    public static void ConfigureUsersEndpoints(this WebApplication app)
     {
         var group = app.MapGroup("")
             .RequireAuthorization(AuthorizationPolicyNames.Authenticated, RolePolicyNames.AdminOnly)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .AddFluentValidationAutoValidation()
-            .WithTags("Staff");
+            .WithTags("Users");
 
-        group.MapPost("/staff", async (
-                [FromServices] IRequestHandler<CreateStaff.Request, Result<string>> handler,
-                [FromBody] CreateStaff.Request request,
+        group.MapPost("/users", async (
+                [FromServices] IRequestHandler<CreateUser.Request, Result<string>> handler,
+                [FromBody] CreateUser.Request request,
                 CancellationToken token
             ) =>
             {
                 var result = await handler.HandleAsync(request, token);
                 return result.Match(
-                    newUserId => Results.Created($"/staff/{newUserId}", new { userId = newUserId }),
+                    newUserId => Results.Created($"/users/{newUserId}", new { userId = newUserId }),
                     error => error.ToProblemDetails()
                 );
             })
-            .WithName("CreateStaff")
+            .WithName("CreateUsers")
             .Produces<string>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
 
-        group.MapGet("/staff", async (
-                [FromServices] IRequestHandler<QueryStaff.Request, PagedResult<QueryStaff.Response>> handler,
-                [AsParameters] QueryStaff.Request request,
+        group.MapGet("/users", async (
+                [FromServices] IRequestHandler<QueryUsers.Request, PagedResult<QueryUsers.Response>> handler,
+                [AsParameters] QueryUsers.Request request,
                 CancellationToken token
             ) =>
             {
                 var pagedResult = await handler.HandleAsync(request, token);
                 return ApiPagedResponse.From(pagedResult);
             })
-            .WithName("QueryStaff")
-            .Produces<ApiPagedResponse<QueryStaff.Response>>();
+            .WithName("QueryUsers")
+            .Produces<ApiPagedResponse<QueryUsers.Response>>();
 
-        group.MapGet("/staff/{id}", async (
-                [FromServices] IRequestHandler<GetStaffById.Request, GetStaffById.Response?> handler,
+        group.MapGet("/users/{id}", async (
+                [FromServices] IRequestHandler<GetUserById.Request, GetUserById.Response?> handler,
                 CancellationToken token,
                 string id) =>
             {
-                var response = await handler.HandleAsync(new GetStaffById.Request(id), token);
+                var response = await handler.HandleAsync(new GetUserById.Request(id), token);
                 return response is not null
                     ? Results.Ok(ApiDataResponse.From(response))
                     : Results.NotFound();
             })
-            .WithName("GetStaffById")
-            .Produces<GetStaffById.Response>()
+            .WithName("GetUserById")
+            .Produces<GetUserById.Response>()
             .Produces(StatusCodes.Status404NotFound);
     }
 }

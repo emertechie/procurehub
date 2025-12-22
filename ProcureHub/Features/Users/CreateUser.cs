@@ -5,9 +5,9 @@ using ProcureHub.Common;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
 
-namespace ProcureHub.Features.Staff;
+namespace ProcureHub.Features.Users;
 
-public static class CreateStaff
+public static class CreateUser
 {
     public record Request(string Email, string Password, string FirstName, string LastName);
 
@@ -23,37 +23,20 @@ public static class CreateStaff
     }
 
     public class Handler(
-        ApplicationDbContext dbContext,
-        UserManager<ApplicationUser> userManager,
+        UserManager<User> userManager,
         ILogger<Handler> logger)
         : IRequestHandler<Request, Result<string>>
     {
         public async Task<Result<string>> HandleAsync(Request request, CancellationToken token)
         {
+            var now = DateTime.UtcNow;
+
             // Create the ASP.NET Identity user
-            var user = new ApplicationUser
+            var user = new User
             {
                 UserName = request.Email,
                 // Ensure email always stored in lowercase to enable case-insensitive search
-                Email = request.Email.ToLowerInvariant()
-            };
-            var result = await userManager.CreateAsync(user, request.Password);
-
-            if (!result.Succeeded)
-            {
-                logger.LogWarning("Failed to create staff user with email {Email}. Errors: {Errors}",
-                    request.Email,
-                    string.Join(", ", result.Errors.Select(e => e.Description)));
-                return Result.Failure<string>(UserCreationFailed(result.Errors));
-            }
-
-            var userId = await userManager.GetUserIdAsync(user);
-
-            // Create linked Staff entity
-            var now = DateTime.UtcNow;
-            var staff = new Models.Staff
-            {
-                UserId = userId,
+                Email = request.Email.ToLowerInvariant(),
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 CreatedAt = now,
@@ -61,11 +44,16 @@ public static class CreateStaff
                 EnabledAt = now
             };
 
-            dbContext.Staff.Add(staff);
-            await dbContext.SaveChangesAsync(token);
+            var result = await userManager.CreateAsync(user, request.Password);
+            if (!result.Succeeded)
+            {
+                logger.LogWarning("Failed to create user. Errors: {Errors}",
+                    string.Join(", ", result.Errors.Select(e => e.Description)));
+                return Result.Failure<string>(UserCreationFailed(result.Errors));
+            }
 
-            logger.LogInformation("Registered Staff entity for user {UserId}", userId);
-
+            var userId = await userManager.GetUserIdAsync(user);
+            logger.LogInformation("Created user {UserId}", userId);
             return Result.Success(userId);
         }
 

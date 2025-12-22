@@ -5,7 +5,7 @@ using Microsoft.OpenApi;
 using ProcureHub;
 using ProcureHub.Constants;
 using ProcureHub.Data;
-using ProcureHub.Features.Staff;
+using ProcureHub.Features.Users;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
 using ProcureHub.WebApi;
@@ -52,7 +52,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
         options.UseNpgsql(connectionString, dbOptions => dbOptions.MigrationsAssembly("ProcureHub")));
 
     // Configure Identity with API endpoints (automatically adds Bearer token authentication)
-    builder.Services.AddIdentityApiEndpoints<ApplicationUser>(options =>
+    builder.Services.AddIdentityApiEndpoints<User>(options =>
         {
             options.Stores.MaxLengthForKeys = 128;
             options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
@@ -89,7 +89,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
     appBuilder.Services.AddRequestHandlers();
 
     // Register all FluentValidation validators 
-    appBuilder.Services.AddValidatorsFromAssemblyContaining<CreateStaff.Request>();
+    appBuilder.Services.AddValidatorsFromAssemblyContaining<CreateUser.Request>();
 
     // Automatically run FluentValidation validators on ASP.Net Minimal APIs:
     builder.Services.AddFluentValidationAutoValidation();
@@ -119,7 +119,7 @@ async Task ConfigureApplication(WebApplication app)
         // Seed database with roles and initial admin user
         await DataSeeder.SeedAsync(
             dbContext,
-            scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>(),
+            scope.ServiceProvider.GetRequiredService<UserManager<User>>(),
             scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>(),
             scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>(),
             app.Configuration.GetRequiredString("DevAdminUser:Email"),
@@ -138,7 +138,7 @@ async Task ConfigureApplication(WebApplication app)
 void ConfigureIdentityApiEndpoints(WebApplication app)
 {
     // Map Identity API endpoints (login, register, refresh, etc.)
-    var identityEndpointsConventionBuilder = app.MapIdentityApi<ApplicationUser>()
+    var identityEndpointsConventionBuilder = app.MapIdentityApi<User>()
         .AddOpenApiOperationTransformer(async (operation, context, _) =>
         {
             // Transform /login endpoint to document the ProblemHttpResult 401 response which is
@@ -161,7 +161,7 @@ void ConfigureIdentityApiEndpoints(WebApplication app)
         });
 
     // The `MapIdentityApi` call doesn't add a `/logout` endpoint so add one here:
-    app.MapPost("/logout", async (SignInManager<ApplicationUser> signInManager) =>
+    app.MapPost("/logout", async (SignInManager<User> signInManager) =>
     {
         await signInManager.SignOutAsync();
         return Results.Ok();

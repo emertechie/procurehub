@@ -2,9 +2,9 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Infrastructure;
 
-namespace ProcureHub.Features.Staff;
+namespace ProcureHub.Features.Users;
 
-public static class GetStaffById
+public static class GetUserById
 {
     public record Request(string Id);
 
@@ -29,18 +29,17 @@ public static class GetStaffById
     {
         public Task<Response?> HandleAsync(Request request, CancellationToken token)
         {
-            return dbContext.Staff
+            return dbContext.Users
                 .AsNoTracking()
-                .Where(s => s.UserId == request.Id)
-                .Include(s => s.User)
-                .Include(s => s.Department)
-                .Select(s => new Response(
-                    s.UserId,
-                    s.User.Email!,
-                    s.FirstName!,
-                    s.LastName!,
-                    s.DepartmentId,
-                    s.Department != null ? s.Department.Name : null))
+                .Where(u => u.Id == request.Id)
+                .Include(u => u.Department)
+                .Select(u => new Response(
+                    u.Id,
+                    u.Email!,
+                    u.FirstName!,
+                    u.LastName!,
+                    u.DepartmentId,
+                    u.Department != null ? u.Department.Name : null))
                 .FirstOrDefaultAsync(token);
         }
     }

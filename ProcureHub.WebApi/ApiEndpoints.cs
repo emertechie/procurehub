@@ -1,6 +1,6 @@
 using ProcureHub.WebApi.Features.Auth;
 using ProcureHub.WebApi.Features.Departments;
-using ProcureHub.WebApi.Features.Staff;
+using ProcureHub.WebApi.Features.Users;
 
 namespace ProcureHub.WebApi;
 
@@ -12,7 +12,7 @@ public static class ApiEndpoints
         app.MapGet("/test", async () => Results.Ok(new { DateTime = DateTime.UtcNow }));
 
         app.ConfigureAuthEndpoints();
-        app.ConfigureStaffEndpoints();
+        app.ConfigureUsersEndpoints();
         app.ConfigureDepartmentEndpoints();
     }
 }

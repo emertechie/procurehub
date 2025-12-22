@@ -10,7 +10,7 @@ public class Department
     [MaxLength(200)]
     public string? Name { get; set; }
 
-    public ICollection<Staff> Staff { get; set; } = new HashSet<Staff>();
+    public ICollection<User> Users { get; set; } = new HashSet<User>();
 
     public DateTime CreatedAt { get; set; }
 
