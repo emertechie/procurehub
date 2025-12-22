@@ -10,15 +10,12 @@ public abstract class HttpClientAndDbResetBase(ApiTestHostFixture hostFixture, I
 {
     public async ValueTask InitializeAsync()
     {
-        Console.WriteLine("*** In IntegrationTestsBase.InitializeAsync. Resetting database");
-
         await DatabaseResetter.ResetDatabaseAsync();
         await DatabaseResetter.SeedDataAsync(ApiTestHost.Services, AdminEmail, AdminPassword);
     }
 
     public ValueTask DisposeAsync()
     {
-        Console.WriteLine("*** In IntegrationTestsBase.DisposeAsync");
         return ValueTask.CompletedTask;
     }
 }

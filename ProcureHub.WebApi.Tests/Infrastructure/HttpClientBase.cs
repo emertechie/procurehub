@@ -10,8 +10,8 @@ namespace ProcureHub.WebApi.Tests.Infrastructure;
 /// </summary>
 public abstract class HttpClientBase
 {
-    protected const string AdminEmail = "test-admin@procurehub.local";
-    protected const string AdminPassword = "TestAdmin123!";
+    public const string AdminEmail = "test-admin@procurehub.local";
+    public const string AdminPassword = "TestAdmin123!";
 
     protected readonly ApiTestHost ApiTestHost;
     protected readonly HttpClient HttpClient;

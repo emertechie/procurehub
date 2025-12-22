@@ -7,9 +7,12 @@ using ProcureHub.WebApi.Tests.Infrastructure;
 
 namespace ProcureHub.WebApi.Tests.Features;
 
+/// <summary>
+/// NOTE: DB is only reset once per class, so only use for tests that don't persist state
+/// </summary>
 [Collection("ApiTestHost")]
-public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOutputHelper)
-    : HttpClientAndDbResetBase(hostFixture, testOutputHelper)
+public class UserTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHelper testOutputHelper)
+    : HttpClientBase(hostFixture, testOutputHelper), IClassFixture<ResetDatabaseFixture>
 {
     private const string ValidUserEmail = "user1@example.com";
     private const string ValidUserPassword = "Test1234!";
@@ -110,6 +113,16 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
             };
         });
     }
+}
+
+[Collection("ApiTestHost")]
+public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOutputHelper)
+    : HttpClientAndDbResetBase(hostFixture, testOutputHelper)
+{
+    private const string ValidUserEmail = "user1@example.com";
+    private const string ValidUserPassword = "Test1234!";
+
+    private static readonly CreateUser.Request ValidCreateRequest = new(ValidUserEmail, ValidUserPassword, "Some", "User");
 
     /// <summary>
     /// Note: In a real-world system, this would use invite emails and a time-limited invite token.
@@ -275,11 +288,11 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
             };
         });
     }
+}
 
-    private class AllUserEndpoints
-    {
-        public Func<Task> CreateUser { get; set; } = null!;
-        public Func<Task> QueryUsers { get; set; } = null!;
-        public Func<Task> GetUserById { get; set; } = null!;
-    }
+internal class AllUserEndpoints
+{
+    public Func<Task> CreateUser { get; set; } = null!;
+    public Func<Task> QueryUsers { get; set; } = null!;
+    public Func<Task> GetUserById { get; set; } = null!;
 }
