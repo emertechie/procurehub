@@ -41,7 +41,14 @@ public static class Endpoints
 
                 var roles = await userManager.GetRolesAsync(appUser);
 
-                return Results.Ok(new User { Id = userId, Email = email, Roles = roles.ToArray() });
+                return Results.Ok(new User
+                {
+                    Id = userId,
+                    Email = email,
+                    FirstName = appUser.FirstName!,
+                    LastName = appUser.LastName!,
+                    Roles = roles.ToArray()
+                });
             })
             .RequireAuthorization(AuthorizationPolicyNames.Authenticated)
             .WithName("GetCurrentUser")

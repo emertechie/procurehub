@@ -4,12 +4,13 @@ namespace ProcureHub.WebApi.Features.Auth;
 
 public class User
 {
-    [Required]
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
-    [Required]
-    public string Email { get; set; }
+    public required string Email { get; set; }
 
-    [Required]
-    public string[] Roles { get; set; }
+    public required string FirstName { get; set; }
+
+    public required string LastName { get; set; }
+
+    public required string[] Roles { get; set; }
 }

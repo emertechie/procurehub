@@ -17,7 +17,7 @@ public class DepartmentTests(ITestOutputHelper testOutputHelper, IntegrationTest
         // Assert no departments yet
         var queryDeptsResp1 = await HttpClient.GetAsync("/departments", CancellationToken);
         var departments1 = await queryDeptsResp1.AssertSuccessAndReadJsonAsync<ListDepartments.Response[]>(CancellationToken);
-        Assert.Empty(departments1);
+        Assert.Empty(departments1!);
 
         // Create department
         var createDeptReq = new CreateDepartment.Request("New Department");
