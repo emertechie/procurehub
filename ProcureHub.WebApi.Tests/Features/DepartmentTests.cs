@@ -5,9 +5,9 @@ using ProcureHub.WebApi.Tests.Infrastructure;
 
 namespace ProcureHub.WebApi.Tests.Features;
 
-[Collection("Integration Tests")]
-public class DepartmentTests(ITestOutputHelper testOutputHelper, IntegrationTestFixture fixture)
-    : IntegrationTestsBase(testOutputHelper, fixture)
+[Collection("ApiTestHost")]
+public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOutputHelper)
+    : HttpClientAndDbResetBase(hostFixture, testOutputHelper)
 {
     [Fact]
     public async Task Can_create_and_fetch_department()

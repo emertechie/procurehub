@@ -5,9 +5,9 @@ using ProcureHub.WebApi.Tests.Infrastructure;
 
 namespace ProcureHub.WebApi.Tests;
 
-[Collection("Integration Tests")]
-public class AuthenticationTests(ITestOutputHelper testOutputHelper, IntegrationTestFixture fixture)
-    : IntegrationTestsBase(testOutputHelper, fixture)
+[Collection("ApiTestHost")]
+public class AuthenticationTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOutputHelper)
+    : HttpClientAndDbResetBase(hostFixture, testOutputHelper)
 {
     /// <summary>
     /// For demo purposes, just not allowing manual registration.

@@ -7,9 +7,9 @@ using ProcureHub.WebApi.Tests.Infrastructure;
 
 namespace ProcureHub.WebApi.Tests.Features;
 
-[Collection("Integration Tests")]
-public class UserTests(ITestOutputHelper testOutputHelper, IntegrationTestFixture fixture)
-    : IntegrationTestsBase(testOutputHelper, fixture)
+[Collection("ApiTestHost")]
+public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOutputHelper)
+    : HttpClientAndDbResetBase(hostFixture, testOutputHelper)
 {
     private const string ValidUserEmail = "user1@example.com";
     private const string ValidUserPassword = "Test1234!";

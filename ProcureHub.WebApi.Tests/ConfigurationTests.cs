@@ -3,9 +3,9 @@ using ProcureHub.WebApi.Tests.Infrastructure;
 
 namespace ProcureHub.WebApi.Tests;
 
-[Collection("Integration Tests")]
-public class ConfigurationTests(ITestOutputHelper testOutputHelper, IntegrationTestFixture fixture)
-    : IntegrationTestsBase(testOutputHelper, fixture)
+[Collection("ApiTestHost")]
+public class ConfigurationTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOutputHelper)
+    : HttpClientAndDbResetBase(hostFixture, testOutputHelper)
 {
     /// <summary>
     /// Verifies the use of `webApp.UseStatusCodePages` in API config.

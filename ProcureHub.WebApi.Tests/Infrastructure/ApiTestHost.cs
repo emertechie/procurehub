@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ProcureHub.WebApi.Tests.Infrastructure;
 
-public class WebApiTestHost(string connectionString)
+public class ApiTestHost(string connectionString)
     : WebApplicationFactory<Program>, ITestOutputHelperAccessor
 {
     private static readonly Lock _lock = new();

@@ -4,37 +4,26 @@ using System.Net.Http.Json;
 
 namespace ProcureHub.WebApi.Tests.Infrastructure;
 
-public abstract class IntegrationTestsBase : IAsyncLifetime
+/// <summary>
+/// Creates a default HttpClient instance and provides convenience methods
+/// to login and set required authentication headers on the HttpClient.
+/// </summary>
+public abstract class HttpClientBase
 {
     protected const string AdminEmail = "test-admin@procurehub.local";
     protected const string AdminPassword = "TestAdmin123!";
-    private readonly IntegrationTestFixture _fixture;
 
+    protected readonly ApiTestHost ApiTestHost;
     protected readonly HttpClient HttpClient;
 
-    protected IntegrationTestsBase(ITestOutputHelper testOutputHelper, IntegrationTestFixture fixture)
+    protected HttpClientBase(ApiTestHostFixture hostFixture, ITestOutputHelper testOutputHelper)
     {
-        _fixture = fixture;
-        _fixture.WebApiTestHost.OutputHelper = testOutputHelper;
-
-        HttpClient = _fixture.WebApiTestHost.CreateClient();
+        ApiTestHost = hostFixture.ApiTestHost;
+        ApiTestHost.OutputHelper = testOutputHelper;
+        HttpClient = ApiTestHost.CreateClient();
     }
 
     protected static CancellationToken CancellationToken => TestContext.Current.CancellationToken;
-
-    public async ValueTask InitializeAsync()
-    {
-        Console.WriteLine("*** In IntegrationTestsBase.InitializeAsync. Resetting database");
-
-        await DatabaseResetter.ResetDatabaseAsync();
-        await DatabaseResetter.SeedDataAsync(_fixture.WebApiTestHost.Services, AdminEmail, AdminPassword);
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        Console.WriteLine("*** In IntegrationTestsBase.DisposeAsync");
-        return ValueTask.CompletedTask;
-    }
 
     protected async Task LoginAsAdminAsync()
     {

@@ -1,21 +1,20 @@
 namespace ProcureHub.WebApi.Tests.Infrastructure;
 
-// ReSharper disable once ClassNeverInstantiated.Global
-public class IntegrationTestFixture : IDisposable
+public class ApiTestHostFixture : IDisposable
 {
-    public IntegrationTestFixture()
+    public ApiTestHostFixture()
     {
         Console.WriteLine("*** In IntegrationTestFixture ctor");
 
         var connectionString = Configuration.GetConnectionString();
-        WebApiTestHost = new WebApiTestHost(connectionString);
+        ApiTestHost = new ApiTestHost(connectionString);
     }
 
-    public WebApiTestHost WebApiTestHost { get; } = null!;
+    public ApiTestHost ApiTestHost { get; } = null!;
 
     public void Dispose()
     {
         Console.WriteLine("*** In IntegrationTestFixture.Dispose");
-        WebApiTestHost?.Dispose();
+        ApiTestHost?.Dispose();
     }
 }
