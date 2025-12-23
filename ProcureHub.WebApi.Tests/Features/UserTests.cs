@@ -427,12 +427,15 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         var userId = createUserResp.Headers.Location!.ToString().Split('/').Last();
 
         // Try to assign user to non-existent department
-        var assignReq = new AssignUserToDepartment.Request(userId, 99999);
+        const int departmentId = 99999;
+        var assignReq = new AssignUserToDepartment.Request(userId, departmentId);
         var assignResp = await HttpClient.PatchAsync($"/users/{userId}/department", JsonContent.Create(assignReq), CancellationToken);
         await assignResp.AssertProblemDetailsAsync(
             HttpStatusCode.NotFound,
             CancellationToken,
-            detail: "Department.NotFound");
+            detail: "Department.NotFound",
+            title: $"Department with ID '{departmentId}' not found",
+            instance: $"PATCH /users/{userId}/department");
     }
 
     [Fact]
@@ -440,12 +443,15 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
     {
         await LoginAsAdminAsync();
 
+        const string userId = "nonexistent-id";
         var updateReq = new UpdateUser.Request("nonexistent-id", "test@example.com", "Test", "User");
-        var updateResp = await HttpClient.PutAsync("/users/nonexistent-id", JsonContent.Create(updateReq), CancellationToken);
+        var updateResp = await HttpClient.PutAsync($"/users/{userId}", JsonContent.Create(updateReq), CancellationToken);
         await updateResp.AssertProblemDetailsAsync(
             HttpStatusCode.NotFound,
             CancellationToken,
-            detail: "User.NotFound");
+            detail: "User.NotFound",
+            title: $"User with ID '{userId}' not found",
+            instance: $"PUT /users/{userId}");
     }
 
     [Fact]

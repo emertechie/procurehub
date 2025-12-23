@@ -43,7 +43,7 @@ public static class AssignUserToDepartment
 
                 if (!departmentExists)
                 {
-                    return Result.Failure<bool>(Error.NotFound(
+                    return Result.Failure(Error.NotFound(
                         "Department.NotFound",
                         $"Department with ID '{request.DepartmentId}' not found"));
                 }
