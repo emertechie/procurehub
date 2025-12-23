@@ -290,6 +290,162 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
             };
         });
     }
+
+    [Fact]
+    public async Task Admin_can_update_user_profile()
+    {
+        await LoginAsAdminAsync();
+
+        // Create user
+        var createResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest), CancellationToken);
+        var userId = createResp.Headers.Location!.ToString().Split('/').Last();
+
+        // Update user profile
+        var updateReq = new UpdateUser.Request(userId, "updated@example.com", "Updated", "Name");
+        var updateResp = await HttpClient.PutAsync($"/users/{userId}", JsonContent.Create(updateReq), CancellationToken);
+        Assert.Equal(HttpStatusCode.NoContent, updateResp.StatusCode);
+
+        // Verify update
+        var getUserResp = await HttpClient.GetAsync($"/users/{userId}", CancellationToken);
+        var user = await getUserResp.AssertSuccessAndReadJsonAsync<ApiDataResponse<GetUserById.Response>>(CancellationToken);
+        Assert.Equal("updated@example.com", user!.Data.Email);
+        Assert.Equal("Updated", user.Data.FirstName);
+        Assert.Equal("Name", user.Data.LastName);
+    }
+
+    [Fact]
+    public async Task Admin_can_enable_and_disable_user()
+    {
+        await LoginAsAdminAsync();
+
+        // Create user (enabled by default)
+        var createResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest), CancellationToken);
+        var userId = createResp.Headers.Location!.ToString().Split('/').Last();
+
+        // Disable user
+        var disableResp = await HttpClient.PatchAsync($"/users/{userId}/disable", null, CancellationToken);
+        Assert.Equal(HttpStatusCode.NoContent, disableResp.StatusCode);
+
+        // Enable user
+        var enableResp = await HttpClient.PatchAsync($"/users/{userId}/enable", null, CancellationToken);
+        Assert.Equal(HttpStatusCode.NoContent, enableResp.StatusCode);
+
+        // Enable again (idempotent)
+        var enableResp2 = await HttpClient.PatchAsync($"/users/{userId}/enable", null, CancellationToken);
+        Assert.Equal(HttpStatusCode.NoContent, enableResp2.StatusCode);
+    }
+
+    [Fact]
+    public async Task Admin_can_assign_user_to_department()
+    {
+        await LoginAsAdminAsync();
+
+        // Create department
+        var createDeptReq = new ProcureHub.Features.Departments.CreateDepartment.Request("Engineering");
+        var createDeptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createDeptReq), CancellationToken);
+        var deptId = int.Parse(createDeptResp.Headers.Location!.ToString().Split('/').Last());
+
+        // Create user
+        var createUserResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest), CancellationToken);
+        var userId = createUserResp.Headers.Location!.ToString().Split('/').Last();
+
+        // Assign user to department
+        var assignReq = new AssignUserToDepartment.Request(userId, deptId);
+        var assignResp = await HttpClient.PatchAsync($"/users/{userId}/department", JsonContent.Create(assignReq), CancellationToken);
+        Assert.Equal(HttpStatusCode.NoContent, assignResp.StatusCode);
+
+        // Verify assignment
+        var getUserResp = await HttpClient.GetAsync($"/users/{userId}", CancellationToken);
+        var user = await getUserResp.AssertSuccessAndReadJsonAsync<ApiDataResponse<GetUserById.Response>>(CancellationToken);
+        Assert.Equal(deptId, user!.Data.DepartmentId);
+        Assert.Equal("Engineering", user.Data.DepartmentName);
+
+        // Unassign user from department (set to null)
+        var unassignReq = new AssignUserToDepartment.Request(userId, null);
+        var unassignResp = await HttpClient.PatchAsync($"/users/{userId}/department", JsonContent.Create(unassignReq), CancellationToken);
+        Assert.Equal(HttpStatusCode.NoContent, unassignResp.StatusCode);
+
+        // Verify unassignment
+        var getUserResp2 = await HttpClient.GetAsync($"/users/{userId}", CancellationToken);
+        var user2 = await getUserResp2.AssertSuccessAndReadJsonAsync<ApiDataResponse<GetUserById.Response>>(CancellationToken);
+        Assert.Null(user2!.Data.DepartmentId);
+        Assert.Null(user2.Data.DepartmentName);
+    }
+
+    [Fact]
+    public async Task Cannot_assign_user_to_nonexistent_department()
+    {
+        await LoginAsAdminAsync();
+
+        // Create user
+        var createUserResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest), CancellationToken);
+        var userId = createUserResp.Headers.Location!.ToString().Split('/').Last();
+
+        // Try to assign user to non-existent department
+        var assignReq = new AssignUserToDepartment.Request(userId, 99999);
+        var assignResp = await HttpClient.PatchAsync($"/users/{userId}/department", JsonContent.Create(assignReq), CancellationToken);
+        await assignResp.AssertProblemDetailsAsync(
+            HttpStatusCode.NotFound,
+            CancellationToken,
+            detail: "Department.NotFound");
+    }
+
+    [Fact]
+    public async Task Update_user_returns_404_for_nonexistent_user()
+    {
+        await LoginAsAdminAsync();
+
+        var updateReq = new UpdateUser.Request("nonexistent-id", "test@example.com", "Test", "User");
+        var updateResp = await HttpClient.PutAsync("/users/nonexistent-id", JsonContent.Create(updateReq), CancellationToken);
+        await updateResp.AssertProblemDetailsAsync(
+            HttpStatusCode.NotFound,
+            CancellationToken,
+            detail: "User.NotFound");
+    }
+
+    [Fact]
+    public async Task Enable_user_returns_404_for_nonexistent_user()
+    {
+        await LoginAsAdminAsync();
+
+        var enableResp = await HttpClient.PatchAsync("/users/nonexistent-id/enable", null, CancellationToken);
+        await enableResp.AssertProblemDetailsAsync(
+            HttpStatusCode.NotFound,
+            CancellationToken,
+            detail: "User.NotFound");
+    }
+
+    [Fact]
+    public async Task Disable_user_returns_404_for_nonexistent_user()
+    {
+        await LoginAsAdminAsync();
+
+        var disableResp = await HttpClient.PatchAsync("/users/nonexistent-id/disable", null, CancellationToken);
+        await disableResp.AssertProblemDetailsAsync(
+            HttpStatusCode.NotFound,
+            CancellationToken,
+            detail: "User.NotFound");
+    }
+
+    [Fact]
+    public async Task Get_user_includes_roles()
+    {
+        await LoginAsAdminAsync();
+
+        // Get admin user (should have Admin role)
+        var adminUserResp = await HttpClient.GetAsync($"/users?email={AdminEmail}", CancellationToken);
+        var adminUsers = await adminUserResp.AssertSuccessAndReadJsonAsync<ApiPagedResponse<QueryUsers.Response>>(CancellationToken);
+        var adminUser = Assert.Single(adminUsers!.Data);
+        Assert.Contains("Admin", adminUser.Roles);
+
+        // Create regular user (should have no roles)
+        var createUserResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest), CancellationToken);
+        var userId = createUserResp.Headers.Location!.ToString().Split('/').Last();
+
+        var getUserResp = await HttpClient.GetAsync($"/users/{userId}", CancellationToken);
+        var user = await getUserResp.AssertSuccessAndReadJsonAsync<ApiDataResponse<GetUserById.Response>>(CancellationToken);
+        Assert.Empty(user!.Data.Roles);
+    }
 }
 
 internal class AllUserEndpoints

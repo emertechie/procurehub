@@ -61,5 +61,85 @@ public static class Endpoints
             .WithName("GetUserById")
             .Produces<GetUserById.Response>()
             .Produces(StatusCodes.Status404NotFound);
+
+        group.MapPut("/users/{id}", async (
+                [FromServices] IRequestHandler<UpdateUser.Request, Result<bool>> handler,
+                [FromBody] UpdateUser.Request request,
+                CancellationToken token,
+                string id
+            ) =>
+            {
+                // Ensure route ID matches body ID
+                if (id != request.Id)
+                {
+                    return Results.BadRequest(new { error = "Route ID does not match request ID" });
+                }
+
+                var result = await handler.HandleAsync(request, token);
+                return result.Match(
+                    _ => Results.NoContent(),
+                    error => error.ToProblemDetails()
+                );
+            })
+            .WithName("UpdateUser")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesValidationProblem()
+            .Produces(StatusCodes.Status404NotFound);
+
+        group.MapPatch("/users/{id}/enable", async (
+                [FromServices] IRequestHandler<EnableUser.Request, Result<bool>> handler,
+                CancellationToken token,
+                string id
+            ) =>
+            {
+                var result = await handler.HandleAsync(new EnableUser.Request(id), token);
+                return result.Match(
+                    _ => Results.NoContent(),
+                    error => error.ToProblemDetails()
+                );
+            })
+            .WithName("EnableUser")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
+
+        group.MapPatch("/users/{id}/disable", async (
+                [FromServices] IRequestHandler<DisableUser.Request, Result<bool>> handler,
+                CancellationToken token,
+                string id
+            ) =>
+            {
+                var result = await handler.HandleAsync(new DisableUser.Request(id), token);
+                return result.Match(
+                    _ => Results.NoContent(),
+                    error => error.ToProblemDetails()
+                );
+            })
+            .WithName("DisableUser")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
+
+        group.MapPatch("/users/{id}/department", async (
+                [FromServices] IRequestHandler<AssignUserToDepartment.Request, Result<bool>> handler,
+                [FromBody] AssignUserToDepartment.Request request,
+                CancellationToken token,
+                string id
+            ) =>
+            {
+                // Ensure route ID matches body ID
+                if (id != request.Id)
+                {
+                    return Results.BadRequest(new { error = "Route ID does not match request ID" });
+                }
+
+                var result = await handler.HandleAsync(request, token);
+                return result.Match(
+                    _ => Results.NoContent(),
+                    error => error.ToProblemDetails()
+                );
+            })
+            .WithName("AssignUserToDepartment")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesValidationProblem()
+            .Produces(StatusCodes.Status404NotFound);
     }
 }

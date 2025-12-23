@@ -27,7 +27,8 @@ public static class QueryUsers
         string FirstName,
         string LastName,
         int? DepartmentId,
-        string? DepartmentName);
+        string? DepartmentName,
+        string[] Roles);
 
     public class Handler(ApplicationDbContext dbContext, UserManager<User> userManager)
         : IRequestHandler<Request, PagedResult<Response>>
@@ -42,6 +43,8 @@ public static class QueryUsers
                             s.NormalizedEmail == normalizedEmail);
 
             return await query
+                .Include(s => s.UserRoles!)
+                    .ThenInclude(ur => ur.Role)
                 .OrderBy(s => s.Email)
                 .ToPagedResultAsync(
                     s => new Response(
@@ -50,7 +53,8 @@ public static class QueryUsers
                         s.FirstName!,
                         s.LastName!,
                         s.DepartmentId,
-                        s.Department != null ? s.Department.Name : null),
+                        s.Department != null ? s.Department.Name : null,
+                        s.UserRoles != null ? s.UserRoles.Select(ur => ur.Role.Name!).ToArray() : Array.Empty<string>()),
                     request.Page,
                     request.PageSize,
                     token);
