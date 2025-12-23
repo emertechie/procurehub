@@ -16,11 +16,12 @@
   - Update the client after any API change that updates the OpenAPI spec. Use command given below.
 - Detailed guidance for the React app can be found in `ProcureHub.WebApp/AGENTS.md`
 
-## Architecture
+# Architecture
 
 - On both backend and frontend, implement features using a Vertical Slice Architecture (VSA). Use `/Features/{FeatureName}` folders to group all code for a feature together.
+- Use command-focused endpoints in API design: Use slim update endpoints for basic profile edits (user name, department name). Use dedicated command endpoints for actions (enable/disable user, assign department, assign roles).
 
-# Project Structure
+# Project Structure
 
 ## .Net Backend
 
