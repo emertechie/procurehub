@@ -356,15 +356,33 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         var createResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest));
         var userId = createResp.Headers.Location!.ToString().Split('/').Last();
 
+        // User can login initially
+        await LoginAsync(ValidCreateRequest.Email, ValidCreateRequest.Password);
+
+        // Switch back to admin
+        await LoginAsAdminAsync();
+
         // Disable user
         var disableResp = await HttpClient.PatchAsync($"/users/{userId}/disable", null);
         Assert.Equal(HttpStatusCode.NoContent, disableResp.StatusCode);
+
+        // Disabled user cannot log in
+        var loginReq = new LoginRequest { Email = ValidCreateRequest.Email, Password = ValidCreateRequest.Password };
+        var loginResp = await HttpClient.PostAsync("/login?useCookies=true", JsonContent.Create(loginReq));
+        Assert.Equal(HttpStatusCode.Unauthorized, loginResp.StatusCode);
+
+        // Switch back to admin
+        await LoginAsAdminAsync();
 
         // Enable user
         var enableResp = await HttpClient.PatchAsync($"/users/{userId}/enable", null);
         Assert.Equal(HttpStatusCode.NoContent, enableResp.StatusCode);
 
-        // Enable again (idempotent)
+        // User can login again
+        await LoginAsync(ValidCreateRequest.Email, ValidCreateRequest.Password);
+
+        // Switch back to admin and enable again (idempotent)
+        await LoginAsAdminAsync();
         var enableResp2 = await HttpClient.PatchAsync($"/users/{userId}/enable", null);
         Assert.Equal(HttpStatusCode.NoContent, enableResp2.StatusCode);
     }

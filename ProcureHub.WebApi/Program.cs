@@ -11,8 +11,10 @@ using ProcureHub.Models;
 using ProcureHub.WebApi;
 using ProcureHub.WebApi.Authentication;
 using ProcureHub.WebApi.Constants;
+using ProcureHub.WebApi.Features.Auth;
 using ProcureHub.WebApi.Helpers;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
+using User = ProcureHub.Models.User;
 
 // Customize FluentValidation messages
 ValidatorOptions.Global.LanguageManager = new CustomLanguageManager();
@@ -59,6 +61,12 @@ void RegisterServices(WebApplicationBuilder appBuilder)
         })
         .AddRoles<ApplicationRole>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
+
+    // Add custom user sign-in validator
+    builder.Services.AddScoped<UserSigninValidator>();
+
+    // Replace default SignInManager<TUser>
+    builder.Services.AddScoped<SignInManager<User>, ApplicationSigninManager>();
 
     // Add API Key authentication scheme (AddIdentityApiEndpoints already added Bearer token)
     builder.Services.AddAuthentication()
