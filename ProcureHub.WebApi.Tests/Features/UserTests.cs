@@ -179,9 +179,9 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         var newUserEmailLower = newUserEmailMixedCase.ToLowerInvariant();
 
         // Search for new user by email -> No result
-        var listUsersResp1 = await HttpClient.GetAsync($"/users?email={newUserEmailMixedCase}");
-        var userList1 = await listUsersResp1.AssertSuccessAndReadJsonAsync<ApiPagedResponse<QueryUsers.Response>>();
-        Assert.Empty(userList1!.Data);
+        var userList1 = await HttpClient.GetAsync($"/users?email={newUserEmailMixedCase}")
+            .ReadJsonAsync<ApiPagedResponse<QueryUsers.Response>>();
+        Assert.Empty(userList1.Data);
 
         // Admin creates user
         var newUserReq = ValidCreateRequest with { Email = newUserEmailMixedCase };
@@ -194,16 +194,16 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         var newUserId = location!.Split('/').Last();
 
         // Search for new user by email -> Found
-        var listUsersResp2 = await HttpClient.GetAsync($"/users?email={newUserEmailMixedCase2}");
-        var userList2 = await listUsersResp2.AssertSuccessAndReadJsonAsync<ApiPagedResponse<QueryUsers.Response>>();
-        var newUser = Assert.Single(userList2!.Data);
+        var userList2 = await HttpClient.GetAsync($"/users?email={newUserEmailMixedCase2}")
+            .ReadJsonAsync<ApiPagedResponse<QueryUsers.Response>>();
+        var newUser = Assert.Single(userList2.Data);
         Assert.Equal(newUserId, newUser.Id);
         Assert.Equal(newUserEmailLower, newUser.Email);
 
         // Can get new user by ID
-        var getUserResp = await HttpClient.GetAsync($"/users/{newUserId}");
-        var userById = await getUserResp.AssertSuccessAndReadJsonAsync<ApiDataResponse<GetUserById.Response>>();
-        Assert.Equal(newUserId, userById!.Data.Id);
+        var userById = await HttpClient.GetAsync($"/users/{newUserId}")
+            .ReadJsonAsync<ApiDataResponse<GetUserById.Response>>();
+        Assert.Equal(newUserId, userById.Data.Id);
         Assert.Equal(newUserEmailLower, userById!.Data.Email);
     }
 
@@ -231,9 +231,9 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
             });
 
         // Assert only 1 user record created
-        var listUsersResp2 = await HttpClient.GetAsync($"/users?email={email}");
-        var userList2 = await listUsersResp2.AssertSuccessAndReadJsonAsync<ApiPagedResponse<QueryUsers.Response>>();
-        var newUser2 = Assert.Single(userList2!.Data);
+        var userList2 = await HttpClient.GetAsync($"/users?email={email}")
+            .ReadJsonAsync<ApiPagedResponse<QueryUsers.Response>>();
+        var newUser2 = Assert.Single(userList2.Data);
         Assert.Equal(email, newUser2.Email);
     }
 
@@ -244,9 +244,9 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         await LoginAsAdminAsync();
 
         // Confirm logged in as admin: 
-        var infoResp1 = await HttpClient.GetAsync("/manage/info");
-        var info1 = await infoResp1.AssertSuccessAndReadJsonAsync<InfoResponse>();
-        Assert.Equal(AdminEmail, info1!.Email);
+        var info1 = await HttpClient.GetAsync("/manage/info")
+            .ReadJsonAsync<InfoResponse>();
+        Assert.Equal(AdminEmail, info1.Email);
 
         // Admin creates user
         var regResp1 = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest));
@@ -256,9 +256,9 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         await LoginAsync(ValidCreateRequest.Email, ValidCreateRequest.Password);
 
         // Confirm logged in as user: 
-        var infoResp2 = await HttpClient.GetAsync("/manage/info");
-        var info2 = await infoResp2.AssertSuccessAndReadJsonAsync<InfoResponse>();
-        Assert.Equal(ValidCreateRequest.Email, info2!.Email);
+        var info2 = await HttpClient.GetAsync("/manage/info")
+            .ReadJsonAsync<InfoResponse>();
+        Assert.Equal(ValidCreateRequest.Email, info2.Email);
     }
 
     [Fact]
@@ -340,9 +340,9 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         Assert.Equal(HttpStatusCode.NoContent, updateResp.StatusCode);
 
         // Verify update
-        var getUserResp = await HttpClient.GetAsync($"/users/{userId}");
-        var user = await getUserResp.AssertSuccessAndReadJsonAsync<ApiDataResponse<GetUserById.Response>>();
-        Assert.Equal("updated@example.com", user!.Data.Email);
+        var user = await HttpClient.GetAsync($"/users/{userId}")
+            .ReadJsonAsync<ApiDataResponse<GetUserById.Response>>();
+        Assert.Equal("updated@example.com", user.Data.Email);
         Assert.Equal("Updated", user.Data.FirstName);
         Assert.Equal("Name", user.Data.LastName);
     }
@@ -384,9 +384,9 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         var userId = createUserResp.Headers.Location!.ToString().Split('/').Last();
 
         // Assert no department assigned initially
-        var initialUserResp = await HttpClient.GetAsync($"/users/{userId}");
-        var initialUser = await initialUserResp.AssertSuccessAndReadJsonAsync<ApiDataResponse<GetUserById.Response>>();
-        Assert.Null(initialUser!.Data.DepartmentId);
+        var initialUser = await HttpClient.GetAsync($"/users/{userId}")
+            .ReadJsonAsync<ApiDataResponse<GetUserById.Response>>();
+        Assert.Null(initialUser.Data.DepartmentId);
 
         // Assign user to department
         var assignReq = new AssignUserToDepartment.Request(userId, deptId);
@@ -394,9 +394,9 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         Assert.Equal(HttpStatusCode.NoContent, assignResp.StatusCode);
 
         // Verify assignment
-        var getUserResp = await HttpClient.GetAsync($"/users/{userId}");
-        var user = await getUserResp.AssertSuccessAndReadJsonAsync<ApiDataResponse<GetUserById.Response>>();
-        Assert.Equal(deptId, user!.Data.DepartmentId);
+        var user = await HttpClient.GetAsync($"/users/{userId}")
+            .ReadJsonAsync<ApiDataResponse<GetUserById.Response>>();
+        Assert.Equal(deptId, user.Data.DepartmentId);
         Assert.Equal("Engineering", user.Data.DepartmentName);
 
         // Unassign user from department (set to null)
@@ -405,9 +405,9 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         Assert.Equal(HttpStatusCode.NoContent, unassignResp.StatusCode);
 
         // Verify unassignment
-        var getUserResp2 = await HttpClient.GetAsync($"/users/{userId}");
-        var user2 = await getUserResp2.AssertSuccessAndReadJsonAsync<ApiDataResponse<GetUserById.Response>>();
-        Assert.Null(user2!.Data.DepartmentId);
+        var user2 = await HttpClient.GetAsync($"/users/{userId}")
+            .ReadJsonAsync<ApiDataResponse<GetUserById.Response>>();
+        Assert.Null(user2.Data.DepartmentId);
         Assert.Null(user2.Data.DepartmentName);
     }
 
@@ -474,18 +474,18 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         await LoginAsAdminAsync();
 
         // Get admin user (should have Admin role)
-        var adminUserResp = await HttpClient.GetAsync($"/users?email={AdminEmail}");
-        var adminUsers = await adminUserResp.AssertSuccessAndReadJsonAsync<ApiPagedResponse<QueryUsers.Response>>();
-        var adminUser = Assert.Single(adminUsers!.Data);
+        var adminUsers = await HttpClient.GetAsync($"/users?email={AdminEmail}")
+            .ReadJsonAsync<ApiPagedResponse<QueryUsers.Response>>();
+        var adminUser = Assert.Single(adminUsers.Data);
         Assert.Contains("Admin", adminUser.Roles);
 
         // Create regular user (should have no roles)
         var createUserResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest));
         var userId = createUserResp.Headers.Location!.ToString().Split('/').Last();
 
-        var getUserResp = await HttpClient.GetAsync($"/users/{userId}");
-        var user = await getUserResp.AssertSuccessAndReadJsonAsync<ApiDataResponse<GetUserById.Response>>();
-        Assert.Empty(user!.Data.Roles);
+        var user = await HttpClient.GetAsync($"/users/{userId}")
+            .ReadJsonAsync<ApiDataResponse<GetUserById.Response>>();
+        Assert.Empty(user.Data.Roles);
     }
 }
 
