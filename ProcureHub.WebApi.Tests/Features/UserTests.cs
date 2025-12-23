@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using Microsoft.AspNetCore.Identity.Data;
 using ProcureHub.Features.Departments;
 using ProcureHub.Features.Users;
-using ProcureHub.WebApi.ApiResponses;
+using ProcureHub.WebApi.Responses;
 using ProcureHub.WebApi.Tests.Infrastructure;
 using ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
 using ProcureHub.WebApi.Tests.Infrastructure.Xunit;
@@ -180,7 +180,7 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
 
         // Search for new user by email -> No result
         var userList1 = await HttpClient.GetAsync($"/users?email={newUserEmailMixedCase}")
-            .ReadJsonAsync<ApiPagedResponse<QueryUsers.Response>>();
+            .ReadJsonAsync<PagedResponse<QueryUsers.Response>>();
         Assert.Empty(userList1.Data);
 
         // Admin creates user
@@ -195,14 +195,14 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
 
         // Search for new user by email -> Found
         var userList2 = await HttpClient.GetAsync($"/users?email={newUserEmailMixedCase2}")
-            .ReadJsonAsync<ApiPagedResponse<QueryUsers.Response>>();
+            .ReadJsonAsync<PagedResponse<QueryUsers.Response>>();
         var newUser = Assert.Single(userList2.Data);
         Assert.Equal(newUserId, newUser.Id);
         Assert.Equal(newUserEmailLower, newUser.Email);
 
         // Can get new user by ID
         var userById = await HttpClient.GetAsync($"/users/{newUserId}")
-            .ReadJsonAsync<ApiDataResponse<GetUserById.Response>>();
+            .ReadJsonAsync<DataResponse<GetUserById.Response>>();
         Assert.Equal(newUserId, userById.Data.Id);
         Assert.Equal(newUserEmailLower, userById!.Data.Email);
     }
@@ -232,7 +232,7 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
 
         // Assert only 1 user record created
         var userList2 = await HttpClient.GetAsync($"/users?email={email}")
-            .ReadJsonAsync<ApiPagedResponse<QueryUsers.Response>>();
+            .ReadJsonAsync<PagedResponse<QueryUsers.Response>>();
         var newUser2 = Assert.Single(userList2.Data);
         Assert.Equal(email, newUser2.Email);
     }
@@ -341,7 +341,7 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
 
         // Verify update
         var user = await HttpClient.GetAsync($"/users/{userId}")
-            .ReadJsonAsync<ApiDataResponse<GetUserById.Response>>();
+            .ReadJsonAsync<DataResponse<GetUserById.Response>>();
         Assert.Equal("updated@example.com", user.Data.Email);
         Assert.Equal("Updated", user.Data.FirstName);
         Assert.Equal("Name", user.Data.LastName);
@@ -385,7 +385,7 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
 
         // Assert no department assigned initially
         var initialUser = await HttpClient.GetAsync($"/users/{userId}")
-            .ReadJsonAsync<ApiDataResponse<GetUserById.Response>>();
+            .ReadJsonAsync<DataResponse<GetUserById.Response>>();
         Assert.Null(initialUser.Data.DepartmentId);
 
         // Assign user to department
@@ -395,7 +395,7 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
 
         // Verify assignment
         var user = await HttpClient.GetAsync($"/users/{userId}")
-            .ReadJsonAsync<ApiDataResponse<GetUserById.Response>>();
+            .ReadJsonAsync<DataResponse<GetUserById.Response>>();
         Assert.Equal(deptId, user.Data.DepartmentId);
         Assert.Equal("Engineering", user.Data.DepartmentName);
 
@@ -406,7 +406,7 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
 
         // Verify unassignment
         var user2 = await HttpClient.GetAsync($"/users/{userId}")
-            .ReadJsonAsync<ApiDataResponse<GetUserById.Response>>();
+            .ReadJsonAsync<DataResponse<GetUserById.Response>>();
         Assert.Null(user2.Data.DepartmentId);
         Assert.Null(user2.Data.DepartmentName);
     }
@@ -475,7 +475,7 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
 
         // Get admin user (should have Admin role)
         var adminUsers = await HttpClient.GetAsync($"/users?email={AdminEmail}")
-            .ReadJsonAsync<ApiPagedResponse<QueryUsers.Response>>();
+            .ReadJsonAsync<PagedResponse<QueryUsers.Response>>();
         var adminUser = Assert.Single(adminUsers.Data);
         Assert.Contains("Admin", adminUser.Roles);
 
@@ -484,7 +484,7 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         var userId = createUserResp.Headers.Location!.ToString().Split('/').Last();
 
         var user = await HttpClient.GetAsync($"/users/{userId}")
-            .ReadJsonAsync<ApiDataResponse<GetUserById.Response>>();
+            .ReadJsonAsync<DataResponse<GetUserById.Response>>();
         Assert.Empty(user.Data.Roles);
     }
 }

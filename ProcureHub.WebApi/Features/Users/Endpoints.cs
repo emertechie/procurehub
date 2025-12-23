@@ -3,9 +3,9 @@ using ProcureHub.Common;
 using ProcureHub.Common.Pagination;
 using ProcureHub.Features.Users;
 using ProcureHub.Infrastructure;
-using ProcureHub.WebApi.ApiResponses;
 using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Helpers;
+using ProcureHub.WebApi.Responses;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 namespace ProcureHub.WebApi.Features.Users;
@@ -43,10 +43,10 @@ public static class Endpoints
             ) =>
             {
                 var pagedResult = await handler.HandleAsync(request, token);
-                return ApiPagedResponse.From(pagedResult);
+                return PagedResponse.From(pagedResult);
             })
             .WithName("QueryUsers")
-            .Produces<ApiPagedResponse<QueryUsers.Response>>();
+            .Produces<PagedResponse<QueryUsers.Response>>();
 
         group.MapGet("/users/{id}", async (
                 [FromServices] IRequestHandler<GetUserById.Request, GetUserById.Response?> handler,
@@ -55,7 +55,7 @@ public static class Endpoints
             {
                 var response = await handler.HandleAsync(new GetUserById.Request(id), token);
                 return response is not null
-                    ? Results.Ok(ApiDataResponse.From(response))
+                    ? Results.Ok(DataResponse.From(response))
                     : Results.NotFound();
             })
             .WithName("GetUserById")
