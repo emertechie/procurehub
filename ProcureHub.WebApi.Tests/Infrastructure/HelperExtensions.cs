@@ -20,7 +20,7 @@ public static class HelperExtensions
 
     extension(HttpResponseMessage response)
     {
-        public Task<T?> AssertSuccessAndReadJsonAsync<T>(CancellationToken token)
+        public Task<T?> AssertSuccessAndReadJsonAsync<T>(CancellationToken token = default)
         {
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             return response.Content.ReadFromJsonAsync<T>(token);
@@ -28,10 +28,10 @@ public static class HelperExtensions
 
         public async Task<ProblemDetails> AssertProblemDetailsAsync(
             HttpStatusCode expectedStatus,
-            CancellationToken cancellationToken = default,
             string? title = null,
             string? detail = null,
-            string? instance = null)
+            string? instance = null,
+            CancellationToken cancellationToken = default)
         {
             Assert.Equal(expectedStatus, response.StatusCode);
             Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);

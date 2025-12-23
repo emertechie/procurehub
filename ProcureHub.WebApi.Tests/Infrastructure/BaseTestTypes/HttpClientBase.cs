@@ -24,8 +24,6 @@ public abstract class HttpClientBase
         HttpClient = ApiTestHost.CreateClient();
     }
 
-    protected static CancellationToken CancellationToken => TestContext.Current.CancellationToken;
-
     protected async Task LoginAsAdminAsync()
     {
         await LoginAsync(AdminEmail, AdminPassword);
@@ -34,9 +32,9 @@ public abstract class HttpClientBase
     protected async Task LoginAsync(string email, string password)
     {
         var loginRequest = JsonContent.Create(new { email, password });
-        var loginResp = await HttpClient.PostAsync("/login", loginRequest, CancellationToken);
+        var loginResp = await HttpClient.PostAsync("/login", loginRequest);
         Assert.Equal(HttpStatusCode.OK, loginResp.StatusCode);
-        var loginResult = await loginResp.Content.ReadFromJsonAsync<LoginResponse>(CancellationToken);
+        var loginResult = await loginResp.Content.ReadFromJsonAsync<LoginResponse>();
 
         HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult!.AccessToken);
     }

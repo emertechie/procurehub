@@ -17,13 +17,13 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
         await LoginAsAdminAsync();
 
         // Assert no departments yet
-        var queryDeptsResp1 = await HttpClient.GetAsync("/departments", CancellationToken);
-        var departments1 = await queryDeptsResp1.AssertSuccessAndReadJsonAsync<ListDepartments.Response[]>(CancellationToken);
+        var queryDeptsResp1 = await HttpClient.GetAsync("/departments");
+        var departments1 = await queryDeptsResp1.AssertSuccessAndReadJsonAsync<ListDepartments.Response[]>();
         Assert.Empty(departments1!);
 
         // Create department
         var createDeptReq = new CreateDepartment.Request("New Department");
-        var createDeptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createDeptReq), CancellationToken);
+        var createDeptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createDeptReq));
         Assert.Equal(HttpStatusCode.Created, createDeptResp.StatusCode);
 
         // Extract department ID from Location header
@@ -32,15 +32,15 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
         var newDepartmentId = int.Parse(location!.Split('/').Last());
 
         // Assert department returned in list
-        var queryDeptsResp2 = await HttpClient.GetAsync("/departments", CancellationToken);
-        var departments2 = await queryDeptsResp2.AssertSuccessAndReadJsonAsync<ListDepartments.Response[]>(CancellationToken);
+        var queryDeptsResp2 = await HttpClient.GetAsync("/departments");
+        var departments2 = await queryDeptsResp2.AssertSuccessAndReadJsonAsync<ListDepartments.Response[]>();
         Assert.Equal(
             new ListDepartments.Response[] { new(newDepartmentId, "New Department") },
             departments2);
 
         // Assert can get department by ID
-        var getDeptResp = await HttpClient.GetAsync($"/departments/{newDepartmentId}", CancellationToken);
-        var department = await getDeptResp.AssertSuccessAndReadJsonAsync<GetDepartment.Response>(CancellationToken);
+        var getDeptResp = await HttpClient.GetAsync($"/departments/{newDepartmentId}");
+        var department = await getDeptResp.AssertSuccessAndReadJsonAsync<GetDepartment.Response>();
         Assert.Equal(
             new GetDepartment.Response(newDepartmentId, "New Department"),
             department);
