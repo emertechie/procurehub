@@ -9,7 +9,7 @@ riderModule.iml
 ProcureHub/Data/app.db*
 ProcureHub.sln.DotSettings.user
 todos.md
-.plans/
+.plans/ignore
 .notes/
 .context/
 .bruno/
