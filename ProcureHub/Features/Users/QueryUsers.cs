@@ -43,8 +43,6 @@ public static class QueryUsers
                             s.NormalizedEmail == normalizedEmail);
 
             return await query
-                .Include(s => s.UserRoles!)
-                    .ThenInclude(ur => ur.Role)
                 .OrderBy(s => s.Email)
                 .ToPagedResultAsync(
                     s => new Response(
@@ -53,8 +51,8 @@ public static class QueryUsers
                         s.FirstName!,
                         s.LastName!,
                         s.DepartmentId,
-                        s.Department != null ? s.Department.Name : null,
-                        s.UserRoles != null ? s.UserRoles.Select(ur => ur.Role.Name!).ToArray() : Array.Empty<string>()),
+                        s.Department!.Name,
+                        s.UserRoles!.Select(ur => ur.Role.Name!).ToArray()),
                     request.Page,
                     request.PageSize,
                     token);

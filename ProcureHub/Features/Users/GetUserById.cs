@@ -33,17 +33,15 @@ public static class GetUserById
             return dbContext.Users
                 .AsNoTracking()
                 .Where(u => u.Id == request.Id)
-                .Include(u => u.Department)
-                .Include(u => u.UserRoles!)
-                    .ThenInclude(ur => ur.Role)
                 .Select(u => new Response(
                     u.Id,
                     u.Email!,
                     u.FirstName!,
                     u.LastName!,
                     u.DepartmentId,
-                    u.Department != null ? u.Department.Name : null,
-                    u.UserRoles != null ? u.UserRoles.Select(ur => ur.Role.Name!).ToArray() : Array.Empty<string>()))
+                    u.Department!.Name,
+                    u.UserRoles!.Select(ur => ur.Role.Name!).ToArray()
+                ))
                 .FirstOrDefaultAsync(token);
         }
     }
