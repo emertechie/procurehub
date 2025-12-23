@@ -21,7 +21,7 @@ public class User : IdentityUser
 
     public Department? Department { get; set; }
 
-    public DateTime EnabledAt { get; set; }
+    public DateTime? EnabledAt { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

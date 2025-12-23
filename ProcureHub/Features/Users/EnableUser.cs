@@ -35,7 +35,7 @@ public static class EnableUser
                     $"User with ID '{request.Id}' not found"));
             }
 
-            if (user.EnabledAt != default)
+            if (user.EnabledAt.HasValue)
             {
                 // Already enabled, no-op
                 return Result.Success(true);

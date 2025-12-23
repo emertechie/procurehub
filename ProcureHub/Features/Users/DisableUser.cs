@@ -35,13 +35,13 @@ public static class DisableUser
                     $"User with ID '{request.Id}' not found"));
             }
 
-            if (user.EnabledAt == default)
+            if (!user.EnabledAt.HasValue)
             {
                 // Already disabled, no-op
                 return Result.Success(true);
             }
 
-            user.EnabledAt = default;
+            user.EnabledAt = null;
             user.UpdatedAt = DateTime.UtcNow;
 
             await dbContext.SaveChangesAsync(token);
