@@ -21,16 +21,16 @@ public static class EnableUser
     public class Handler(
         ApplicationDbContext dbContext,
         ILogger<Handler> logger)
-        : IRequestHandler<Request, Result<bool>>
+        : IRequestHandler<Request, Result>
     {
-        public async Task<Result<bool>> HandleAsync(Request request, CancellationToken token)
+        public async Task<Result> HandleAsync(Request request, CancellationToken token)
         {
             var user = await dbContext.Users
                 .FirstOrDefaultAsync(u => u.Id == request.Id, token);
 
             if (user is null)
             {
-                return Result.Failure<bool>(Error.NotFound(
+                return Result.Failure(Error.NotFound(
                     "User.NotFound",
                     $"User with ID '{request.Id}' not found"));
             }
@@ -38,7 +38,7 @@ public static class EnableUser
             if (user.EnabledAt.HasValue)
             {
                 // Already enabled, no-op
-                return Result.Success(true);
+                return Result.Success();
             }
 
             user.EnabledAt = DateTime.UtcNow;
@@ -47,7 +47,7 @@ public static class EnableUser
             await dbContext.SaveChangesAsync(token);
 
             logger.LogInformation("Enabled user {UserId}", user.Id);
-            return Result.Success(true);
+            return Result.Success();
         }
     }
 }

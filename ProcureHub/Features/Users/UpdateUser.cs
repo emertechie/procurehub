@@ -27,16 +27,16 @@ public static class UpdateUser
         ApplicationDbContext dbContext,
         UserManager<User> userManager,
         ILogger<Handler> logger)
-        : IRequestHandler<Request, Result<bool>>
+        : IRequestHandler<Request, Result>
     {
-        public async Task<Result<bool>> HandleAsync(Request request, CancellationToken token)
+        public async Task<Result> HandleAsync(Request request, CancellationToken token)
         {
             var user = await dbContext.Users
                 .FirstOrDefaultAsync(u => u.Id == request.Id, token);
 
             if (user is null)
             {
-                return Result.Failure<bool>(Error.NotFound(
+                return Result.Failure(Error.NotFound(
                     "User.NotFound",
                     $"User with ID '{request.Id}' not found"));
             }
@@ -53,7 +53,7 @@ public static class UpdateUser
             await dbContext.SaveChangesAsync(token);
 
             logger.LogInformation("Updated user {UserId}", user.Id);
-            return Result.Success(true);
+            return Result.Success();
         }
     }
 }

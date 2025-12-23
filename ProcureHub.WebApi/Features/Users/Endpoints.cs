@@ -63,7 +63,7 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPut("/users/{id}", async (
-                [FromServices] IRequestHandler<UpdateUser.Request, Result<bool>> handler,
+                [FromServices] IRequestHandler<UpdateUser.Request, Result> handler,
                 [FromBody] UpdateUser.Request request,
                 CancellationToken token,
                 string id
@@ -77,7 +77,7 @@ public static class Endpoints
 
                 var result = await handler.HandleAsync(request, token);
                 return result.Match(
-                    _ => Results.NoContent(),
+                    Results.NoContent,
                     error => error.ToProblemDetails()
                 );
             })
@@ -87,14 +87,14 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPatch("/users/{id}/enable", async (
-                [FromServices] IRequestHandler<EnableUser.Request, Result<bool>> handler,
+                [FromServices] IRequestHandler<EnableUser.Request, Result> handler,
                 CancellationToken token,
                 string id
             ) =>
             {
                 var result = await handler.HandleAsync(new EnableUser.Request(id), token);
                 return result.Match(
-                    _ => Results.NoContent(),
+                    Results.NoContent,
                     error => error.ToProblemDetails()
                 );
             })
@@ -103,14 +103,14 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPatch("/users/{id}/disable", async (
-                [FromServices] IRequestHandler<DisableUser.Request, Result<bool>> handler,
+                [FromServices] IRequestHandler<DisableUser.Request, Result> handler,
                 CancellationToken token,
                 string id
             ) =>
             {
                 var result = await handler.HandleAsync(new DisableUser.Request(id), token);
                 return result.Match(
-                    _ => Results.NoContent(),
+                    Results.NoContent,
                     error => error.ToProblemDetails()
                 );
             })
@@ -119,7 +119,7 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPatch("/users/{id}/department", async (
-                [FromServices] IRequestHandler<AssignUserToDepartment.Request, Result<bool>> handler,
+                [FromServices] IRequestHandler<AssignUserToDepartment.Request, Result> handler,
                 [FromBody] AssignUserToDepartment.Request request,
                 CancellationToken token,
                 string id
@@ -133,7 +133,7 @@ public static class Endpoints
 
                 var result = await handler.HandleAsync(request, token);
                 return result.Match(
-                    _ => Results.NoContent(),
+                    Results.NoContent,
                     error => error.ToProblemDetails()
                 );
             })
