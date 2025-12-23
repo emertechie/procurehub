@@ -69,10 +69,13 @@ public static class Endpoints
                 string id
             ) =>
             {
-                // Ensure route ID matches body ID
                 if (id != request.Id)
                 {
-                    return Results.BadRequest(new { error = "Route ID does not match request ID" });
+                    return TypedResults.Problem(
+                        title: "Route ID mismatch",
+                        detail: "Route ID does not match request ID",
+                        statusCode: StatusCodes.Status400BadRequest
+                    );
                 }
 
                 var result = await handler.HandleAsync(request, token);
@@ -125,10 +128,13 @@ public static class Endpoints
                 string id
             ) =>
             {
-                // Ensure route ID matches body ID
                 if (id != request.Id)
                 {
-                    return Results.BadRequest(new { error = "Route ID does not match request ID" });
+                    return TypedResults.Problem(
+                        title: "Route ID mismatch",
+                        detail: "Route ID does not match request ID",
+                        statusCode: StatusCodes.Status400BadRequest
+                    );
                 }
 
                 var result = await handler.HandleAsync(request, token);

@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Identity.Data;
+using ProcureHub.Features.Departments;
 using ProcureHub.Features.Users;
 using ProcureHub.WebApi.ApiResponses;
 using ProcureHub.WebApi.Tests.Infrastructure;
@@ -114,6 +115,45 @@ public class UserTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
                 Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
             };
         });
+    }
+
+    [Fact]
+    public async Task Route_id_must_match_body_id_for_update_user()
+    {
+        await LoginAsAdminAsync();
+
+        const string user1Id = "user-id-1";
+        const string user2Id = "user-id-2";
+
+        var updateReq = new UpdateUser.Request(user1Id, "test@example.com", "Test", "User");
+        var resp = await HttpClient.PutAsync($"/users/{user2Id}", JsonContent.Create(updateReq), CancellationToken);
+
+        await resp.AssertProblemDetailsAsync(
+            HttpStatusCode.BadRequest,
+            CancellationToken,
+            "Route ID mismatch",
+            "Route ID does not match request ID",
+            $"PUT /users/{user2Id}");
+    }
+
+    [Fact]
+    public async Task Route_id_must_match_body_id_for_assign_department()
+    {
+        await LoginAsAdminAsync();
+
+        const string user1Id = "user-id-1";
+        const string user2Id = "user-id-2";
+        ;
+
+        var assignReq = new AssignUserToDepartment.Request(user1Id, 123);
+        var resp = await HttpClient.PatchAsync($"/users/{user2Id}/department", JsonContent.Create(assignReq), CancellationToken);
+
+        await resp.AssertProblemDetailsAsync(
+            HttpStatusCode.BadRequest,
+            CancellationToken,
+            "Route ID mismatch",
+            "Route ID does not match request ID",
+            $"PATCH /users/{user2Id}/department");
     }
 }
 
@@ -341,13 +381,18 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         await LoginAsAdminAsync();
 
         // Create department
-        var createDeptReq = new ProcureHub.Features.Departments.CreateDepartment.Request("Engineering");
+        var createDeptReq = new CreateDepartment.Request("Engineering");
         var createDeptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createDeptReq), CancellationToken);
         var deptId = int.Parse(createDeptResp.Headers.Location!.ToString().Split('/').Last());
 
         // Create user
         var createUserResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest), CancellationToken);
         var userId = createUserResp.Headers.Location!.ToString().Split('/').Last();
+
+        // Assert no department assigned initially
+        var initialUserResp = await HttpClient.GetAsync($"/users/{userId}", CancellationToken);
+        var initialUser = await initialUserResp.AssertSuccessAndReadJsonAsync<ApiDataResponse<GetUserById.Response>>(CancellationToken);
+        Assert.Null(initialUser!.Data.DepartmentId);
 
         // Assign user to department
         var assignReq = new AssignUserToDepartment.Request(userId, deptId);

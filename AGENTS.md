@@ -16,6 +16,10 @@
   - Update the client after any API change that updates the OpenAPI spec. Use command given below.
 - Detailed guidance for the React app can be found in `ProcureHub.WebApp/AGENTS.md`
 
+## API Notes
+
+- Always return a ProblemDetails type response for errors
+
 # Architecture
 
 - On both backend and frontend, implement features using a Vertical Slice Architecture (VSA). Use `/Features/{FeatureName}` folders to group all code for a feature together.
@@ -42,8 +46,12 @@
 
 # Testing
 
+- Use Arrange-Act-Assert approach
+  - For state-changing operations: assert initial state → perform action → assert new state
+  - Example: assign user to department - fetch user, assert dept is null, assign dept via API, refetch user, assert dept is set
 - You must add or update API tests when adding or updating any API endpoint
   - Use the `ProcureHub.WebApi.Tests/Features/UserTests.cs` file as a guide for how to implement tests
+- Aim for 100% code coverage, but be pragmatic. If a code path is not easy to test, call it out in response or add a TODO
 
 # Commons Commands
 
