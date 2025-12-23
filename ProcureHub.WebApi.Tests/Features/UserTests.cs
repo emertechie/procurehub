@@ -404,7 +404,7 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         // Assert no department assigned initially
         var initialUser = await HttpClient.GetAsync($"/users/{userId}")
             .ReadJsonAsync<DataResponse<GetUserById.Response>>();
-        Assert.Null(initialUser.Data.DepartmentId);
+        Assert.Null(initialUser.Data.Department);
 
         // Assign user to department
         var assignReq = new AssignUserToDepartment.Request(userId, deptId);
@@ -414,8 +414,9 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         // Verify assignment
         var user = await HttpClient.GetAsync($"/users/{userId}")
             .ReadJsonAsync<DataResponse<GetUserById.Response>>();
-        Assert.Equal(deptId, user.Data.DepartmentId);
-        Assert.Equal("Engineering", user.Data.DepartmentName);
+        Assert.NotNull(user.Data.Department);
+        Assert.Equal(deptId, user.Data.Department.Id);
+        Assert.Equal("Engineering", user.Data.Department.Name);
 
         // Unassign user from department (set to null)
         var unassignReq = new AssignUserToDepartment.Request(userId, null);
@@ -425,8 +426,7 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         // Verify unassignment
         var user2 = await HttpClient.GetAsync($"/users/{userId}")
             .ReadJsonAsync<DataResponse<GetUserById.Response>>();
-        Assert.Null(user2.Data.DepartmentId);
-        Assert.Null(user2.Data.DepartmentName);
+        Assert.Null(user2.Data.Department);
     }
 
     [Fact]

@@ -21,9 +21,10 @@ public static class GetUserById
         string Email,
         string FirstName,
         string LastName,
-        int? DepartmentId,
-        string? DepartmentName,
-        string[] Roles);
+        string[] Roles,
+        Department? Department);
+
+    public record Department(int Id, string Name);
 
     public class Handler(ApplicationDbContext dbContext)
         : IRequestHandler<Request, Response?>
@@ -38,9 +39,10 @@ public static class GetUserById
                     u.Email!,
                     u.FirstName!,
                     u.LastName!,
-                    u.DepartmentId,
-                    u.Department!.Name,
-                    u.UserRoles!.Select(ur => ur.Role.Name!).ToArray()
+                    u.UserRoles!.Select(ur => ur.Role.Name!).ToArray(),
+                    u.Department != null
+                        ? new Department(u.Department.Id, u.Department.Name!)
+                        : null
                 ))
                 .FirstOrDefaultAsync(token);
         }
