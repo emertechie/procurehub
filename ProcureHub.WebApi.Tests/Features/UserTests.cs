@@ -70,7 +70,7 @@ public class UserTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
     public async Task All_user_endpoints_require_admin_authorization(EndpointInfo endpoint)
     {
         // Log in as a regular user, not an admin
-        await LoginAsync(ValidUserCreateRequest.Email, ValidUserCreateRequest.Password);
+        await LoginAsync(ValidUserEmail, ValidUserPassword);
 
         const string testId = "test-id";
 

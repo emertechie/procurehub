@@ -10,9 +10,25 @@ using ProcureHub.WebApi.Tests.Infrastructure.Xunit;
 namespace ProcureHub.WebApi.Tests.Features;
 
 [Collection("ApiTestHost")]
-public class RoleTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHelper testOutputHelper)
-    : HttpClientBase(hostFixture, testOutputHelper), IClassFixture<ResetDatabaseFixture>
+public class RoleTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHelper testOutputHelper, UserSetupFixture userSetupFixture)
+    : HttpClientBase(hostFixture, testOutputHelper),
+        IClassFixture<ResetDatabaseFixture>,
+        IClassFixture<UserSetupFixture>,
+        IAsyncLifetime
 {
+    private const string ValidUserEmail = "user1@example.com";
+    private const string ValidUserPassword = "Test1234!";
+
+    public async ValueTask InitializeAsync()
+    {
+        await userSetupFixture.EnsureUserCreated(this, AdminEmail, AdminPassword, ValidUserEmail, ValidUserPassword);
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
+
     public static TheoryData<EndpointInfo> GetAllRoleEndpoints()
     {
         return new TheoryData<EndpointInfo>
@@ -40,6 +56,22 @@ public class RoleTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
 
         var resp = await HttpClient.SendAsync(request);
         Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetAllRoleEndpoints))]
+    public async Task All_role_endpoints_require_admin_authorization(EndpointInfo endpoint)
+    {
+        // Log in as a regular user, not an admin
+        await LoginAsync(ValidUserEmail, ValidUserPassword);
+
+        const string testId = "test-id";
+
+        var path = endpoint.Path.Replace("{id}", testId);
+        var request = new HttpRequestMessage(new HttpMethod(endpoint.Method), path);
+
+        var resp = await HttpClient.SendAsync(request);
+        Assert.Equal(HttpStatusCode.Forbidden, resp.StatusCode);
     }
 
     [Theory]
