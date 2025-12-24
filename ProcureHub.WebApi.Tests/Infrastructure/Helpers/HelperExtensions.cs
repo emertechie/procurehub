@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ProcureHub.WebApi.Tests.Infrastructure;
+namespace ProcureHub.WebApi.Tests.Infrastructure.Helpers;
 
 public static class HelperExtensions
 {
