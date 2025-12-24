@@ -52,7 +52,9 @@ public static class Endpoints
                 int id) =>
             {
                 if (id != request.Id)
-                    return Results.BadRequest();
+                {
+                    return CustomResults.RouteIdMismatch();
+                }
 
                 var result = await handler.HandleAsync(request, token);
                 return result.Match(

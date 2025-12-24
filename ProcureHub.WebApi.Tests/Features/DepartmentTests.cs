@@ -138,6 +138,18 @@ public class DepartmentTestsWithSharedDb(
         var respInvalidId = await HttpClient.PutAsync("/departments/0", JsonContent.Create(reqInvalidId));
         await respInvalidId.AssertValidationProblemAsync(
             errors: new Dictionary<string, string[]> { ["Id"] = ["'Id' must be greater than '0'."] });
+
+        // Route id must match body id
+        const int deptId = 1;
+        var updateReq = new UpdateDepartment.Request(deptId, "IT Department");
+        var differentId = deptId + 1;
+        var updateResp = await HttpClient.PutAsync($"/departments/{differentId}", JsonContent.Create(updateReq));
+
+        await updateResp.AssertProblemDetailsAsync(
+            HttpStatusCode.BadRequest,
+            "Route ID mismatch",
+            "Route ID does not match request ID",
+            $"PUT /departments/{differentId}");
     }
 
     [Fact]
@@ -304,23 +316,5 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
             "Department not found",
             "NotFound",
             "DELETE /departments/99999");
-    }
-
-    [Fact]
-    public async Task Update_department_validates_route_id_matches_body_id()
-    {
-        await LoginAsAdminAsync();
-
-        // Create department
-        var createReq = new CreateDepartment.Request("IT");
-        var createResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createReq));
-        var deptId = int.Parse(createResp.Headers.Location!.ToString().Split('/').Last());
-
-        // Update with mismatched IDs
-        var updateReq = new UpdateDepartment.Request(deptId, "IT Department");
-        var differentId = deptId + 1;
-        var updateResp = await HttpClient.PutAsync($"/departments/{differentId}", JsonContent.Create(updateReq));
-
-        Assert.Equal(HttpStatusCode.BadRequest, updateResp.StatusCode);
     }
 }
