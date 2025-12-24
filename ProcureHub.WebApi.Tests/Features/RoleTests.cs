@@ -13,79 +13,81 @@ namespace ProcureHub.WebApi.Tests.Features;
 public class RoleTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHelper testOutputHelper)
     : HttpClientBase(hostFixture, testOutputHelper), IClassFixture<ResetDatabaseFixture>
 {
-    [Fact]
-    public async Task Test_validation_for_all_endpoints()
+    public static TheoryData<EndpointInfo> GetAllRoleEndpoints()
     {
-        await LoginAsAdminAsync();
-
-        await TestHelper.RunTestsForAllAsync<AllRoleEndpoints>(configure =>
+        return new TheoryData<EndpointInfo>
         {
-            configure.QueryRoles = TestQueryRolesEndpoint;
-            configure.AssignRole = TestAssignRoleEndpoint;
-            configure.RemoveRole = TestRemoveRoleEndpoint;
-        });
-
-        Task TestQueryRolesEndpoint()
-        {
-            // No params to validate
-            return Task.CompletedTask;
-        }
-
-        async Task TestAssignRoleEndpoint()
-        {
-            // No user ID
-            var reqNoUserId = new AssignRole.Request("", "role-1");
-            var respNoUserId = await HttpClient.PostAsync("/users/user-1/roles", JsonContent.Create(reqNoUserId));
-            await respNoUserId.AssertValidationProblemAsync(
-                errors: new Dictionary<string, string[]> { ["UserId"] = ["'User Id' must not be empty."] });
-
-            // No role ID
-            var reqNoRoleId = new AssignRole.Request("user-1", "");
-            var respNoRoleId = await HttpClient.PostAsync("/users/user-1/roles", JsonContent.Create(reqNoRoleId));
-            await respNoRoleId.AssertValidationProblemAsync(
-                errors: new Dictionary<string, string[]> { ["RoleId"] = ["'Role Id' must not be empty."] });
-
-            // User ID doesn't match query
-            var reqUser1Id = new AssignRole.Request("user-1", "role-1");
-            var respMismatch = await HttpClient.PostAsync("/users/user-2/roles", JsonContent.Create(reqUser1Id));
-            await respMismatch.AssertProblemDetailsAsync(
-                HttpStatusCode.BadRequest,
-                "Route ID mismatch",
-                "Route ID does not match request ID",
-                "POST /users/user-2/roles");
-        }
-
-        Task TestRemoveRoleEndpoint()
-        {
-            // Nothing to validate in path params (IDs)
-            return Task.CompletedTask;
-        }
+            new EndpointInfo("/roles", "GET", "QueryRoles"),
+            new EndpointInfo("/users/{id}/roles", "POST", "AssignRole"),
+            new EndpointInfo("/users/{userId}/roles/{roleId}", "DELETE", "RemoveRole")
+        };
     }
 
-    [Fact]
-    public async Task Ensure_authentication_required_for_all_endpoints()
+    [Theory]
+    [MemberData(nameof(GetAllRoleEndpoints))]
+    public async Task All_role_endpoints_require_authentication(EndpointInfo endpoint)
     {
         // Note: Not logging in to test unauth access
 
-        await TestHelper.RunTestsForAllAsync<AllRoleEndpoints>(configure =>
-        {
-            configure.QueryRoles = async () =>
-            {
-                var resp = await HttpClient.GetAsync("/roles");
-                Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
-            };
-            configure.AssignRole = async () =>
-            {
-                var req = JsonContent.Create(new { RoleId = "role-id" });
-                var resp = await HttpClient.PostAsync("/users/user-id/roles", req);
-                Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
-            };
-            configure.RemoveRole = async () =>
-            {
-                var resp = await HttpClient.DeleteAsync("/users/user-id/roles/role-id");
-                Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
-            };
-        });
+        const string testUserId = "test-user-id";
+        const string testRoleId = "test-role-id";
+
+        var path = endpoint.Path
+            .Replace("{id}", testUserId)
+            .Replace("{userId}", testUserId)
+            .Replace("{roleId}", testRoleId);
+        var request = new HttpRequestMessage(new HttpMethod(endpoint.Method), path);
+
+        var resp = await HttpClient.SendAsync(request);
+        Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetAllRoleEndpoints))]
+    public async Task All_role_endpoints_have_validation_tests(EndpointInfo endpoint)
+    {
+        // Verify test method exists using reflection
+        var testMethod = GetType().GetMethod($"Test_{endpoint.Name}_validation");
+        Assert.NotNull(testMethod);
+    }
+
+    [Fact]
+    public async Task Test_QueryRoles_validation()
+    {
+        // No params to validate
+    }
+
+    [Fact]
+    public async Task Test_AssignRole_validation()
+    {
+        await LoginAsAdminAsync();
+
+        // No user ID
+        var reqNoUserId = new AssignRole.Request("", "role-1");
+        var respNoUserId = await HttpClient.PostAsync("/users/user-1/roles", JsonContent.Create(reqNoUserId));
+        await respNoUserId.AssertValidationProblemAsync(
+            errors: new Dictionary<string, string[]> { ["UserId"] = ["'User Id' must not be empty."] });
+
+        // No role ID
+        var reqNoRoleId = new AssignRole.Request("user-1", "");
+        var respNoRoleId = await HttpClient.PostAsync("/users/user-1/roles", JsonContent.Create(reqNoRoleId));
+        await respNoRoleId.AssertValidationProblemAsync(
+            errors: new Dictionary<string, string[]> { ["RoleId"] = ["'Role Id' must not be empty."] });
+
+        // User ID doesn't match query
+        var reqUser1Id = new AssignRole.Request("user-1", "role-1");
+        var respMismatch = await HttpClient.PostAsync("/users/user-2/roles", JsonContent.Create(reqUser1Id));
+        await respMismatch.AssertProblemDetailsAsync(
+            HttpStatusCode.BadRequest,
+            "Route ID mismatch",
+            "Route ID does not match request ID",
+            "POST /users/user-2/roles");
+    }
+
+    [Fact]
+    public async Task Test_RemoveRole_validation()
+    {
+        // Nothing to validate in path params (IDs)
     }
 
     [Fact]
@@ -215,11 +217,4 @@ public class RoleTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
 
         Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
     }
-}
-
-internal class AllRoleEndpoints
-{
-    public Func<Task> QueryRoles { get; set; } = null!;
-    public Func<Task> AssignRole { get; set; } = null!;
-    public Func<Task> RemoveRole { get; set; } = null!;
 }
