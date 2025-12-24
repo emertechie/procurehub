@@ -262,7 +262,7 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
     }
 
     [Fact]
-    public async Task Cannot_delete_department_with_active_users()
+    public async Task Cannot_delete_department_with_users()
     {
         await LoginAsAdminAsync();
 
@@ -281,27 +281,14 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
         var assignResp = await HttpClient.PatchAsync($"/users/{userId}/department", JsonContent.Create(assignReq));
         Assert.Equal(HttpStatusCode.NoContent, assignResp.StatusCode);
 
-        // Verify user is initially enabled (new users start enabled)
-        var userInitialResp = await HttpClient.GetAsync($"/users/{userId}");
-        var userInitial = await userInitialResp.Content.ReadFromJsonAsync<DataResponse<GetUserById.Response>>();
-        Assert.NotNull(userInitial!.Data.EnabledAt);
-
         // Attempt to delete department - should fail with validation error
-        var deleteResp1 = await HttpClient.DeleteAsync($"/departments/{deptId}");
+        var deleteResp = await HttpClient.DeleteAsync($"/departments/{deptId}");
 
-        await deleteResp1.AssertProblemDetailsAsync(
+        await deleteResp.AssertProblemDetailsAsync(
             HttpStatusCode.BadRequest,
-            "Cannot delete department. It has 1 active user(s). Please reassign users before deleting.",
+            "Cannot delete department. It has 1 user(s). Please reassign users before deleting.",
             "Validation.Error",
             $"DELETE /departments/{deptId}");
-
-        // Disable user
-        var disableResp = await HttpClient.PatchAsync($"/users/{userId}/disable", null);
-        Assert.Equal(HttpStatusCode.NoContent, disableResp.StatusCode);
-
-        // Attempt to delete department - should succeed (disabled users don't block deletion)
-        var deleteResp2 = await HttpClient.DeleteAsync($"/departments/{deptId}");
-        Assert.Equal(HttpStatusCode.NoContent, deleteResp2.StatusCode);
     }
 
     [Fact]

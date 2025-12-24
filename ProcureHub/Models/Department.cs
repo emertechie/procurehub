@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ProcureHub.Models;
 
@@ -14,4 +16,12 @@ public class Department
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+}
+
+public class DepartmentEntityTypeConfiguration : IEntityTypeConfiguration<Department>
+{
+    public void Configure(EntityTypeBuilder<Department> builder)
+    {
+        builder.ToTable("Departments");
+    }
 }
