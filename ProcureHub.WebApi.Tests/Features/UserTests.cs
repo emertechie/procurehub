@@ -10,19 +10,6 @@ using ProcureHub.WebApi.Tests.Infrastructure.Xunit;
 
 namespace ProcureHub.WebApi.Tests.Features;
 
-public record EndpointInfo(string Path, string Method, string Name /*, Func<string, object>? MakeRequestBody = null!*/)
-{
-    public override string ToString()
-    {
-        return $"{Method} {Path} ({Name})";
-    }
-}
-
-public class UserSetupFixture
-{
-    public bool UserCreated { get; set; }
-}
-
 /// <summary>
 /// NOTE: DB is only reset once per class instance, so only use for tests that don't persist state
 /// </summary>
@@ -40,18 +27,7 @@ public class UserTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
 
     public async ValueTask InitializeAsync()
     {
-        if (!userSetupFixture.UserCreated)
-        {
-            await LoginAsAdminAsync();
-
-            // Create a user (So we can log in as that user to test endpoints need admin auth)
-            var regResp1 = await HttpClient.PostAsync("/users", JsonContent.Create(ValidUserCreateRequest));
-            Assert.Equal(HttpStatusCode.Created, regResp1.StatusCode);
-
-            await Logout();
-
-            userSetupFixture.UserCreated = true;
-        }
+        await userSetupFixture.EnsureUserCreated(this, AdminEmail, AdminPassword, ValidUserEmail, ValidUserPassword);
     }
 
     public ValueTask DisposeAsync()

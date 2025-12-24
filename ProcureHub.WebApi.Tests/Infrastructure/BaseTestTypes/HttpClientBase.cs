@@ -9,13 +9,12 @@ namespace ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
 /// Creates a default HttpClient instance and provides convenience methods
 /// to login and set required authentication headers on the HttpClient.
 /// </summary>
-public abstract class HttpClientBase
+public abstract class HttpClientBase : IHttpClientAuthHelper
 {
     public const string AdminEmail = "test-admin@procurehub.local";
     public const string AdminPassword = "TestAdmin123!";
 
     protected readonly ApiTestHost ApiTestHost;
-    protected readonly HttpClient HttpClient;
 
     protected HttpClientBase(ApiTestHostFixture hostFixture, ITestOutputHelper testOutputHelper)
     {
@@ -24,12 +23,9 @@ public abstract class HttpClientBase
         HttpClient = ApiTestHost.CreateClient();
     }
 
-    protected async Task LoginAsAdminAsync()
-    {
-        await LoginAsync(AdminEmail, AdminPassword);
-    }
+    public HttpClient HttpClient { get; init; }
 
-    protected async Task LoginAsync(string email, string password)
+    public async Task LoginAsync(string email, string password)
     {
         var loginRequest = JsonContent.Create(new { email, password });
         var loginResp = await HttpClient.PostAsync("/login", loginRequest);
@@ -39,12 +35,17 @@ public abstract class HttpClientBase
         HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult!.AccessToken);
     }
 
-    protected async Task Logout()
+    public async Task LogoutAsync()
     {
         var logoutResp = await HttpClient.PostAsync("/logout", null);
         Assert.Equal(HttpStatusCode.OK, logoutResp.StatusCode);
 
         HttpClient.DefaultRequestHeaders.Authorization = null;
+    }
+
+    protected async Task LoginAsAdminAsync()
+    {
+        await LoginAsync(AdminEmail, AdminPassword);
     }
 
     private record LoginResponse(string AccessToken, string TokenType, int ExpiresIn, string RefreshToken);
