@@ -49,8 +49,12 @@
 - Use Arrange-Act-Assert approach
   - For state-changing operations: assert initial state → perform action → assert new state
   - Example: assign user to department - fetch user, assert dept is null, assign dept via API, refetch user, assert dept is set
+- Cross-cutting endpoint concerns like authentication or request validation should use `[Theory]` tests with a `GetAll{FeatureName}Endpoints` method to automatically test all endpoints.
+  - Use a class fixture with these kind of tests to not reset DB between each test
+  - Good example: the `UserTestsWithSharedDb` class
 - You must add or update API tests when adding or updating any API endpoint
   - Use the `ProcureHub.WebApi.Tests/Features/UserTests.cs` file as a guide for how to implement tests
+  - Always add a new entry in the appropriate `GetAll{FeatureName}Endpoints` method to enforce testing of cross cutting concerns
 - Aim for 100% code coverage, but be pragmatic. If a code path is not easy to test, call it out in response or add a TODO
 
 # Commons Commands
