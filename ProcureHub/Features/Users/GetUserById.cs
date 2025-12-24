@@ -28,7 +28,7 @@ public static class GetUserById
         DateTime? DeletedAt,
         Department? Department);
 
-    public record Department(int Id, string Name);
+    public record Department(Guid Id, string Name);
 
     public class Handler(ApplicationDbContext dbContext)
         : IRequestHandler<Request, Response?>

@@ -180,7 +180,7 @@ public class UserTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
         const string user2Id = "user-id-2";
         ;
 
-        var assignReq = new AssignUserToDepartment.Request(user1Id, 123);
+        var assignReq = new AssignUserToDepartment.Request(user1Id, Guid.NewGuid());
         var resp = await HttpClient.PatchAsync($"/users/{user2Id}/department", JsonContent.Create(assignReq));
 
         await resp.AssertProblemDetailsAsync(
@@ -381,7 +381,7 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         // Create department
         var createDeptReq = new CreateDepartment.Request("Engineering");
         var createDeptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createDeptReq));
-        var deptId = int.Parse(createDeptResp.Headers.Location!.ToString().Split('/').Last());
+        var deptId = Guid.Parse(createDeptResp.Headers.Location!.ToString().Split('/').Last());
 
         // Create user
         var createUserResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest));
@@ -425,7 +425,7 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         var userId = createUserResp.Headers.Location!.ToString().Split('/').Last();
 
         // Try to assign user to non-existent department
-        const int departmentId = 99999;
+        var departmentId = Guid.NewGuid();
         var assignReq = new AssignUserToDepartment.Request(userId, departmentId);
         var assignResp = await HttpClient.PatchAsync($"/users/{userId}/department", JsonContent.Create(assignReq));
         await assignResp.AssertProblemDetailsAsync(

@@ -18,7 +18,7 @@ public static class Endpoints
             .WithTags("Departments");
 
         group.MapPost("/departments", async (
-                [FromServices] IRequestHandler<CreateDepartment.Request, int> handler,
+                [FromServices] IRequestHandler<CreateDepartment.Request, Guid> handler,
                 [FromBody] CreateDepartment.Request request,
                 CancellationToken token
             ) =>
@@ -35,21 +35,21 @@ public static class Endpoints
             ) => await handler.HandleAsync(new ListDepartments.Request(), token))
             .WithName("GetDepartments");
 
-        group.MapGet("/departments/{id:int}", async (
+        group.MapGet("/departments/{id:guid}", async (
                     [FromServices] IRequestHandler<GetDepartment.Request, GetDepartment.Response?> handler,
                     CancellationToken token,
-                    int id) =>
+                    Guid id) =>
                 await handler.HandleAsync(new GetDepartment.Request(id), token) is var response
                     ? Results.Ok(response)
                     : Results.NotFound())
             .RequireAuthorization(AuthorizationPolicyNames.Authenticated)
             .WithName("GetDepartmentById");
 
-        group.MapPut("/departments/{id:int}", async (
+        group.MapPut("/departments/{id:guid}", async (
                 [FromBody] UpdateDepartment.Request request,
                 [FromServices] IRequestHandler<UpdateDepartment.Request, Common.Result> handler,
                 CancellationToken token,
-                int id) =>
+                Guid id) =>
             {
                 if (id != request.Id)
                 {
@@ -64,10 +64,10 @@ public static class Endpoints
             .RequireAuthorization(RolePolicyNames.AdminOnly)
             .WithName("UpdateDepartment");
 
-        group.MapDelete("/departments/{id:int}", async (
+        group.MapDelete("/departments/{id:guid}", async (
                 [FromServices] IRequestHandler<DeleteDepartment.Request, Common.Result> handler,
                 CancellationToken token,
-                int id) =>
+                Guid id) =>
             {
                 var result = await handler.HandleAsync(new DeleteDepartment.Request(id), token);
                 return result.Match(

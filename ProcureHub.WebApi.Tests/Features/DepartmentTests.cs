@@ -53,9 +53,9 @@ public class DepartmentTestsWithSharedDb(
     {
         // Note: Not logging in as anyone initially
 
-        const string testId = "123";
+        var testId = Guid.NewGuid();
 
-        var path = endpoint.Path.Replace("{id}", testId);
+        var path = endpoint.Path.Replace("{id}", testId.ToString());
         var request = new HttpRequestMessage(new HttpMethod(endpoint.Method), path);
 
         var resp = await HttpClient.SendAsync(request);
@@ -69,9 +69,9 @@ public class DepartmentTestsWithSharedDb(
         // Log in as a regular user, not an admin
         await LoginAsync(ValidUserEmail, ValidUserPassword);
 
-        const string testId = "123";
+        var testId = Guid.NewGuid();
 
-        var path = endpoint.Path.Replace("{id}", testId);
+        var path = endpoint.Path.Replace("{id}", testId.ToString());
         var request = new HttpRequestMessage(new HttpMethod(endpoint.Method), path);
 
         var resp = await HttpClient.SendAsync(request);
@@ -128,21 +128,15 @@ public class DepartmentTestsWithSharedDb(
         await LoginAsAdminAsync();
 
         // No name
-        var reqNoName = new UpdateDepartment.Request(1, null!);
-        var respNoName = await HttpClient.PutAsync("/departments/1", JsonContent.Create(reqNoName));
+        var reqNoName = new UpdateDepartment.Request(Guid.NewGuid(), null!);
+        var respNoName = await HttpClient.PutAsync($"/departments/{reqNoName.Id}", JsonContent.Create(reqNoName));
         await respNoName.AssertValidationProblemAsync(
             errors: new Dictionary<string, string[]> { ["Name"] = ["'Name' must not be empty."] });
 
-        // Id must be > 0
-        var reqInvalidId = new UpdateDepartment.Request(0, "Test Dept");
-        var respInvalidId = await HttpClient.PutAsync("/departments/0", JsonContent.Create(reqInvalidId));
-        await respInvalidId.AssertValidationProblemAsync(
-            errors: new Dictionary<string, string[]> { ["Id"] = ["'Id' must be greater than '0'."] });
-
         // Route id must match body id
-        const int deptId = 1;
+        var deptId = Guid.NewGuid();
         var updateReq = new UpdateDepartment.Request(deptId, "IT Department");
-        var differentId = deptId + 1;
+        var differentId = Guid.NewGuid();
         var updateResp = await HttpClient.PutAsync($"/departments/{differentId}", JsonContent.Create(updateReq));
 
         await updateResp.AssertProblemDetailsAsync(
@@ -182,8 +176,8 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
 
         // Extract department ID from Location header
         var location = createDeptResp.Headers.Location?.ToString();
-        Assert.Matches(@"^/departments/\d+$", location);
-        var newDepartmentId = int.Parse(location!.Split('/').Last());
+        Assert.Matches(@"^/departments/[0-9a-f-]+$", location);
+        var newDepartmentId = Guid.Parse(location!.Split('/').Last());
 
         // Assert department returned in list
         var departments2 = await HttpClient.GetAsync("/departments")
@@ -208,7 +202,7 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
         // Create department
         var createReq = new CreateDepartment.Request("Marketing");
         var createResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createReq));
-        var deptId = int.Parse(createResp.Headers.Location!.ToString().Split('/').Last());
+        var deptId = Guid.Parse(createResp.Headers.Location!.ToString().Split('/').Last());
 
         // Update department name
         var updateReq = new UpdateDepartment.Request(deptId, "Marketing & Sales");
@@ -226,14 +220,15 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
     {
         await LoginAsAdminAsync();
 
-        var updateReq = new UpdateDepartment.Request(99999, "Nonexistent Dept");
-        var updateResp = await HttpClient.PutAsync("/departments/99999", JsonContent.Create(updateReq));
+        var nonexistentId = Guid.NewGuid();
+        var updateReq = new UpdateDepartment.Request(nonexistentId, "Nonexistent Dept");
+        var updateResp = await HttpClient.PutAsync($"/departments/{nonexistentId}", JsonContent.Create(updateReq));
 
         await updateResp.AssertProblemDetailsAsync(
             HttpStatusCode.NotFound,
             "Department not found",
             "NotFound",
-            "PUT /departments/99999");
+            $"PUT /departments/{nonexistentId}");
     }
 
     [Fact]
@@ -244,7 +239,7 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
         // Create department
         var createReq = new CreateDepartment.Request("Temporary Dept");
         var createResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createReq));
-        var deptId = int.Parse(createResp.Headers.Location!.ToString().Split('/').Last());
+        var deptId = Guid.Parse(createResp.Headers.Location!.ToString().Split('/').Last());
 
         // Verify department exists in list
         var deptsBefore = await HttpClient.GetAsync("/departments")
@@ -269,7 +264,7 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
         // Create department
         var deptReq = new CreateDepartment.Request("Finance");
         var deptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(deptReq));
-        var deptId = int.Parse(deptResp.Headers.Location!.ToString().Split('/').Last());
+        var deptId = Guid.Parse(deptResp.Headers.Location!.ToString().Split('/').Last());
 
         // Create user
         var userReq = new CreateUser.Request("finance.user@example.com", "Test1234!", "Finance", "User");
@@ -296,12 +291,13 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
     {
         await LoginAsAdminAsync();
 
-        var deleteResp = await HttpClient.DeleteAsync("/departments/99999");
+        var unknownDeptId = Guid.NewGuid();
+        var deleteResp = await HttpClient.DeleteAsync($"/departments/{unknownDeptId}");
 
         await deleteResp.AssertProblemDetailsAsync(
             HttpStatusCode.NotFound,
             "Department not found",
             "NotFound",
-            "DELETE /departments/99999");
+            $"DELETE /departments/{unknownDeptId}");
     }
 }

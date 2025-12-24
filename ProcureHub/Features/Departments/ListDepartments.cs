@@ -8,7 +8,7 @@ public static class ListDepartments
 {
     public record Request();
 
-    public record Response(int Id, string Name);
+    public record Response(Guid Id, string Name);
 
     public class Handler(ApplicationDbContext dbContext)
         : IRequestHandler<Request, Response[]>

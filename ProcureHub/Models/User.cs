@@ -17,7 +17,7 @@ public class User : IdentityUser
     [MaxLength(200)]
     public string LastName { get; set; } = null!;
 
-    public int? DepartmentId { get; set; }
+    public Guid? DepartmentId { get; set; }
 
     public Department? Department { get; set; }
 

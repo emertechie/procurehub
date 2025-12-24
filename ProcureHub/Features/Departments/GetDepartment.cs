@@ -6,9 +6,9 @@ namespace ProcureHub.Features.Departments;
 
 public static class GetDepartment
 {
-    public record Request(int id);
+    public record Request(Guid id);
 
-    public record Response(int Id, string Name);
+    public record Response(Guid Id, string Name);
 
     public class Handler(ApplicationDbContext dbContext)
         : IRequestHandler<Request, Response?>

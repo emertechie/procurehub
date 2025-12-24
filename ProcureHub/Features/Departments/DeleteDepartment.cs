@@ -6,7 +6,7 @@ namespace ProcureHub.Features.Departments;
 
 public static class DeleteDepartment
 {
-    public record Request(int Id);
+    public record Request(Guid Id);
 
     public class Handler(ApplicationDbContext dbContext)
         : IRequestHandler<Request, Result>

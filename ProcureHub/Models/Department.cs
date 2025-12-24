@@ -6,7 +6,7 @@ namespace ProcureHub.Models;
 
 public class Department
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     [MaxLength(200)]
     public required string Name { get; set; }
@@ -23,5 +23,8 @@ public class DepartmentEntityTypeConfiguration : IEntityTypeConfiguration<Depart
     public void Configure(EntityTypeBuilder<Department> builder)
     {
         builder.ToTable("Departments");
+
+        builder.Property(d => d.Id)
+            .HasDefaultValueSql("uuidv7()");
     }
 }

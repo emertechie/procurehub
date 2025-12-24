@@ -17,9 +17,9 @@ public static class CreateDepartment
     }
 
     public class Handler(ApplicationDbContext dbContext)
-        : IRequestHandler<Request, int>
+        : IRequestHandler<Request, Guid>
     {
-        public async Task<int> HandleAsync(Request request, CancellationToken token)
+        public async Task<Guid> HandleAsync(Request request, CancellationToken token)
         {
             var department = new Department { Name = request.Name };
             var result = await dbContext.Departments.AddAsync(department, token);

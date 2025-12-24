@@ -8,7 +8,7 @@ namespace ProcureHub.Features.Users;
 
 public static class AssignUserToDepartment
 {
-    public record Request(string Id, int? DepartmentId);
+    public record Request(string Id, Guid? DepartmentId);
 
     public class RequestValidator : AbstractValidator<Request>
     {

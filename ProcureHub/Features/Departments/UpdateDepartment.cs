@@ -7,13 +7,13 @@ namespace ProcureHub.Features.Departments;
 
 public static class UpdateDepartment
 {
-    public record Request(int Id, string Name);
+    public record Request(Guid Id, string Name);
 
     public class RequestValidator : AbstractValidator<Request>
     {
         public RequestValidator()
         {
-            RuleFor(r => r.Id).GreaterThan(0);
+            RuleFor(r => r.Id).NotEmpty();
             RuleFor(r => r.Name).NotEmpty();
         }
     }

@@ -33,7 +33,7 @@ public static class QueryUsers
         DateTime? DeletedAt,
         Department? Department);
 
-    public record Department(int Id, string Name);
+    public record Department(Guid Id, string Name);
 
     public class Handler(ApplicationDbContext dbContext, UserManager<User> userManager)
         : IRequestHandler<Request, PagedResult<Response>>
