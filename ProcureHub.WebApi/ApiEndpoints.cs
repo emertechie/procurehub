@@ -1,5 +1,6 @@
 using ProcureHub.WebApi.Features.Auth;
 using ProcureHub.WebApi.Features.Departments;
+using ProcureHub.WebApi.Features.Roles;
 using ProcureHub.WebApi.Features.Users;
 
 namespace ProcureHub.WebApi;
@@ -14,5 +15,6 @@ public static class ApiEndpoints
         app.ConfigureAuthEndpoints();
         app.ConfigureUsersEndpoints();
         app.ConfigureDepartmentEndpoints();
+        app.ConfigureRolesEndpoints();
     }
 }

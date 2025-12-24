@@ -11,7 +11,7 @@ using ProcureHub.WebApi.Tests.Infrastructure.Xunit;
 namespace ProcureHub.WebApi.Tests.Features;
 
 /// <summary>
-/// NOTE: DB is only reset once per class, so only use for tests that don't persist state
+/// NOTE: DB is only reset once per class instance, so only use for tests that don't persist state
 /// </summary>
 [Collection("ApiTestHost")]
 public class UserTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHelper testOutputHelper)

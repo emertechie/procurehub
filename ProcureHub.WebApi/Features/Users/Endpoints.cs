@@ -71,11 +71,7 @@ public static class Endpoints
             {
                 if (id != request.Id)
                 {
-                    return TypedResults.Problem(
-                        title: "Route ID mismatch",
-                        detail: "Route ID does not match request ID",
-                        statusCode: StatusCodes.Status400BadRequest
-                    );
+                    return CustomResults.RouteIdMismatch();
                 }
 
                 var result = await handler.HandleAsync(request, token);
@@ -130,11 +126,7 @@ public static class Endpoints
             {
                 if (id != request.Id)
                 {
-                    return TypedResults.Problem(
-                        title: "Route ID mismatch",
-                        detail: "Route ID does not match request ID",
-                        statusCode: StatusCodes.Status400BadRequest
-                    );
+                    return CustomResults.RouteIdMismatch();
                 }
 
                 var result = await handler.HandleAsync(request, token);
