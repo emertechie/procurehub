@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Common;
 using ProcureHub.Infrastructure;
@@ -7,6 +8,15 @@ namespace ProcureHub.Features.Departments;
 public static class UpdateDepartment
 {
     public record Request(int Id, string Name);
+
+    public class RequestValidator : AbstractValidator<Request>
+    {
+        public RequestValidator()
+        {
+            RuleFor(r => r.Id).GreaterThan(0);
+            RuleFor(r => r.Name).NotEmpty();
+        }
+    }
 
     public class Handler(ApplicationDbContext dbContext)
         : IRequestHandler<Request, Result>

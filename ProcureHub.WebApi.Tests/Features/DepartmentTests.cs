@@ -86,6 +86,67 @@ public class DepartmentTestsWithSharedDb(
             Assert.NotEqual(HttpStatusCode.Forbidden, resp.StatusCode);
         }
     }
+
+    #region Endpoint Validation Tests
+
+    [Theory]
+    [MemberData(nameof(GetAllDepartmentEndpoints))]
+    public void All_department_endpoints_have_validation_tests(EndpointInfo endpoint)
+    {
+        // Verify test method exists using reflection
+        var testMethod = GetType().GetMethod($"Test_{endpoint.Name}_validation");
+        Assert.NotNull(testMethod);
+    }
+
+    [Fact]
+    public async Task Test_CreateDepartment_validation()
+    {
+        await LoginAsAdminAsync();
+
+        // No name
+        var reqNoName = new CreateDepartment.Request(null!);
+        var respNoName = await HttpClient.PostAsync("/departments", JsonContent.Create(reqNoName));
+        await respNoName.AssertValidationProblemAsync(
+            errors: new Dictionary<string, string[]> { ["Name"] = ["'Name' must not be empty."] });
+    }
+
+    [Fact]
+    public async Task Test_GetDepartments_validation()
+    {
+        // No validation - no parameters
+    }
+
+    [Fact]
+    public async Task Test_GetDepartmentById_validation()
+    {
+        // No validation - id comes from route only
+    }
+
+    [Fact]
+    public async Task Test_UpdateDepartment_validation()
+    {
+        await LoginAsAdminAsync();
+
+        // No name
+        var reqNoName = new UpdateDepartment.Request(1, null!);
+        var respNoName = await HttpClient.PutAsync("/departments/1", JsonContent.Create(reqNoName));
+        await respNoName.AssertValidationProblemAsync(
+            errors: new Dictionary<string, string[]> { ["Name"] = ["'Name' must not be empty."] });
+
+        // Id must be > 0
+        var reqInvalidId = new UpdateDepartment.Request(0, "Test Dept");
+        var respInvalidId = await HttpClient.PutAsync("/departments/0", JsonContent.Create(reqInvalidId));
+        await respInvalidId.AssertValidationProblemAsync(
+            errors: new Dictionary<string, string[]> { ["Id"] = ["'Id' must be greater than '0'."] });
+    }
+
+    [Fact]
+    public async Task Test_DeleteDepartment_validation()
+    {
+        // No validation - id comes from route only
+    }
+
+    #endregion
 }
 
 [Collection("ApiTestHost")]
