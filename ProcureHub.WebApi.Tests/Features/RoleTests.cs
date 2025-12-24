@@ -144,7 +144,7 @@ public class RoleTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
     : HttpClientAndDbResetBase(hostFixture, testOutputHelper)
 {
     [Fact]
-    public async Task Assign_and_remove_roles_workflow()
+    public async Task Admin_can_assign_and_remove_roles_workflow()
     {
         await LoginAsAdminAsync();
 
