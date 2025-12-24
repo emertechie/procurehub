@@ -22,6 +22,10 @@ public static class GetUserById
         string FirstName,
         string LastName,
         string[] Roles,
+        DateTime? EnabledAt,
+        DateTime CreatedAt,
+        DateTime UpdatedAt,
+        DateTime? DeletedAt,
         Department? Department);
 
     public record Department(int Id, string Name);
@@ -40,6 +44,10 @@ public static class GetUserById
                     u.FirstName!,
                     u.LastName!,
                     u.UserRoles!.Select(ur => ur.Role.Name!).ToArray(),
+                    u.EnabledAt,
+                    u.CreatedAt,
+                    u.UpdatedAt,
+                    u.DeletedAt,
                     u.Department != null
                         ? new Department(u.Department.Id, u.Department.Name!)
                         : null

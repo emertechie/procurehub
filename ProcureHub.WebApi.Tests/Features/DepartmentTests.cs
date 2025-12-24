@@ -2,6 +2,7 @@
 using System.Net.Http.Json;
 using ProcureHub.Features.Departments;
 using ProcureHub.Features.Users;
+using ProcureHub.WebApi.Responses;
 using ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
 using ProcureHub.WebApi.Tests.Infrastructure.Helpers;
 using ProcureHub.WebApi.Tests.Infrastructure.Xunit;
@@ -207,49 +208,27 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
         var assignResp = await HttpClient.PatchAsync($"/users/{userId}/department", JsonContent.Create(assignReq));
         Assert.Equal(HttpStatusCode.NoContent, assignResp.StatusCode);
 
-        // Enable user (make them "active")
-        var enableResp = await HttpClient.PatchAsync($"/users/{userId}/enable", null);
-        Assert.Equal(HttpStatusCode.NoContent, enableResp.StatusCode);
+        // Verify user is initially enabled (new users start enabled)
+        var userInitialResp = await HttpClient.GetAsync($"/users/{userId}");
+        var userInitial = await userInitialResp.Content.ReadFromJsonAsync<DataResponse<GetUserById.Response>>();
+        Assert.NotNull(userInitial!.Data.EnabledAt);
 
         // Attempt to delete department - should fail with validation error
-        var deleteResp = await HttpClient.DeleteAsync($"/departments/{deptId}");
+        var deleteResp1 = await HttpClient.DeleteAsync($"/departments/{deptId}");
 
-        await deleteResp.AssertProblemDetailsAsync(
+        await deleteResp1.AssertProblemDetailsAsync(
             HttpStatusCode.BadRequest,
             "Cannot delete department. It has 1 active user(s). Please reassign users before deleting.",
             "Validation.Error",
             $"DELETE /departments/{deptId}");
-    }
 
-    [Fact]
-    public async Task Can_delete_department_with_disabled_users()
-    {
-        await LoginAsAdminAsync();
-
-        // Create department
-        var deptReq = new CreateDepartment.Request("HR");
-        var deptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(deptReq));
-        var deptId = int.Parse(deptResp.Headers.Location!.ToString().Split('/').Last());
-
-        // Create user
-        var userReq = new CreateUser.Request("hr.user@example.com", "Test1234!", "HR", "User");
-        var userResp = await HttpClient.PostAsync("/users", JsonContent.Create(userReq));
-        var userId = userResp.Headers.Location!.ToString().Split('/').Last();
-
-        // Assign user to department
-        var assignReq = new AssignUserToDepartment.Request(userId, deptId);
-        await HttpClient.PatchAsync($"/users/{userId}/department", JsonContent.Create(assignReq));
-
-        // Enable user
-        await HttpClient.PatchAsync($"/users/{userId}/enable", null);
-
-        // Disable user (make them inactive)
+        // Disable user
         var disableResp = await HttpClient.PatchAsync($"/users/{userId}/disable", null);
         Assert.Equal(HttpStatusCode.NoContent, disableResp.StatusCode);
 
-        // Attempt to delete department - should succeed
-        var deleteResp = await HttpClient.DeleteAsync($"/departments/{deptId}");
-        Assert.Equal(HttpStatusCode.NoContent, deleteResp.StatusCode);
+        // Attempt to delete department - should succeed (disabled users don't block deletion)
+        var deleteResp2 = await HttpClient.DeleteAsync($"/departments/{deptId}");
+        Assert.Equal(HttpStatusCode.NoContent, deleteResp2.StatusCode);
     }
 
     [Fact]
