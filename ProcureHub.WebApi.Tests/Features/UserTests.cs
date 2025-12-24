@@ -10,118 +10,176 @@ using ProcureHub.WebApi.Tests.Infrastructure.Xunit;
 
 namespace ProcureHub.WebApi.Tests.Features;
 
+public record EndpointInfo(string Path, string Method, string Name /*, Func<string, object>? MakeRequestBody = null!*/)
+{
+    public override string ToString()
+    {
+        return $"{Method} {Path} ({Name})";
+    }
+}
+
+public class UserSetupFixture
+{
+    public bool UserCreated { get; set; }
+}
+
 /// <summary>
 /// NOTE: DB is only reset once per class instance, so only use for tests that don't persist state
 /// </summary>
 [Collection("ApiTestHost")]
-public class UserTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHelper testOutputHelper)
-    : HttpClientBase(hostFixture, testOutputHelper), IClassFixture<ResetDatabaseFixture>
+public class UserTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHelper testOutputHelper, UserSetupFixture userSetupFixture)
+    : HttpClientBase(hostFixture, testOutputHelper),
+        IClassFixture<ResetDatabaseFixture>,
+        IClassFixture<UserSetupFixture>,
+        IAsyncLifetime
 {
     private const string ValidUserEmail = "user1@example.com";
     private const string ValidUserPassword = "Test1234!";
 
-    private static readonly CreateUser.Request ValidCreateRequest = new(ValidUserEmail, ValidUserPassword, "Some", "User");
+    private static readonly CreateUser.Request ValidUserCreateRequest = new(ValidUserEmail, ValidUserPassword, "Some", "User");
+
+    public async ValueTask InitializeAsync()
+    {
+        if (!userSetupFixture.UserCreated)
+        {
+            await LoginAsAdminAsync();
+
+            // Create a user (So we can log in as that user to test endpoints need admin auth)
+            var regResp1 = await HttpClient.PostAsync("/users", JsonContent.Create(ValidUserCreateRequest));
+            Assert.Equal(HttpStatusCode.Created, regResp1.StatusCode);
+
+            await Logout();
+
+            userSetupFixture.UserCreated = true;
+        }
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
+
+    public static TheoryData<EndpointInfo> GetAllUserEndpoints()
+    {
+        // TODO: consider auto-generating this list in future
+        return new TheoryData<EndpointInfo>
+        {
+            new EndpointInfo("/users", "POST", "CreateUser"),
+            new EndpointInfo("/users", "GET", "QueryUsers"),
+            new EndpointInfo("/users/{id}", "GET", "GetUserById"),
+            new EndpointInfo("/users/{id}", "PUT", "UpdateUser"),
+            new EndpointInfo("/users/{id}/department", "PATCH", "AssignUserToDepartment"),
+            new EndpointInfo("/users/{id}/enable", "PATCH", "EnableUser"),
+            new EndpointInfo("/users/{id}/disable", "PATCH", "DisableUser")
+        };
+    }
+
+    [Theory]
+    [MemberData(nameof(GetAllUserEndpoints))]
+    public async Task All_user_endpoints_require_authentication(EndpointInfo endpoint)
+    {
+        // Note: Not logging in as anyone initially
+
+        const string testId = "test-id";
+
+        var path = endpoint.Path.Replace("{id}", testId);
+        var request = new HttpRequestMessage(new HttpMethod(endpoint.Method), path);
+
+        var resp = await HttpClient.SendAsync(request);
+        Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetAllUserEndpoints))]
+    public async Task All_user_endpoints_require_admin_authorization(EndpointInfo endpoint)
+    {
+        // Log in as a regular user, not an admin
+        await LoginAsync(ValidUserCreateRequest.Email, ValidUserCreateRequest.Password);
+
+        const string testId = "test-id";
+
+        var path = endpoint.Path.Replace("{id}", testId);
+        var request = new HttpRequestMessage(new HttpMethod(endpoint.Method), path);
+
+        var resp = await HttpClient.SendAsync(request);
+        Assert.Equal(HttpStatusCode.Forbidden, resp.StatusCode);
+    }
+
+    #region Endpoint Validation Tests
+
+    [Theory]
+    [MemberData(nameof(GetAllUserEndpoints))]
+    public void All_user_endpoints_have_validation_tests(EndpointInfo endpoint)
+    {
+        // Verify test method exists using reflection
+        var testMethod = GetType().GetMethod($"Test_{endpoint.Name}_validation");
+        Assert.NotNull(testMethod);
+    }
 
     [Fact]
-    public async Task Test_validation_for_all_endpoints()
+    public async Task Test_CreateUser_validation()
     {
         // Log in as admin to be able to manage users
         await LoginAsAdminAsync();
 
-        await TestHelper.RunTestsForAllAsync<AllUserEndpoints>(configure =>
-        {
-            configure.CreateUser = TestCreateUserEndpoint;
-            configure.QueryUsers = TestQueryUsersEndpoint;
-            configure.GetUserById = TestGetUserByIdEndpoint;
-        });
+        // No email
+        var reqNoEmail = ValidUserCreateRequest with { Email = null! };
+        var respNoEmail = await HttpClient.PostAsync("/users", JsonContent.Create(reqNoEmail));
+        await respNoEmail.AssertValidationProblemAsync(
+            errors: new Dictionary<string, string[]> { ["Email"] = ["'Email' must not be empty."] });
 
-        async Task TestCreateUserEndpoint()
-        {
-            // No email
-            var reqNoEmail = ValidCreateRequest with { Email = null! };
-            var respNoEmail = await HttpClient.PostAsync("/users", JsonContent.Create(reqNoEmail));
-            await respNoEmail.AssertValidationProblemAsync(
-                errors: new Dictionary<string, string[]> { ["Email"] = ["'Email' must not be empty."] });
+        // Not a valid email
+        var reqInvalidEmail = ValidUserCreateRequest with { Email = "not-an-email" };
+        var respInvalidEmail = await HttpClient.PostAsync("/users", JsonContent.Create(reqInvalidEmail));
+        await respInvalidEmail.AssertValidationProblemAsync(
+            errors: new Dictionary<string, string[]> { ["Email"] = ["'Email' is not a valid email address."] });
 
-            // Not a valid email
-            var reqInvalidEmail = ValidCreateRequest with { Email = "not-an-email" };
-            var respInvalidEmail = await HttpClient.PostAsync("/users", JsonContent.Create(reqInvalidEmail));
-            await respInvalidEmail.AssertValidationProblemAsync(
-                errors: new Dictionary<string, string[]> { ["Email"] = ["'Email' is not a valid email address."] });
-
-            // No password
-            var reqNoPwd = ValidCreateRequest with { Password = null! };
-            var respNoPwd = await HttpClient.PostAsync("/users", JsonContent.Create(reqNoPwd));
-            await respNoPwd.AssertValidationProblemAsync(
-                errors: new Dictionary<string, string[]> { ["Password"] = ["'Password' must not be empty."] });
-        }
-
-        async Task TestQueryUsersEndpoint()
-        {
-            // Not a valid email
-            var respInvalidEmail = await HttpClient.GetAsync("/users?email=not-an-email");
-            await respInvalidEmail.AssertValidationProblemAsync(
-                errors: new Dictionary<string, string[]> { ["Email"] = ["'Email' is not a valid email address."] });
-
-            // Page < 1
-            var respInvalidPage = await HttpClient.GetAsync("/users?page=0");
-            await respInvalidPage.AssertValidationProblemAsync(
-                errors: new Dictionary<string, string[]> { ["Page"] = ["'Page' must be greater than or equal to '1'."] });
-
-            // Page size < 1
-            var respInvalidPageSize1 = await HttpClient.GetAsync("/users?pageSize=0");
-            await respInvalidPageSize1.AssertValidationProblemAsync(
-                errors: new Dictionary<string, string[]> { ["PageSize"] = ["'Page Size' must be between 1 and 100. Received 0."] });
-
-            // Page size > 100
-            var respInvalidPageSize2 = await HttpClient.GetAsync("/users?pageSize=101");
-            await respInvalidPageSize2.AssertValidationProblemAsync(
-                errors: new Dictionary<string, string[]> { ["PageSize"] = ["'Page Size' must be between 1 and 100. Received 101."] });
-        }
-
-        Task TestGetUserByIdEndpoint()
-        {
-            // ID not provided -> not possible to test this as it just maps to the "/users" endpoint 
-            // var respInvalidEmail = await HttpClient.GetAsync("/users/");
-
-            // ReSharper disable once ConvertToLambdaExpression
-            return Task.CompletedTask;
-        }
+        // No password
+        var reqNoPwd = ValidUserCreateRequest with { Password = null! };
+        var respNoPwd = await HttpClient.PostAsync("/users", JsonContent.Create(reqNoPwd));
+        await respNoPwd.AssertValidationProblemAsync(
+            errors: new Dictionary<string, string[]> { ["Password"] = ["'Password' must not be empty."] });
     }
 
     [Fact]
-    public async Task Ensure_authentication_required_for_all_endpoints()
+    public async Task Test_QueryUsers_validation()
     {
-        // Note: Not logging in as admin - to test unauth access.
-        // await LoginAsAdminAsync();
+        // Log in as admin to be able to manage users
+        await LoginAsAdminAsync();
 
-        // Ensure you need to be authenticated to access all /users endpoints
-        await TestHelper.RunTestsForAllAsync<AllUserEndpoints>(configure =>
-        {
-            configure.CreateUser = async () =>
-            {
-                var req = JsonContent.Create(ValidCreateRequest);
-                var resp = await HttpClient.PostAsync("/users", req);
-                Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
-            };
-            configure.QueryUsers = async () =>
-            {
-                var resp = await HttpClient.GetAsync("/users");
-                Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
-            };
-            configure.GetUserById = async () =>
-            {
-                var resp = await HttpClient.GetAsync("/users/1");
-                Assert.Equal(HttpStatusCode.Unauthorized, resp.StatusCode);
-            };
-        });
+        // Not a valid email
+        var respInvalidEmail = await HttpClient.GetAsync("/users?email=not-an-email");
+        await respInvalidEmail.AssertValidationProblemAsync(
+            errors: new Dictionary<string, string[]> { ["Email"] = ["'Email' is not a valid email address."] });
+
+        // Page < 1
+        var respInvalidPage = await HttpClient.GetAsync("/users?page=0");
+        await respInvalidPage.AssertValidationProblemAsync(
+            errors: new Dictionary<string, string[]> { ["Page"] = ["'Page' must be greater than or equal to '1'."] });
+
+        // Page size < 1
+        var respInvalidPageSize1 = await HttpClient.GetAsync("/users?pageSize=0");
+        await respInvalidPageSize1.AssertValidationProblemAsync(
+            errors: new Dictionary<string, string[]> { ["PageSize"] = ["'Page Size' must be between 1 and 100. Received 0."] });
+
+        // Page size > 100
+        var respInvalidPageSize2 = await HttpClient.GetAsync("/users?pageSize=101");
+        await respInvalidPageSize2.AssertValidationProblemAsync(
+            errors: new Dictionary<string, string[]> { ["PageSize"] = ["'Page Size' must be between 1 and 100. Received 101."] });
     }
 
     [Fact]
-    public async Task Route_id_must_match_body_id_for_update_user()
+    public async Task Test_GetUserById_validation()
+    {
+        // Nothing to do
+    }
+
+    [Fact]
+    public async Task Test_UpdateUser_validation()
     {
         await LoginAsAdminAsync();
 
+        // Route id must match body id for update user
         const string user1Id = "user-id-1";
         const string user2Id = "user-id-2";
 
@@ -135,11 +193,13 @@ public class UserTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
             $"PUT /users/{user2Id}");
     }
 
+
     [Fact]
-    public async Task Route_id_must_match_body_id_for_assign_department()
+    public async Task Test_AssignUserToDepartment_validation()
     {
         await LoginAsAdminAsync();
 
+        // Route id must match body id for assign department
         const string user1Id = "user-id-1";
         const string user2Id = "user-id-2";
         ;
@@ -153,6 +213,20 @@ public class UserTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
             "Route ID does not match request ID",
             $"PATCH /users/{user2Id}/department");
     }
+
+    [Fact]
+    public async Task Test_EnableUser_validation()
+    {
+        // Id comes from route only - nothing to validate
+    }
+
+    [Fact]
+    public async Task Test_DisableUser_validation()
+    {
+        // Id comes from route only - nothing to validate
+    }
+
+    #endregion
 }
 
 [Collection("ApiTestHost")]
@@ -259,70 +333,6 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         var info2 = await HttpClient.GetAsync("/manage/info")
             .ReadJsonAsync<InfoResponse>();
         Assert.Equal(ValidCreateRequest.Email, info2.Email);
-    }
-
-    [Fact]
-    public async Task Users_cannot_access_user_endpoints()
-    {
-        const string email1 = "user1@example.com";
-        const string email2 = "user2@example.com";
-
-        // Log in as admin to be able to manage users
-        await LoginAsAdminAsync();
-
-        // Admin creates user 1
-        var newUser1ReqAdmin = ValidCreateRequest with { Email = email1 };
-        var createResp1Admin = await HttpClient.PostAsync("/users", JsonContent.Create(newUser1ReqAdmin));
-        Assert.Equal(HttpStatusCode.Created, createResp1Admin.StatusCode);
-        var user1Id = createResp1Admin.Headers.Location!.ToString().Split('/').Last();
-
-        // Admin creates user 2
-        var newUser2ReqAdmin = ValidCreateRequest with { Email = email2 };
-        var createResp2Admin = await HttpClient.PostAsync("/users", JsonContent.Create(newUser2ReqAdmin));
-        Assert.Equal(HttpStatusCode.Created, createResp2Admin.StatusCode);
-        var user2Id = createResp2Admin.Headers.Location!.ToString().Split('/').Last();
-
-        // Log in as user 1
-        await LoginAsync(email1, ValidUserPassword);
-
-        await TestHelper.RunTestsForAllAsync<AllUserEndpoints>(configure =>
-        {
-            configure.CreateUser = async () =>
-            {
-                // User 1 tries to create another user - should fail
-                var newUserReq = ValidCreateRequest;
-                var createResp = await HttpClient.PostAsync("/users", JsonContent.Create(newUserReq));
-                await createResp.AssertProblemDetailsAsync(
-                    HttpStatusCode.Forbidden,
-                    "Forbidden",
-                    instance: "POST /users");
-            };
-            configure.QueryUsers = async () =>
-            {
-                // Try to query all users - should fail
-                var queryUsersResp = await HttpClient.GetAsync("/users");
-                await queryUsersResp.AssertProblemDetailsAsync(
-                    HttpStatusCode.Forbidden,
-                    "Forbidden",
-                    instance: "GET /users");
-            };
-            configure.GetUserById = async () =>
-            {
-                // Try to get own user record by ID - should fail
-                var getUser1Resp = await HttpClient.GetAsync($"/users/{user1Id}");
-                await getUser1Resp.AssertProblemDetailsAsync(
-                    HttpStatusCode.Forbidden,
-                    "Forbidden",
-                    instance: $"GET /users/{user1Id}");
-
-                // Try to get user 2 record by ID - should fail
-                var getUser2Resp = await HttpClient.GetAsync($"/users/{user2Id}");
-                await getUser2Resp.AssertProblemDetailsAsync(
-                    HttpStatusCode.Forbidden,
-                    "Forbidden",
-                    instance: $"GET /users/{user2Id}");
-            };
-        });
     }
 
     [Fact]
@@ -505,11 +515,4 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
             .ReadJsonAsync<DataResponse<GetUserById.Response>>();
         Assert.Empty(user.Data.Roles);
     }
-}
-
-internal class AllUserEndpoints
-{
-    public Func<Task> CreateUser { get; set; } = null!;
-    public Func<Task> QueryUsers { get; set; } = null!;
-    public Func<Task> GetUserById { get; set; } = null!;
 }

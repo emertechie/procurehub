@@ -39,5 +39,13 @@ public abstract class HttpClientBase
         HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult!.AccessToken);
     }
 
+    protected async Task Logout()
+    {
+        var logoutResp = await HttpClient.PostAsync("/logout", null);
+        Assert.Equal(HttpStatusCode.OK, logoutResp.StatusCode);
+
+        HttpClient.DefaultRequestHeaders.Authorization = null;
+    }
+
     private record LoginResponse(string AccessToken, string TokenType, int ExpiresIn, string RefreshToken);
 }
