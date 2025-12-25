@@ -86,38 +86,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/departments": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["GetDepartments"];
-        put?: never;
-        post: operations["CreateDepartment"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/departments/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["GetDepartmentById"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/register": {
         parameters: {
             query?: never;
@@ -176,8 +144,8 @@ export interface paths {
         post: {
             parameters: {
                 query?: {
-                    useCookies?: boolean;
-                    useSessionCookies?: boolean;
+                    useCookies?: components["schemas"]["NullableOfBoolean"];
+                    useSessionCookies?: components["schemas"]["NullableOfBoolean"];
                 };
                 header?: never;
                 path?: never;
@@ -553,7 +521,7 @@ export interface paths {
         };
         get: operations["QueryUsers"];
         put?: never;
-        post: operations["CreateUsers"];
+        post: operations["CreateUser"];
         delete?: never;
         options?: never;
         head?: never;
@@ -568,9 +536,137 @@ export interface paths {
             cookie?: never;
         };
         get: operations["GetUserById"];
+        put: operations["UpdateUser"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{id}/enable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["EnableUser"];
+        trace?: never;
+    };
+    "/users/{id}/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["DisableUser"];
+        trace?: never;
+    };
+    "/users/{id}/department": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["AssignUserToDepartment"];
+        trace?: never;
+    };
+    "/departments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["QueryDepartments"];
+        put?: never;
+        post: operations["CreateDepartment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/departments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetDepartmentById"];
+        put: operations["UpdateDepartment"];
+        post?: never;
+        delete: operations["DeleteDepartment"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["QueryRoles"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{userId}/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AssignRole"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{userId}/roles/{roleId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["RemoveRole"];
         options?: never;
         head?: never;
         patch?: never;
@@ -587,23 +683,75 @@ export interface components {
             expiresIn: number | string;
             refreshToken: string;
         };
-        ApiPagedResponseOfResponse: {
-            data: components["schemas"]["Response"][];
-            pagination: components["schemas"]["Pagination"];
+        AssignRoleRequest: {
+            userId: string;
+            roleId: string;
+        };
+        AssignUserToDepartmentRequest: {
+            id: string;
+            departmentId: null | components["schemas"]["NullableOfGuid"];
+        };
+        CreateDepartmentRequest: {
+            name: string;
+        };
+        CreateUserRequest: {
+            email: string;
+            password: string;
+            firstName: string;
+            lastName: string;
+        };
+        DataResponseOfGetDepartmentByIdResponse: {
+            data: components["schemas"]["GetDepartmentByIdResponse"];
+        };
+        DataResponseOfGetUserByIdResponse: {
+            data: components["schemas"]["GetUserByIdResponse"];
+        };
+        DataResponseOfQueryDepartmentsResponseArray: {
+            data: components["schemas"]["QueryDepartmentsResponse"][];
+        };
+        DataResponseOfQueryRolesRoleArray: {
+            data: components["schemas"]["QueryRolesRole"][];
+        };
+        EntityCreatedResponseOfString: {
+            id: null | string;
         };
         ForgotPasswordRequest: {
             email: string;
         };
+        GetDepartmentByIdResponse: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        GetUserByIdDepartment: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        GetUserByIdResponse: {
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+            roles: string[];
+            enabledAt: null | components["schemas"]["NullableOfDateTime"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            deletedAt: null | components["schemas"]["NullableOfDateTime"];
+            department: null | components["schemas"]["GetUserByIdDepartment"];
+        };
         HttpValidationProblemDetails: {
             type?: null | string;
             title?: null | string;
-            /** Format: int32 */
-            status?: null | number | string;
+            status?: null | components["schemas"]["NullableOfInt32"];
             detail?: null | string;
             instance?: null | string;
-            errors?: {
-                [key: string]: string[];
-            };
+            errors?: components["schemas"]["IDictionaryOfStringStringArray"];
+        };
+        IDictionaryOfStringStringArray: {
+            [key: string]: string[];
         };
         InfoRequest: {
             newEmail?: null | string;
@@ -614,11 +762,23 @@ export interface components {
             email: string;
             isEmailConfirmed: boolean;
         };
+        IReadOnlyListOfQueryUsersResponse: components["schemas"]["QueryUsersResponse"][];
         LoginRequest: {
             email: string;
             password: string;
             twoFactorCode?: null | string;
             twoFactorRecoveryCode?: null | string;
+        };
+        NullableOfBoolean: boolean;
+        /** Format: date-time */
+        NullableOfDateTime: string;
+        /** Format: uuid */
+        NullableOfGuid: string;
+        /** Format: int32 */
+        NullableOfInt32: number | string;
+        PagedResponseOfQueryUsersResponse: {
+            data: components["schemas"]["IReadOnlyListOfQueryUsersResponse"];
+            pagination: components["schemas"]["Pagination"];
         };
         Pagination: {
             /** Format: int32 */
@@ -631,10 +791,37 @@ export interface components {
         ProblemDetails: {
             type?: null | string;
             title?: null | string;
-            /** Format: int32 */
-            status?: null | number | string;
+            status?: null | components["schemas"]["NullableOfInt32"];
             detail?: null | string;
             instance?: null | string;
+        };
+        QueryDepartmentsResponse: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        QueryRolesRole: {
+            id: string;
+            name: string;
+        };
+        QueryUsersDepartment: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        QueryUsersResponse: {
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+            roles: string[];
+            enabledAt: null | components["schemas"]["NullableOfDateTime"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            deletedAt: null | components["schemas"]["NullableOfDateTime"];
+            department: null | components["schemas"]["QueryUsersDepartment"];
         };
         RefreshRequest: {
             refreshToken: string;
@@ -642,12 +829,6 @@ export interface components {
         RegisterRequest: {
             email: string;
             password: string;
-        };
-        Request: {
-            email: string;
-            password: string;
-            firstName: string;
-            lastName: string;
         };
         ResendConfirmationEmailRequest: {
             email: string;
@@ -657,17 +838,8 @@ export interface components {
             resetCode: string;
             newPassword: string;
         };
-        Response: {
-            id: string;
-            email: string;
-            firstName: string;
-            lastName: string;
-            /** Format: int32 */
-            departmentId: null | number | string;
-            departmentName: null | string;
-        };
         TwoFactorRequest: {
-            enable?: null | boolean;
+            enable?: null | components["schemas"]["NullableOfBoolean"];
             twoFactorCode?: null | string;
             resetSharedKey?: boolean;
             resetRecoveryCodes?: boolean;
@@ -680,6 +852,17 @@ export interface components {
             recoveryCodes?: null | string[];
             isTwoFactorEnabled: boolean;
             isMachineRemembered: boolean;
+        };
+        UpdateDepartmentRequest: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        UpdateUserRequest: {
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
         };
         User: {
             id: string;
@@ -717,68 +900,6 @@ export interface operations {
             };
         };
     };
-    GetDepartments: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Response"][];
-                };
-            };
-        };
-    };
-    CreateDepartment: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["Request"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    GetDepartmentById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     "MapIdentityApi-/confirmEmail": {
         parameters: {
             query: {
@@ -805,8 +926,8 @@ export interface operations {
         parameters: {
             query?: {
                 Email?: string;
-                Page?: number | string;
-                PageSize?: number | string;
+                Page?: components["schemas"]["NullableOfInt32"];
+                PageSize?: components["schemas"]["NullableOfInt32"];
             };
             header?: never;
             path?: never;
@@ -820,7 +941,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ApiPagedResponseOfResponse"];
+                    "application/json": components["schemas"]["PagedResponseOfQueryUsersResponse"];
                 };
             };
             /** @description Unauthorized */
@@ -834,7 +955,7 @@ export interface operations {
             };
         };
     };
-    CreateUsers: {
+    CreateUser: {
         parameters: {
             query?: never;
             header?: never;
@@ -843,7 +964,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["Request"];
+                "application/json": components["schemas"]["CreateUserRequest"];
             };
         };
         responses: {
@@ -853,7 +974,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": string;
+                    "application/json": components["schemas"]["EntityCreatedResponseOfString"];
                 };
             };
             /** @description Bad Request */
@@ -893,7 +1014,495 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Response"];
+                    "application/json": components["schemas"]["DataResponseOfGetUserByIdResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdateUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUserRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EnableUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DisableUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AssignUserToDepartment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignUserToDepartmentRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QueryDepartments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DataResponseOfQueryDepartmentsResponseArray"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    CreateDepartment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateDepartmentRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EntityCreatedResponseOfString"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    GetDepartmentById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DataResponseOfGetDepartmentByIdResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdateDepartment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateDepartmentRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteDepartment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QueryRoles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DataResponseOfQueryRolesRoleArray"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    AssignRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignRoleRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RemoveRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: string;
+                roleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
                 };
             };
             /** @description Unauthorized */

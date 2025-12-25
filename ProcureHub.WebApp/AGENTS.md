@@ -2,6 +2,7 @@
 
 - In all interactions, plans, and commit messages, be extremely concise and sacrifice grammar for the sake of concision.
 - Prefer to use TanStack Query instead of raw fetch calls
+- After changes, run `npm run typecheck` to ensure no new type errors introduced
 - Always run prettier to format new or updated files
 
 # React
