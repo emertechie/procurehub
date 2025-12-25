@@ -27,7 +27,7 @@ public static class Endpoints
                 var roles = await handler.HandleAsync(new QueryRoles.Request(), token);
                 return DataResponse.From(roles);
             })
-            .WithName("QueryRoles")
+            .WithName(nameof(QueryRoles))
             .Produces<DataResponse<QueryRoles.Role[]>>();
 
         group.MapPost("/users/{userId}/roles", async (
@@ -48,7 +48,7 @@ public static class Endpoints
                     error => error.ToProblemDetails()
                 );
             })
-            .WithName("AssignRole")
+            .WithName(nameof(AssignRole))
             .Produces(StatusCodes.Status204NoContent)
             .ProducesValidationProblem()
             .Produces(StatusCodes.Status404NotFound);
@@ -66,7 +66,7 @@ public static class Endpoints
                     error => error.ToProblemDetails()
                 );
             })
-            .WithName("RemoveRole")
+            .WithName(nameof(RemoveRole))
             .Produces(StatusCodes.Status204NoContent)
             .ProducesValidationProblem()
             .Produces(StatusCodes.Status404NotFound);

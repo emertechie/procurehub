@@ -32,7 +32,7 @@ public static class Endpoints
                     error => error.ToProblemDetails()
                 );
             })
-            .WithName("CreateUsers")
+            .WithName(nameof(CreateUser))
             .Produces<EntityCreatedResponse<string>>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
 
@@ -45,7 +45,7 @@ public static class Endpoints
                 var pagedResult = await handler.HandleAsync(request, token);
                 return PagedResponse.From(pagedResult);
             })
-            .WithName("QueryUsers")
+            .WithName(nameof(QueryUsers))
             .Produces<PagedResponse<QueryUsers.Response>>();
 
         group.MapGet("/users/{id}", async (
@@ -58,7 +58,7 @@ public static class Endpoints
                     ? Results.Ok(DataResponse.From(response))
                     : Results.NotFound();
             })
-            .WithName("GetUserById")
+            .WithName(nameof(GetUserById))
             .Produces<DataResponse<GetUserById.Response>>()
             .Produces(StatusCodes.Status404NotFound);
 
@@ -80,7 +80,7 @@ public static class Endpoints
                     error => error.ToProblemDetails()
                 );
             })
-            .WithName("UpdateUser")
+            .WithName(nameof(UpdateUser))
             .Produces(StatusCodes.Status204NoContent)
             .ProducesValidationProblem()
             .Produces(StatusCodes.Status404NotFound);
@@ -97,7 +97,7 @@ public static class Endpoints
                     error => error.ToProblemDetails()
                 );
             })
-            .WithName("EnableUser")
+            .WithName(nameof(EnableUser))
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
 
@@ -113,7 +113,7 @@ public static class Endpoints
                     error => error.ToProblemDetails()
                 );
             })
-            .WithName("DisableUser")
+            .WithName(nameof(DisableUser))
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
 
@@ -135,7 +135,7 @@ public static class Endpoints
                     error => error.ToProblemDetails()
                 );
             })
-            .WithName("AssignUserToDepartment")
+            .WithName(nameof(AssignUserToDepartment))
             .Produces(StatusCodes.Status204NoContent)
             .ProducesValidationProblem()
             .Produces(StatusCodes.Status404NotFound);

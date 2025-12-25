@@ -29,7 +29,7 @@ public static class Endpoints
                 return Results.Created($"/departments/{newId}", new EntityCreatedResponse<string>(newId.ToString()));
             })
             .RequireAuthorization(RolePolicyNames.AdminOnly)
-            .WithName("CreateDepartment")
+            .WithName(nameof(CreateDepartment))
             .Produces<EntityCreatedResponse<string>>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
 
@@ -41,7 +41,7 @@ public static class Endpoints
                 var departments = await handler.HandleAsync(new QueryDepartments.Request(), token);
                 return Results.Ok(DataResponse.From(departments));
             })
-            .WithName("QueryDepartments")
+            .WithName(nameof(QueryDepartments))
             .Produces<DataResponse<QueryDepartments.Response[]>>();
 
         group.MapGet("/departments/{id:guid}", async (
@@ -55,7 +55,7 @@ public static class Endpoints
                     ? Results.Ok(DataResponse.From(response))
                     : Results.NotFound();
             })
-            .WithName("GetDepartmentById")
+            .WithName(nameof(GetDepartmentById))
             .Produces<DataResponse<GetDepartmentById.Response>>()
             .Produces(StatusCodes.Status404NotFound);
 
@@ -78,7 +78,7 @@ public static class Endpoints
                 );
             })
             .RequireAuthorization(RolePolicyNames.AdminOnly)
-            .WithName("UpdateDepartment")
+            .WithName(nameof(UpdateDepartment))
             .Produces(StatusCodes.Status204NoContent)
             .ProducesValidationProblem()
             .Produces(StatusCodes.Status404NotFound);
@@ -96,7 +96,7 @@ public static class Endpoints
                 );
             })
             .RequireAuthorization(RolePolicyNames.AdminOnly)
-            .WithName("DeleteDepartment")
+            .WithName(nameof(DeleteDepartment))
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
     }
