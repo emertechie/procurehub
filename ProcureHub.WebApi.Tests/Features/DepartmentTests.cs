@@ -166,7 +166,7 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
 
         // Assert no departments yet
         var departments1 = await HttpClient.GetAsync("/departments")
-            .ReadJsonAsync<DataResponse<GetDepartments.Response[]>>();
+            .ReadJsonAsync<DataResponse<QueryDepartments.Response[]>>();
         Assert.Empty(departments1.Data);
 
         // Create department
@@ -180,9 +180,9 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
 
         // Assert department returned in list
         var departments2 = await HttpClient.GetAsync("/departments")
-            .ReadJsonAsync<DataResponse<GetDepartments.Response[]>>();
+            .ReadJsonAsync<DataResponse<QueryDepartments.Response[]>>();
         Assert.Equal(
-            new GetDepartments.Response[] { new(newDepartmentId, "New Department") },
+            new QueryDepartments.Response[] { new(newDepartmentId, "New Department") },
             departments2.Data);
 
         // Assert can get department by ID
@@ -244,7 +244,7 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
 
         // Verify department exists in list
         var deptsBefore = await HttpClient.GetAsync("/departments")
-            .ReadJsonAsync<DataResponse<GetDepartments.Response[]>>();
+            .ReadJsonAsync<DataResponse<QueryDepartments.Response[]>>();
         Assert.Contains(deptsBefore.Data, d => d.Id == deptId);
 
         // Delete department
@@ -253,7 +253,7 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
 
         // Verify deletion - department no longer in list
         var deptsAfter = await HttpClient.GetAsync("/departments")
-            .ReadJsonAsync<DataResponse<GetDepartments.Response[]>>();
+            .ReadJsonAsync<DataResponse<QueryDepartments.Response[]>>();
         Assert.DoesNotContain(deptsAfter.Data, d => d.Id == deptId);
     }
 

@@ -4,7 +4,7 @@ using ProcureHub.Infrastructure;
 
 namespace ProcureHub.Features.Departments;
 
-public static class GetDepartments
+public static class QueryDepartments
 {
     public record Request();
 

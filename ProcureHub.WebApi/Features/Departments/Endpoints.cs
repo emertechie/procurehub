@@ -34,15 +34,15 @@ public static class Endpoints
             .ProducesValidationProblem();
 
         group.MapGet("/departments", async (
-                [FromServices] IRequestHandler<GetDepartments.Request, GetDepartments.Response[]> handler,
+                [FromServices] IRequestHandler<QueryDepartments.Request, QueryDepartments.Response[]> handler,
                 CancellationToken token
             ) =>
             {
-                var departments = await handler.HandleAsync(new GetDepartments.Request(), token);
+                var departments = await handler.HandleAsync(new QueryDepartments.Request(), token);
                 return Results.Ok(DataResponse.From(departments));
             })
-            .WithName("GetDepartments")
-            .Produces<DataResponse<GetDepartments.Response[]>>();
+            .WithName("QueryDepartments")
+            .Produces<DataResponse<QueryDepartments.Response[]>>();
 
         group.MapGet("/departments/{id:guid}", async (
                 [FromServices] IRequestHandler<GetDepartmentById.Request, GetDepartmentById.Response?> handler,
