@@ -1,5 +1,7 @@
+using System.Text.Json.Serialization.Metadata;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using ProcureHub;
@@ -46,7 +48,11 @@ void RegisterServices(WebApplicationBuilder appBuilder)
 
     // Add services to the container.
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-    appBuilder.Services.AddOpenApi(options => { options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1; });
+    appBuilder.Services.AddOpenApi(options =>
+    {
+        options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1;
+        options.CreateSchemaReferenceId = CreateOpenApiSchemaReferenceId;
+    });
 
     var connectionString = appBuilder.Configuration.GetConnectionString("DefaultConnection") ??
                            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -193,4 +199,51 @@ void BlockRegisterEndpoint(IEndpointConventionBuilder endpointConventionBuilder)
                 invocationContext => new ValueTask<object?>(Results.NotFound()));
         }
     });
+}
+
+// Nested types like `GetUserById.Response` and `GetDepartmentById.Response` were producing the same OpenApi
+// schema name of DataResponseOfResponse for a return type like `DataResponse<GetUserById.Response>`. So the
+// code below ensures the type name is the combined parent + child class to generate unique response schemas.
+string? CreateOpenApiSchemaReferenceId(JsonTypeInfo jsonTypeInfo)
+{
+    var type = jsonTypeInfo.Type;
+
+    // Handle generic types like DataResponse<T>, PagedResponse<T>
+    if (type.IsGenericType)
+    {
+        var genericTypeName = type.Name.Split('`')[0]; // Gets "DataResponse" from "DataResponse`1"
+        var genericArgs = type.GetGenericArguments();
+
+        // Build schema name from generic arguments
+        var argNames = string.Join("", genericArgs.Select(arg =>
+        {
+            // If the generic arg is a nested type, use DeclaringType + Type name
+            if (arg.DeclaringType != null)
+            {
+                return $"{arg.DeclaringType.Name}{arg.Name}";
+            }
+
+            // Handle arrays
+            if (arg.IsArray)
+            {
+                var elementType = arg.GetElementType()!;
+                var elementName = elementType.DeclaringType != null
+                    ? $"{elementType.DeclaringType.Name}{elementType.Name}"
+                    : elementType.Name;
+                return $"{elementName}Array";
+            }
+
+            return arg.Name;
+        }));
+
+        return $"{genericTypeName}Of{argNames}";
+    }
+
+    // For nested types, use DeclaringType + Type name
+    if (type.DeclaringType != null)
+    {
+        return $"{type.DeclaringType.Name}{type.Name}";
+    }
+
+    return OpenApiOptions.CreateDefaultSchemaReferenceId(jsonTypeInfo);
 }
