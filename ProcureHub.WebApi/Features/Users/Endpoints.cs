@@ -28,12 +28,12 @@ public static class Endpoints
             {
                 var result = await handler.HandleAsync(request, token);
                 return result.Match(
-                    newUserId => Results.Created($"/users/{newUserId}", new { userId = newUserId }),
+                    newUserId => Results.Created($"/users/{newUserId}", new EntityCreatedResponse<string>(newUserId)),
                     error => error.ToProblemDetails()
                 );
             })
             .WithName("CreateUsers")
-            .Produces<string>(StatusCodes.Status201Created)
+            .Produces<EntityCreatedResponse<string>>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
 
         group.MapGet("/users", async (
@@ -59,7 +59,7 @@ public static class Endpoints
                     : Results.NotFound();
             })
             .WithName("GetUserById")
-            .Produces<GetUserById.Response>()
+            .Produces<DataResponse<GetUserById.Response>>()
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPut("/users/{id}", async (

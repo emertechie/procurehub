@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using ProcureHub.Common;
 using ProcureHub.Features.Departments;
 using ProcureHub.Infrastructure;
 using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Helpers;
+using ProcureHub.WebApi.Responses;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 namespace ProcureHub.WebApi.Features.Departments;
@@ -24,32 +26,45 @@ public static class Endpoints
             ) =>
             {
                 var newId = await handler.HandleAsync(request, token);
-                return Results.Created($"/departments/{newId}", null);
+                return Results.Created($"/departments/{newId}", new EntityCreatedResponse<string>(newId.ToString()));
             })
             .RequireAuthorization(RolePolicyNames.AdminOnly)
-            .WithName("CreateDepartment");
+            .WithName("CreateDepartment")
+            .Produces<EntityCreatedResponse<string>>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
 
         group.MapGet("/departments", async (
-                [FromServices] IRequestHandler<ListDepartments.Request, ListDepartments.Response[]> handler,
+                [FromServices] IRequestHandler<GetDepartments.Request, GetDepartments.Response[]> handler,
                 CancellationToken token
-            ) => await handler.HandleAsync(new ListDepartments.Request(), token))
-            .WithName("GetDepartments");
+            ) =>
+            {
+                var departments = await handler.HandleAsync(new GetDepartments.Request(), token);
+                return Results.Ok(DataResponse.From(departments));
+            })
+            .WithName("GetDepartments")
+            .Produces<DataResponse<GetDepartments.Response[]>>();
 
         group.MapGet("/departments/{id:guid}", async (
-                    [FromServices] IRequestHandler<GetDepartment.Request, GetDepartment.Response?> handler,
-                    CancellationToken token,
-                    Guid id) =>
-                await handler.HandleAsync(new GetDepartment.Request(id), token) is var response
-                    ? Results.Ok(response)
-                    : Results.NotFound())
-            .RequireAuthorization(AuthorizationPolicyNames.Authenticated)
-            .WithName("GetDepartmentById");
+                [FromServices] IRequestHandler<GetDepartmentById.Request, GetDepartmentById.Response?> handler,
+                CancellationToken token,
+                Guid id
+            ) =>
+            {
+                var response = await handler.HandleAsync(new GetDepartmentById.Request(id), token);
+                return response is not null
+                    ? Results.Ok(DataResponse.From(response))
+                    : Results.NotFound();
+            })
+            .WithName("GetDepartmentById")
+            .Produces<DataResponse<GetDepartmentById.Response>>()
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapPut("/departments/{id:guid}", async (
+                [FromServices] IRequestHandler<UpdateDepartment.Request, Result> handler,
                 [FromBody] UpdateDepartment.Request request,
-                [FromServices] IRequestHandler<UpdateDepartment.Request, Common.Result> handler,
                 CancellationToken token,
-                Guid id) =>
+                Guid id
+            ) =>
             {
                 if (id != request.Id)
                 {
@@ -59,22 +74,30 @@ public static class Endpoints
                 var result = await handler.HandleAsync(request, token);
                 return result.Match(
                     Results.NoContent,
-                    error => error.ToProblemDetails());
+                    error => error.ToProblemDetails()
+                );
             })
             .RequireAuthorization(RolePolicyNames.AdminOnly)
-            .WithName("UpdateDepartment");
+            .WithName("UpdateDepartment")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesValidationProblem()
+            .Produces(StatusCodes.Status404NotFound);
 
         group.MapDelete("/departments/{id:guid}", async (
-                [FromServices] IRequestHandler<DeleteDepartment.Request, Common.Result> handler,
+                [FromServices] IRequestHandler<DeleteDepartment.Request, Result> handler,
                 CancellationToken token,
-                Guid id) =>
+                Guid id
+            ) =>
             {
                 var result = await handler.HandleAsync(new DeleteDepartment.Request(id), token);
                 return result.Match(
                     Results.NoContent,
-                    error => error.ToProblemDetails());
+                    error => error.ToProblemDetails()
+                );
             })
             .RequireAuthorization(RolePolicyNames.AdminOnly)
-            .WithName("DeleteDepartment");
+            .WithName("DeleteDepartment")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
     }
 }

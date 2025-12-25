@@ -166,32 +166,31 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
 
         // Assert no departments yet
         var departments1 = await HttpClient.GetAsync("/departments")
-            .ReadJsonAsync<ListDepartments.Response[]>();
-        Assert.Empty(departments1);
+            .ReadJsonAsync<DataResponse<GetDepartments.Response[]>>();
+        Assert.Empty(departments1.Data);
 
         // Create department
         var createDeptReq = new CreateDepartment.Request("New Department");
         var createDeptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createDeptReq));
         Assert.Equal(HttpStatusCode.Created, createDeptResp.StatusCode);
 
-        // Extract department ID from Location header
-        var location = createDeptResp.Headers.Location?.ToString();
-        Assert.Matches(@"^/departments/[0-9a-f-]+$", location);
-        var newDepartmentId = Guid.Parse(location!.Split('/').Last());
+        // Extract department ID from response
+        var createdDept = await createDeptResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
+        var newDepartmentId = createdDept.Id;
 
         // Assert department returned in list
         var departments2 = await HttpClient.GetAsync("/departments")
-            .ReadJsonAsync<ListDepartments.Response[]>();
+            .ReadJsonAsync<DataResponse<GetDepartments.Response[]>>();
         Assert.Equal(
-            new ListDepartments.Response[] { new(newDepartmentId, "New Department") },
-            departments2);
+            new GetDepartments.Response[] { new(newDepartmentId, "New Department") },
+            departments2.Data);
 
         // Assert can get department by ID
         var department = await HttpClient.GetAsync($"/departments/{newDepartmentId}")
-            .ReadJsonAsync<GetDepartment.Response>();
+            .ReadJsonAsync<DataResponse<GetDepartmentById.Response>>();
         Assert.Equal(
-            new GetDepartment.Response(newDepartmentId, "New Department"),
-            department);
+            new GetDepartmentById.Response(newDepartmentId, "New Department"),
+            department.Data);
     }
 
     [Fact]
@@ -202,7 +201,8 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
         // Create department
         var createReq = new CreateDepartment.Request("Marketing");
         var createResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createReq));
-        var deptId = Guid.Parse(createResp.Headers.Location!.ToString().Split('/').Last());
+        var createdDept = await createResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
+        var deptId = createdDept.Id;
 
         // Update department name
         var updateReq = new UpdateDepartment.Request(deptId, "Marketing & Sales");
@@ -211,8 +211,8 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
 
         // Verify update
         var getDeptResp = await HttpClient.GetAsync($"/departments/{deptId}")
-            .ReadJsonAsync<GetDepartment.Response>();
-        Assert.Equal("Marketing & Sales", getDeptResp.Name);
+            .ReadJsonAsync<DataResponse<GetDepartmentById.Response>>();
+        Assert.Equal("Marketing & Sales", getDeptResp.Data.Name);
     }
 
     [Fact]
@@ -239,12 +239,13 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
         // Create department
         var createReq = new CreateDepartment.Request("Temporary Dept");
         var createResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createReq));
-        var deptId = Guid.Parse(createResp.Headers.Location!.ToString().Split('/').Last());
+        var createdDept = await createResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
+        var deptId = createdDept.Id;
 
         // Verify department exists in list
         var deptsBefore = await HttpClient.GetAsync("/departments")
-            .ReadJsonAsync<ListDepartments.Response[]>();
-        Assert.Contains(deptsBefore, d => d.Id == deptId);
+            .ReadJsonAsync<DataResponse<GetDepartments.Response[]>>();
+        Assert.Contains(deptsBefore.Data, d => d.Id == deptId);
 
         // Delete department
         var deleteResp = await HttpClient.DeleteAsync($"/departments/{deptId}");
@@ -252,8 +253,8 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
 
         // Verify deletion - department no longer in list
         var deptsAfter = await HttpClient.GetAsync("/departments")
-            .ReadJsonAsync<ListDepartments.Response[]>();
-        Assert.DoesNotContain(deptsAfter, d => d.Id == deptId);
+            .ReadJsonAsync<DataResponse<GetDepartments.Response[]>>();
+        Assert.DoesNotContain(deptsAfter.Data, d => d.Id == deptId);
     }
 
     [Fact]
@@ -264,12 +265,14 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
         // Create department
         var deptReq = new CreateDepartment.Request("Finance");
         var deptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(deptReq));
-        var deptId = Guid.Parse(deptResp.Headers.Location!.ToString().Split('/').Last());
+        var createdDept = await deptResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
+        var deptId = createdDept.Id;
 
         // Create user
         var userReq = new CreateUser.Request("finance.user@example.com", "Test1234!", "Finance", "User");
         var userResp = await HttpClient.PostAsync("/users", JsonContent.Create(userReq));
-        var userId = userResp.Headers.Location!.ToString().Split('/').Last();
+        var createdUser = await userResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
+        var userId = createdUser.Id.ToString();
 
         // Assign user to department
         var assignReq = new AssignUserToDepartment.Request(userId, deptId);

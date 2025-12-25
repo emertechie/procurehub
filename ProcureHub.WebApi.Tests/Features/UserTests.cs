@@ -238,10 +238,9 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         var regResp = await HttpClient.PostAsync("/users", JsonContent.Create(newUserReq));
         Assert.Equal(HttpStatusCode.Created, regResp.StatusCode);
 
-        // Ensure Location header contains new user ID
-        var location = regResp.Headers.Location?.ToString();
-        Assert.Matches(@"^/users/[0-9a-f-]+$", location);
-        var newUserId = location!.Split('/').Last();
+        // Extract new user ID from response
+        var createdUser = await regResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
+        var newUserId = createdUser.Id.ToString();
 
         // Search for new user by email -> Found
         var userList2 = await HttpClient.GetAsync($"/users?email={newUserEmailMixedCase2}")
@@ -318,7 +317,8 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
 
         // Create user
         var createResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest));
-        var userId = createResp.Headers.Location!.ToString().Split('/').Last();
+        var createdUser = await createResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
+        var userId = createdUser.Id.ToString();
 
         // Update user profile
         var updateReq = new UpdateUser.Request(userId, "updated@example.com", "Updated", "Name");
@@ -340,7 +340,8 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
 
         // Create user (enabled by default)
         var createResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest));
-        var userId = createResp.Headers.Location!.ToString().Split('/').Last();
+        var createdUser = await createResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
+        var userId = createdUser.Id.ToString();
 
         // User can login initially
         await LoginAsync(ValidCreateRequest.Email, ValidCreateRequest.Password);
@@ -381,11 +382,13 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         // Create department
         var createDeptReq = new CreateDepartment.Request("Engineering");
         var createDeptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createDeptReq));
-        var deptId = Guid.Parse(createDeptResp.Headers.Location!.ToString().Split('/').Last());
+        var createdDept = await createDeptResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
+        var deptId = createdDept.Id;
 
         // Create user
         var createUserResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest));
-        var userId = createUserResp.Headers.Location!.ToString().Split('/').Last();
+        var createdUser = await createUserResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
+        var userId = createdUser.Id.ToString();
 
         // Assert no department assigned initially
         var initialUser = await HttpClient.GetAsync($"/users/{userId}")
@@ -422,7 +425,8 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
 
         // Create user
         var createUserResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest));
-        var userId = createUserResp.Headers.Location!.ToString().Split('/').Last();
+        var createdUser = await createUserResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
+        var userId = createdUser.Id.ToString();
 
         // Try to assign user to non-existent department
         var departmentId = Guid.NewGuid();
@@ -485,7 +489,8 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
 
         // Create regular user (should have no roles)
         var createUserResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest));
-        var userId = createUserResp.Headers.Location!.ToString().Split('/').Last();
+        var createdUser = await createUserResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
+        var userId = createdUser.Id.ToString();
 
         var user = await HttpClient.GetAsync($"/users/{userId}")
             .ReadJsonAsync<DataResponse<GetUserById.Response>>();

@@ -149,10 +149,7 @@ public class RoleTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         await LoginAsAdminAsync();
 
         // Create a test user
-        var createResp = await HttpClient.PostAsync("/users",
-            JsonContent.Create(new { Email = "roletest@example.com", Password = "Test1234!", FirstName = "Role", LastName = "Test" }));
-        createResp.EnsureSuccessStatusCode();
-        var userId = createResp.Headers.Location!.ToString().Split('/').Last();
+        var userId = await CreateTestUser();
 
         // Get all roles
         var rolesResp = await HttpClient.GetAsync("/roles");
@@ -211,12 +208,7 @@ public class RoleTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
     public async Task Assign_role_returns_404_when_role_not_found()
     {
         await LoginAsAdminAsync();
-
-        // Create a test user
-        var createResp = await HttpClient.PostAsync("/users",
-            JsonContent.Create(new { Email = "roletest2@example.com", Password = "Test1234!", FirstName = "Role", LastName = "Test2" }));
-        createResp.EnsureSuccessStatusCode();
-        var userId = createResp.Headers.Location!.ToString().Split('/').Last();
+        var userId = await CreateTestUser();
 
         var resp = await HttpClient.PostAsync($"/users/{userId}/roles",
             JsonContent.Create(new AssignRole.Request(userId, "nonexistent-role-id")));
@@ -238,15 +230,19 @@ public class RoleTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
     public async Task Remove_role_returns_404_when_role_not_found()
     {
         await LoginAsAdminAsync();
-
-        // Create a test user
-        var createResp = await HttpClient.PostAsync("/users",
-            JsonContent.Create(new { Email = "roletest3@example.com", Password = "Test1234!", FirstName = "Role", LastName = "Test3" }));
-        createResp.EnsureSuccessStatusCode();
-        var userId = createResp.Headers.Location!.ToString().Split('/').Last();
+        var userId = await CreateTestUser();
 
         var resp = await HttpClient.DeleteAsync($"/users/{userId}/roles/nonexistent-role-id");
 
         Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
+    }
+
+    private async Task<string> CreateTestUser()
+    {
+        var newUserRequest = new CreateUser.Request("roletest@example.com", "Test1234!", "Role", "Test");
+        var createResp = await HttpClient.PostAsync("/users", JsonContent.Create(newUserRequest))
+            .ReadJsonAsync<EntityCreatedResponse<Guid>>();
+        var userId = createResp.Id.ToString();
+        return userId;
     }
 }

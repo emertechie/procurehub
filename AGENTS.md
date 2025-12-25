@@ -18,7 +18,7 @@
 
 ## API Notes
 
-- Always return a ProblemDetails type response for errors
+- For guidance on how to map endpoints, see: `ProcureHub.WebApi/Features/AGENTS.md`
 
 # Architecture
 
