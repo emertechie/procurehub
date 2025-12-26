@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { api } from "@/lib/api/client";
+import type { components } from "@/lib/api/schema";
 import {
   Card,
   CardContent,
@@ -8,17 +8,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  UserTable,
+  UserDialog,
+  ManageRolesDialog,
+  AssignDepartmentDialog,
+  useUsers,
+} from "@/features/users";
+
+type User = components["schemas"]["QueryUsersResponse"];
 
 export const Route = createFileRoute("/(auth)/_app-layout/admin/users/")({
   component: AdminUsersPage,
@@ -29,15 +29,36 @@ function AdminUsersPage() {
   const [page, setPage] = React.useState(1);
   const pageSize = 20;
 
-  const { data, isPending, isError, error } = api.useQuery("get", "/users", {
-    params: {
-      query: {
-        Email: searchEmail || undefined,
-        Page: page,
-        PageSize: pageSize,
-      },
-    },
-  });
+  const [userDialogOpen, setUserDialogOpen] = React.useState(false);
+  const [rolesDialogOpen, setRolesDialogOpen] = React.useState(false);
+  const [departmentDialogOpen, setDepartmentDialogOpen] = React.useState(false);
+  const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
+
+  const { data, isPending, isError, error } = useUsers(
+    searchEmail,
+    page,
+    pageSize,
+  );
+
+  const handleCreateUser = () => {
+    setSelectedUser(null);
+    setUserDialogOpen(true);
+  };
+
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user);
+    setUserDialogOpen(true);
+  };
+
+  const handleManageRoles = (user: User) => {
+    setSelectedUser(user);
+    setRolesDialogOpen(true);
+  };
+
+  const handleAssignDepartment = (user: User) => {
+    setSelectedUser(user);
+    setDepartmentDialogOpen(true);
+  };
 
   return (
     <div className="space-y-4">
@@ -48,7 +69,7 @@ function AdminUsersPage() {
             Manage user accounts, roles, and permissions
           </p>
         </div>
-        <Button>Create User</Button>
+        <Button onClick={handleCreateUser}>Create User</Button>
       </div>
 
       <Card>
@@ -103,77 +124,12 @@ function AdminUsersPage() {
 
           {data && (
             <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Roles</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data.data.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={6}
-                        className="text-center text-muted-foreground"
-                      >
-                        No users found
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    data.data.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">
-                          {user.firstName} {user.lastName}
-                        </TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>
-                          {user.department ? (
-                            <Badge variant="outline">
-                              {user.department.name}
-                            </Badge>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">
-                              Not assigned
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1 flex-wrap">
-                            {user.roles.length > 0 ? (
-                              user.roles.map((role) => (
-                                <Badge key={role} variant="secondary">
-                                  {role}
-                                </Badge>
-                              ))
-                            ) : (
-                              <span className="text-xs text-muted-foreground">
-                                No roles
-                              </span>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {user.enabledAt ? (
-                            <Badge variant="default">Active</Badge>
-                          ) : (
-                            <Badge variant="destructive">Disabled</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">
-                            Edit
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+              <UserTable
+                users={data.data}
+                onEditUser={handleEditUser}
+                onManageRoles={handleManageRoles}
+                onAssignDepartment={handleAssignDepartment}
+              />
 
               {data.pagination && (
                 <div className="flex items-center justify-between mt-4">
@@ -214,6 +170,22 @@ function AdminUsersPage() {
           )}
         </CardContent>
       </Card>
+
+      <UserDialog
+        open={userDialogOpen}
+        onOpenChange={setUserDialogOpen}
+        user={selectedUser}
+      />
+      <ManageRolesDialog
+        open={rolesDialogOpen}
+        onOpenChange={setRolesDialogOpen}
+        user={selectedUser}
+      />
+      <AssignDepartmentDialog
+        open={departmentDialogOpen}
+        onOpenChange={setDepartmentDialogOpen}
+        user={selectedUser}
+      />
     </div>
   );
 }
