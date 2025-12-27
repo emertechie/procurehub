@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { api } from "@/lib/api/client";
+import type { components } from "@/lib/api/schema";
 import {
   Card,
   CardContent,
@@ -8,27 +8,43 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import {
+  DepartmentDialog,
+  DeleteDepartmentDialog,
+  DepartmentTable,
+  useDepartments,
+} from "@/features/departments";
+
+type Department = components["schemas"]["QueryDepartmentsResponse"];
 
 export const Route = createFileRoute("/(auth)/_app-layout/admin/departments/")({
   component: AdminDepartmentsPage,
 });
 
 function AdminDepartmentsPage() {
-  const { data, isPending, isError, error } = api.useQuery(
-    "get",
-    "/departments",
-  );
+  const { data, isPending, isError, error } = useDepartments();
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [selectedDepartment, setSelectedDepartment] =
+    React.useState<Department | null>(null);
 
   const departments = data?.data ?? [];
+
+  const handleCreate = () => {
+    setSelectedDepartment(null);
+    setDialogOpen(true);
+  };
+
+  const handleEdit = (department: Department) => {
+    setSelectedDepartment(department);
+    setDialogOpen(true);
+  };
+
+  const handleDelete = (department: Department) => {
+    setSelectedDepartment(department);
+    setDeleteDialogOpen(true);
+  };
 
   return (
     <div className="space-y-4">
@@ -41,7 +57,7 @@ function AdminDepartmentsPage() {
             Manage organizational departments
           </p>
         </div>
-        <Button>Create Department</Button>
+        <Button onClick={handleCreate}>Create Department</Button>
       </div>
 
       <Card>
@@ -67,51 +83,26 @@ function AdminDepartmentsPage() {
           )}
 
           {data && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Department Name</TableHead>
-                  <TableHead>ID</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {departments.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={3}
-                      className="text-center text-muted-foreground"
-                    >
-                      No departments found. Create one to get started.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  departments.map((department) => (
-                    <TableRow key={department.id}>
-                      <TableCell className="font-medium">
-                        {department.name}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">
-                        {department.id}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="sm">
-                            Edit
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            Delete
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+            <DepartmentTable
+              departments={departments}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           )}
         </CardContent>
       </Card>
+
+      <DepartmentDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        department={selectedDepartment}
+      />
+
+      <DeleteDepartmentDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        department={selectedDepartment}
+      />
     </div>
   );
 }
