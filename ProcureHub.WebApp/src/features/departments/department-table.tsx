@@ -28,7 +28,6 @@ export function DepartmentTable({
       <TableHeader>
         <TableRow>
           <TableHead>Department Name</TableHead>
-          <TableHead>ID</TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -36,7 +35,7 @@ export function DepartmentTable({
         {departments.length === 0 ? (
           <TableRow>
             <TableCell
-              colSpan={3}
+              colSpan={2}
               className="text-center text-muted-foreground"
             >
               No departments found. Create one to get started.
@@ -46,9 +45,6 @@ export function DepartmentTable({
           departments.map((department) => (
             <TableRow key={department.id}>
               <TableCell className="font-medium">{department.name}</TableCell>
-              <TableCell className="font-mono text-xs text-muted-foreground">
-                {department.id}
-              </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button
