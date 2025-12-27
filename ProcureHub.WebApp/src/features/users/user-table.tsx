@@ -73,18 +73,23 @@ export function UserTable({
               </TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>
-                {user.department ? (
-                  <Badge variant="outline">{user.department.name}</Badge>
-                ) : (
+                <div className="flex items-center gap-2 flex-wrap">
+                  {user.department ? (
+                    <Badge variant="outline">{user.department.name}</Badge>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">
+                      No department
+                    </span>
+                  )}
                   <Button
                     variant="link"
                     size="sm"
                     className="h-auto p-0 text-xs"
                     onClick={() => onAssignDepartment(user)}
                   >
-                    Assign department
+                    {user.department ? "Change" : "Assign"}
                   </Button>
-                )}
+                </div>
               </TableCell>
               <TableCell>
                 <div className="flex gap-1 flex-wrap items-center">
