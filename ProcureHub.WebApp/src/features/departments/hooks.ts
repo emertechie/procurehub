@@ -10,7 +10,7 @@ export function useCreateDepartment() {
 
   return api.useMutation("post", "/departments", {
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/departments"] });
+      queryClient.invalidateQueries({ queryKey: ["get", "/departments"] });
     },
   });
 }
@@ -20,7 +20,7 @@ export function useUpdateDepartment() {
 
   return api.useMutation("put", "/departments/{id}", {
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/departments"] });
+      queryClient.invalidateQueries({ queryKey: ["get", "/departments"] });
     },
   });
 }
@@ -30,7 +30,7 @@ export function useDeleteDepartment() {
 
   return api.useMutation("delete", "/departments/{id}", {
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/departments"] });
+      queryClient.invalidateQueries({ queryKey: ["get", "/departments"] });
     },
   });
 }

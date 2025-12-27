@@ -18,7 +18,7 @@ export function useCreateUser() {
 
   return api.useMutation("post", "/users", {
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/users"] });
+      queryClient.invalidateQueries({ queryKey: ["get", "/users"] });
     },
   });
 }
@@ -28,7 +28,7 @@ export function useUpdateUser() {
 
   return api.useMutation("put", "/users/{id}", {
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/users"] });
+      queryClient.invalidateQueries({ queryKey: ["get", "/users"] });
     },
   });
 }
@@ -38,7 +38,7 @@ export function useEnableUser() {
 
   return api.useMutation("patch", "/users/{id}/enable", {
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/users"] });
+      queryClient.invalidateQueries({ queryKey: ["get", "/users"] });
     },
   });
 }
@@ -48,7 +48,7 @@ export function useDisableUser() {
 
   return api.useMutation("patch", "/users/{id}/disable", {
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/users"] });
+      queryClient.invalidateQueries({ queryKey: ["get", "/users"] });
     },
   });
 }
@@ -58,7 +58,7 @@ export function useAssignUserToDepartment() {
 
   return api.useMutation("patch", "/users/{id}/department", {
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/users"] });
+      queryClient.invalidateQueries({ queryKey: ["get", "/users"] });
     },
   });
 }
@@ -68,7 +68,7 @@ export function useAssignRole() {
 
   return api.useMutation("post", "/users/{userId}/roles", {
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/users"] });
+      queryClient.invalidateQueries({ queryKey: ["get", "/users"] });
     },
   });
 }
@@ -78,7 +78,7 @@ export function useRemoveRole() {
 
   return api.useMutation("delete", "/users/{userId}/roles/{roleId}", {
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/users"] });
+      queryClient.invalidateQueries({ queryKey: ["get", "/users"] });
     },
   });
 }
