@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { useAssignRole, useRemoveRole } from "./hooks";
+import { useAssignRole, useRemoveRole, useUser } from "./hooks";
 
 type User = components["schemas"]["QueryUsersResponse"];
 
@@ -28,13 +28,15 @@ export function ManageRolesDialog({
   user,
 }: ManageRolesDialogProps) {
   const { data: rolesData } = api.useQuery("get", "/roles");
+  const { data: userData } = useUser(user?.id || "", open);
   const assignRole = useAssignRole();
   const removeRole = useRemoveRole();
 
   if (!user) return null;
 
+  const currentUser = userData?.data || user;
   const availableRoles = rolesData?.data || [];
-  const currentRoles = new Set(user.roles);
+  const currentRoles = new Set(currentUser.roles);
 
   const handleToggleRole = async (roleName: string) => {
     const role = availableRoles.find((r) => r.name === roleName);
@@ -76,7 +78,8 @@ export function ManageRolesDialog({
         <DialogHeader>
           <DialogTitle>Manage Roles</DialogTitle>
           <DialogDescription>
-            Assign or remove roles for {user.firstName} {user.lastName}
+            Assign or remove roles for {currentUser.firstName}{" "}
+            {currentUser.lastName}
           </DialogDescription>
         </DialogHeader>
 
@@ -84,8 +87,8 @@ export function ManageRolesDialog({
           <div className="rounded-md border p-4">
             <div className="mb-3 text-sm font-medium">Current Roles</div>
             <div className="flex flex-wrap gap-2">
-              {user.roles.length > 0 ? (
-                user.roles.map((role) => (
+              {currentUser.roles.length > 0 ? (
+                currentUser.roles.map((role) => (
                   <Badge key={role} variant="secondary">
                     {role}
                   </Badge>

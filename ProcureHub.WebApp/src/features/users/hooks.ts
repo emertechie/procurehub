@@ -13,6 +13,17 @@ export function useUsers(email?: string, page = 1, pageSize = 20) {
   });
 }
 
+export function useUser(id: string, enabled = true) {
+  return api.useQuery("get", "/users/{id}", {
+    params: {
+      path: {
+        id,
+      },
+    },
+    enabled: !!id && enabled,
+  });
+}
+
 export function useCreateUser() {
   const queryClient = useQueryClient();
 
@@ -69,6 +80,7 @@ export function useAssignRole() {
   return api.useMutation("post", "/users/{userId}/roles", {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["get", "/users"] });
+      queryClient.invalidateQueries({ queryKey: ["get", "/users/{id}"] });
     },
   });
 }
@@ -79,6 +91,7 @@ export function useRemoveRole() {
   return api.useMutation("delete", "/users/{userId}/roles/{roleId}", {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["get", "/users"] });
+      queryClient.invalidateQueries({ queryKey: ["get", "/users/{id}"] });
     },
   });
 }
