@@ -2,6 +2,7 @@ import * as React from "react";
 import type { components } from "@/lib/api/schema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { FormErrorAlert } from "@/components/form-error-alert";
+import {
+  useProblemDetails,
+  setFormFieldErrors,
+} from "@/hooks/use-problem-details";
 import { useCreateUser, useUpdateUser } from "./hooks";
 import {
   createUserSchema,
@@ -79,15 +85,43 @@ export function UserDialog({ open, onOpenChange, user }: UserDialogProps) {
     }
   }, [user, isEditing, createForm, editForm]);
 
+  // Extract ProblemDetails from mutation errors
+  const createProblem = useProblemDetails(createUser.error);
+  const updateProblem = useProblemDetails(updateUser.error);
+
+  // Sync field errors to forms
+  React.useEffect(() => {
+    if (createProblem.hasFieldErrors) {
+      setFormFieldErrors(createForm, createProblem.fieldErrors);
+    }
+  }, [createProblem.fieldErrors, createProblem.hasFieldErrors, createForm]);
+
+  React.useEffect(() => {
+    if (updateProblem.hasFieldErrors) {
+      setFormFieldErrors(editForm, updateProblem.fieldErrors);
+    }
+  }, [updateProblem.fieldErrors, updateProblem.hasFieldErrors, editForm]);
+
+  // Reset mutation state only when dialog opens (not on every mutation state change)
+  const prevOpenRef = React.useRef(false);
+  React.useEffect(() => {
+    if (open && !prevOpenRef.current) {
+      createUser.reset();
+      updateUser.reset();
+    }
+    prevOpenRef.current = open;
+  }, [open, createUser, updateUser]);
+
   const onCreateSubmit = async (data: CreateUserFormData) => {
     try {
       await createUser.mutateAsync({
         body: data,
       });
+      toast.success("User created successfully");
       onOpenChange(false);
       createForm.reset();
-    } catch (error) {
-      console.error("Failed to create user:", error);
+    } catch {
+      // Error handled via useProblemDetails
     }
   };
 
@@ -97,9 +131,10 @@ export function UserDialog({ open, onOpenChange, user }: UserDialogProps) {
         params: { path: { id: data.id } },
         body: data,
       });
+      toast.success("User updated successfully");
       onOpenChange(false);
-    } catch (error) {
-      console.error("Failed to update user:", error);
+    } catch {
+      // Error handled via useProblemDetails
     }
   };
 
@@ -121,6 +156,8 @@ export function UserDialog({ open, onOpenChange, user }: UserDialogProps) {
               onSubmit={editForm.handleSubmit(onUpdateSubmit)}
               className="space-y-4"
             >
+              <FormErrorAlert message={updateProblem.summary} />
+
               <FormField
                 control={editForm.control}
                 name="firstName"
@@ -183,6 +220,8 @@ export function UserDialog({ open, onOpenChange, user }: UserDialogProps) {
               onSubmit={createForm.handleSubmit(onCreateSubmit)}
               className="space-y-4"
             >
+              <FormErrorAlert message={createProblem.summary} />
+
               <FormField
                 control={createForm.control}
                 name="firstName"
