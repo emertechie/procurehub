@@ -9,8 +9,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     : IdentityDbContext<User, ApplicationRole, string, IdentityUserClaim<string>, ApplicationUserRole,
         IdentityUserLogin<string>, IdentityRoleClaim<string>, IdentityUserToken<string>>(options)
 {
-    // public DbSet<Staff> Staff { get; set; }
-
     public DbSet<Department> Departments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)

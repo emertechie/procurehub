@@ -182,7 +182,7 @@ void ConfigureIdentityApiEndpoints(WebApplication app)
         return Results.Ok();
     }).RequireAuthorization();
 
-    // NOTE: Crude approach for demo app to block self-registration. (Only admins can create / invite staff)
+    // NOTE: Crude approach for demo app to block self-registration. (Only admins can create / invite users)
     BlockRegisterEndpoint(identityEndpointsConventionBuilder);
 }
 

@@ -53,8 +53,8 @@ public static class CreateUser
                 return Result.Failure<string>(
                     IdentityErrorMapper.ToValidationError(
                         result.Errors,
-                        "Staff.UserCreationFailed",
-                        "Failed to create staff user account"));
+                        "UserCreationFailed",
+                        "Failed to create user account"));
             }
 
             var userId = await userManager.GetUserIdAsync(user);
