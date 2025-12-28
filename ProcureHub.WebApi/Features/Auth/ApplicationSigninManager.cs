@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using ProcureHub.Features.Users;
+using ProcureHub.Features.Users.Validation;
 
 namespace ProcureHub.WebApi.Features.Auth;
 

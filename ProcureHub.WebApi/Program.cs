@@ -8,6 +8,7 @@ using ProcureHub;
 using ProcureHub.Constants;
 using ProcureHub.Data;
 using ProcureHub.Features.Users;
+using ProcureHub.Features.Users.Validation;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
 using ProcureHub.WebApi;

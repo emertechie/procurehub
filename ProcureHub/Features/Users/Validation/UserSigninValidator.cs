@@ -1,6 +1,6 @@
 using ProcureHub.Models;
 
-namespace ProcureHub.Features.Users;
+namespace ProcureHub.Features.Users.Validation;
 
 public class UserSigninValidator
 {
