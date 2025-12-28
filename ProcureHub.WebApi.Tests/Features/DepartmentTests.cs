@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using ProcureHub.Features.Departments;
 using ProcureHub.Features.Users;
@@ -191,6 +191,64 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
         Assert.Equal(
             new GetDepartmentById.Response(newDepartmentId, "New Department"),
             department.Data);
+    }
+
+    [Fact]
+    public async Task Cannot_create_department_with_duplicate_name()
+    {
+        await LoginAsAdminAsync();
+
+        const string departmentName = "Operations";
+
+        var createReq = new CreateDepartment.Request(departmentName);
+        var createResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createReq));
+        Assert.Equal(HttpStatusCode.Created, createResp.StatusCode);
+
+        var duplicateResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createReq));
+        await duplicateResp.AssertValidationProblemAsync(
+            title: "Department name must be unique.",
+            detail: "Department.DuplicateName",
+            errors: new Dictionary<string, string[]>
+            {
+                ["Name"] = [$"Department '{departmentName}' already exists."]
+            });
+
+        var departments = await HttpClient.GetAsync("/departments")
+            .ReadJsonAsync<DataResponse<QueryDepartments.Response[]>>();
+        Assert.Single(departments.Data);
+    }
+
+    [Fact]
+    public async Task Cannot_update_department_to_existing_name()
+    {
+        await LoginAsAdminAsync();
+
+        const string duplicateName = "Operations";
+        const string marketingName = "Marketing";
+
+        var createOpsReq = new CreateDepartment.Request(duplicateName);
+        var opsResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createOpsReq));
+        Assert.Equal(HttpStatusCode.Created, opsResp.StatusCode);
+
+        var createMarketingReq = new CreateDepartment.Request(marketingName);
+        var marketingResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createMarketingReq));
+        var marketingDept = await marketingResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
+        var marketingId = marketingDept.Id;
+
+        var updateReq = new UpdateDepartment.Request(marketingId, duplicateName);
+        var updateResp = await HttpClient.PutAsync($"/departments/{marketingId}", JsonContent.Create(updateReq));
+
+        await updateResp.AssertValidationProblemAsync(
+            title: "Department name must be unique.",
+            detail: "Department.DuplicateName",
+            errors: new Dictionary<string, string[]>
+            {
+                ["Name"] = [$"Department '{duplicateName}' already exists."]
+            });
+
+        var marketing = await HttpClient.GetAsync($"/departments/{marketingId}")
+            .ReadJsonAsync<DataResponse<GetDepartmentById.Response>>();
+        Assert.Equal(marketingName, marketing.Data.Name);
     }
 
     [Fact]

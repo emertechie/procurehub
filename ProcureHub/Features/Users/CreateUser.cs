@@ -54,7 +54,7 @@ public static class CreateUser
                 return Result.Failure<string>(
                     IdentityErrorMapper.ToValidationError(
                         result.Errors,
-                        "UserCreationFailed",
+                        "User.CreationFailed",
                         "Failed to create user account"));
             }
 

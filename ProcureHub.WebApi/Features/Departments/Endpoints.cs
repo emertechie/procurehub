@@ -20,13 +20,15 @@ public static class Endpoints
             .WithTags("Departments");
 
         group.MapPost("/departments", async (
-                [FromServices] IRequestHandler<CreateDepartment.Request, Guid> handler,
+                [FromServices] IRequestHandler<CreateDepartment.Request, Result<Guid>> handler,
                 [FromBody] CreateDepartment.Request request,
                 CancellationToken token
             ) =>
             {
-                var newId = await handler.HandleAsync(request, token);
-                return Results.Created($"/departments/{newId}", new EntityCreatedResponse<string>(newId.ToString()));
+                var result = await handler.HandleAsync(request, token);
+                return result.Match(
+                    newId => Results.Created($"/departments/{newId}", new EntityCreatedResponse<string>(newId.ToString())),
+                    error => error.ToProblemDetails());
             })
             .RequireAuthorization(RolePolicyNames.AdminOnly)
             .WithName(nameof(CreateDepartment))

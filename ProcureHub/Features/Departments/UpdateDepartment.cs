@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Common;
+using ProcureHub.Features.Departments.Validation;
 using ProcureHub.Infrastructure;
 using static ProcureHub.Models.Department;
 
@@ -31,9 +32,16 @@ public static class UpdateDepartment
                 return Result.Failure(Error.NotFound("Department not found"));
 
             department.Name = request.Name;
-            await dbContext.SaveChangesAsync(token);
 
-            return Result.Success();
+            try
+            {
+                await dbContext.SaveChangesAsync(token);
+                return Result.Success();
+            }
+            catch (DbUpdateException ex) when (DatabaseErrors.IsUniqueConstraintViolation(ex, "IX_Departments_Name"))
+            {
+                return Result.Failure(DepartmentErrors.DuplicateName(request.Name));
+            }
         }
     }
 }
