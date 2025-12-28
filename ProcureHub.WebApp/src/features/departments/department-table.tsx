@@ -27,7 +27,7 @@ export function DepartmentTable({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Department Name</TableHead>
+          <TableHead>Name</TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
