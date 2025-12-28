@@ -183,6 +183,7 @@ void ConfigureIdentityApiEndpoints(WebApplication app)
     }).RequireAuthorization();
 
     // NOTE: Crude approach for demo app to block self-registration. (Only admins can create / invite users)
+    // TODO: use derived `UserManager<User>` and override CreateAsync instead
     BlockRegisterEndpoint(identityEndpointsConventionBuilder);
 }
 
