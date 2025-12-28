@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using ProcureHub.Common;
+using ProcureHub.Features.Users.Validation;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
 
@@ -49,28 +50,16 @@ public static class CreateUser
             {
                 logger.LogWarning("Failed to create user. Errors: {Errors}",
                     string.Join(", ", result.Errors.Select(e => e.Description)));
-                return Result.Failure<string>(UserCreationFailed(result.Errors));
+                return Result.Failure<string>(
+                    IdentityErrorMapper.ToValidationError(
+                        result.Errors,
+                        "UserCreationFailed",
+                        "Failed to create user account"));
             }
 
             var userId = await userManager.GetUserIdAsync(user);
             logger.LogInformation("Created user {UserId}", userId);
             return Result.Success(userId);
-        }
-
-        private static Error UserCreationFailed(IEnumerable<IdentityError> identityErrors)
-        {
-            var validationErrors = identityErrors
-                .GroupBy(e => e.Code)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(e => e.Description).ToArray()
-                );
-
-            return Error.Validation(
-                "Staff.UserCreationFailed",
-                "Failed to create staff user account",
-                validationErrors
-            );
         }
     }
 }

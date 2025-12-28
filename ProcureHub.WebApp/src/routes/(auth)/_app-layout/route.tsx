@@ -103,8 +103,16 @@ const navigation = {
 };
 
 function AuthenticatedLayout() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const logoutMutation = useLogoutMutation();
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center text-muted-foreground">
+        Checking your session...
+      </div>
+    );
+  }
 
   const handleLogout = () => {
     logoutMutation.mutate({});

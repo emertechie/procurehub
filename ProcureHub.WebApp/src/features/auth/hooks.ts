@@ -17,6 +17,10 @@ export function ensureAuthenticated(
   authContext: AuthContextValue,
   currentHref: string,
 ) {
+  if (authContext.loading) {
+    return;
+  }
+
   if (!authContext.isAuthenticated) {
     throw redirect({
       to: "/login",

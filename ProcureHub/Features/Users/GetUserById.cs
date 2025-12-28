@@ -21,8 +21,14 @@ public static class GetUserById
         string Email,
         string FirstName,
         string LastName,
-        int? DepartmentId,
-        string? DepartmentName);
+        string[] Roles,
+        DateTime? EnabledAt,
+        DateTime CreatedAt,
+        DateTime UpdatedAt,
+        DateTime? DeletedAt,
+        Department? Department);
+
+    public record Department(Guid Id, string Name);
 
     public class Handler(ApplicationDbContext dbContext)
         : IRequestHandler<Request, Response?>
@@ -32,14 +38,20 @@ public static class GetUserById
             return dbContext.Users
                 .AsNoTracking()
                 .Where(u => u.Id == request.Id)
-                .Include(u => u.Department)
                 .Select(u => new Response(
                     u.Id,
                     u.Email!,
                     u.FirstName!,
                     u.LastName!,
-                    u.DepartmentId,
-                    u.Department != null ? u.Department.Name : null))
+                    u.UserRoles!.Select(ur => ur.Role.Name!).ToArray(),
+                    u.EnabledAt,
+                    u.CreatedAt,
+                    u.UpdatedAt,
+                    u.DeletedAt,
+                    u.Department != null
+                        ? new Department(u.Department.Id, u.Department.Name!)
+                        : null
+                ))
                 .FirstOrDefaultAsync(token);
         }
     }

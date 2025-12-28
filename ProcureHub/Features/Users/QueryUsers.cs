@@ -26,8 +26,14 @@ public static class QueryUsers
         string Email,
         string FirstName,
         string LastName,
-        int? DepartmentId,
-        string? DepartmentName);
+        string[] Roles,
+        DateTime? EnabledAt,
+        DateTime CreatedAt,
+        DateTime UpdatedAt,
+        DateTime? DeletedAt,
+        Department? Department);
+
+    public record Department(Guid Id, string Name);
 
     public class Handler(ApplicationDbContext dbContext, UserManager<User> userManager)
         : IRequestHandler<Request, PagedResult<Response>>
@@ -42,15 +48,22 @@ public static class QueryUsers
                             s.NormalizedEmail == normalizedEmail);
 
             return await query
-                .OrderBy(s => s.Email)
+                .OrderBy(u => u.Email)
                 .ToPagedResultAsync(
-                    s => new Response(
-                        s.Id,
-                        s.Email!,
-                        s.FirstName!,
-                        s.LastName!,
-                        s.DepartmentId,
-                        s.Department != null ? s.Department.Name : null),
+                    u => new Response(
+                        u.Id,
+                        u.Email!,
+                        u.FirstName!,
+                        u.LastName!,
+                        u.UserRoles!.Select(ur => ur.Role.Name!).ToArray(),
+                        u.EnabledAt,
+                        u.CreatedAt,
+                        u.UpdatedAt,
+                        u.DeletedAt,
+                        u.Department != null
+                            ? new Department(u.Department.Id, u.Department.Name!)
+                            : null
+                    ),
                     request.Page,
                     request.PageSize,
                     token);

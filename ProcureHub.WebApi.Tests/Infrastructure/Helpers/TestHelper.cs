@@ -1,4 +1,4 @@
-namespace ProcureHub.WebApi.Tests.Infrastructure;
+namespace ProcureHub.WebApi.Tests.Infrastructure.Helpers;
 
 public static class TestHelper
 {

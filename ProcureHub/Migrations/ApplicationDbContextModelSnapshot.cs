@@ -177,11 +177,10 @@ namespace ProcureHub.Migrations
 
             modelBuilder.Entity("ProcureHub.Models.Department", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuidv7()");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -196,7 +195,7 @@ namespace ProcureHub.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Departments");
+                    b.ToTable("Departments", (string)null);
                 });
 
             modelBuilder.Entity("ProcureHub.Models.User", b =>
@@ -217,8 +216,8 @@ namespace ProcureHub.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("DepartmentId")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("DepartmentId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -227,7 +226,7 @@ namespace ProcureHub.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime>("EnabledAt")
+                    b.Property<DateTime?>("EnabledAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("FirstName")

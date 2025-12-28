@@ -1,6 +1,6 @@
 using System.Net;
-using ProcureHub.WebApi.Tests.Infrastructure;
 using ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
+using ProcureHub.WebApi.Tests.Infrastructure.Helpers;
 using ProcureHub.WebApi.Tests.Infrastructure.Xunit;
 
 namespace ProcureHub.WebApi.Tests;
@@ -16,12 +16,11 @@ public class ConfigurationTests(ApiTestHostFixture hostFixture, ITestOutputHelpe
     public async Task UseStatusCodePages_is_correctly_configured()
     {
         // Try fetch a non-existent endpoint
-        var notFoundResp = await HttpClient.GetAsync("/does-not-exist", CancellationToken);
+        var notFoundResp = await HttpClient.GetAsync("/does-not-exist");
 
         // Assert response is in ProblemDetails format, and not just an empty body 
         await notFoundResp.AssertProblemDetailsAsync(
             HttpStatusCode.NotFound,
-            CancellationToken,
             "Not Found");
     }
 }

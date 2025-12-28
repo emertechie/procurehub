@@ -1,18 +1,23 @@
+using System.Text.Json.Serialization.Metadata;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using ProcureHub;
 using ProcureHub.Constants;
 using ProcureHub.Data;
 using ProcureHub.Features.Users;
+using ProcureHub.Features.Users.Validation;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
 using ProcureHub.WebApi;
 using ProcureHub.WebApi.Authentication;
 using ProcureHub.WebApi.Constants;
+using ProcureHub.WebApi.Features.Auth;
 using ProcureHub.WebApi.Helpers;
 using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
+using User = ProcureHub.Models.User;
 
 // Customize FluentValidation messages
 ValidatorOptions.Global.LanguageManager = new CustomLanguageManager();
@@ -44,7 +49,11 @@ void RegisterServices(WebApplicationBuilder appBuilder)
 
     // Add services to the container.
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-    appBuilder.Services.AddOpenApi(options => { options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1; });
+    appBuilder.Services.AddOpenApi(options =>
+    {
+        options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1;
+        options.CreateSchemaReferenceId = CreateOpenApiSchemaReferenceId;
+    });
 
     var connectionString = appBuilder.Configuration.GetConnectionString("DefaultConnection") ??
                            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -59,6 +68,12 @@ void RegisterServices(WebApplicationBuilder appBuilder)
         })
         .AddRoles<ApplicationRole>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
+
+    // Add custom user sign-in validator
+    builder.Services.AddScoped<UserSigninValidator>();
+
+    // Replace default SignInManager<TUser>
+    builder.Services.AddScoped<SignInManager<User>, ApplicationSigninManager>();
 
     // Add API Key authentication scheme (AddIdentityApiEndpoints already added Bearer token)
     builder.Services.AddAuthentication()
@@ -167,7 +182,7 @@ void ConfigureIdentityApiEndpoints(WebApplication app)
         return Results.Ok();
     }).RequireAuthorization();
 
-    // NOTE: Crude approach for demo app to block self-registration. (Only admins can create / invite staff)
+    // NOTE: Crude approach for demo app to block self-registration. (Only admins can create / invite users)
     BlockRegisterEndpoint(identityEndpointsConventionBuilder);
 }
 
@@ -185,4 +200,51 @@ void BlockRegisterEndpoint(IEndpointConventionBuilder endpointConventionBuilder)
                 invocationContext => new ValueTask<object?>(Results.NotFound()));
         }
     });
+}
+
+// Nested types like `GetUserById.Response` and `GetDepartmentById.Response` were producing the same OpenApi
+// schema name of DataResponseOfResponse for a return type like `DataResponse<GetUserById.Response>`. So the
+// code below ensures the type name is the combined parent + child class to generate unique response schemas.
+string? CreateOpenApiSchemaReferenceId(JsonTypeInfo jsonTypeInfo)
+{
+    var type = jsonTypeInfo.Type;
+
+    // Handle generic types like DataResponse<T>, PagedResponse<T>
+    if (type.IsGenericType)
+    {
+        var genericTypeName = type.Name.Split('`')[0]; // Gets "DataResponse" from "DataResponse`1"
+        var genericArgs = type.GetGenericArguments();
+
+        // Build schema name from generic arguments
+        var argNames = string.Join("", genericArgs.Select(arg =>
+        {
+            // If the generic arg is a nested type, use DeclaringType + Type name
+            if (arg.DeclaringType != null)
+            {
+                return $"{arg.DeclaringType.Name}{arg.Name}";
+            }
+
+            // Handle arrays
+            if (arg.IsArray)
+            {
+                var elementType = arg.GetElementType()!;
+                var elementName = elementType.DeclaringType != null
+                    ? $"{elementType.DeclaringType.Name}{elementType.Name}"
+                    : elementType.Name;
+                return $"{elementName}Array";
+            }
+
+            return arg.Name;
+        }));
+
+        return $"{genericTypeName}Of{argNames}";
+    }
+
+    // For nested types, use DeclaringType + Type name
+    if (type.DeclaringType != null)
+    {
+        return $"{type.DeclaringType.Name}{type.Name}";
+    }
+
+    return OpenApiOptions.CreateDefaultSchemaReferenceId(jsonTypeInfo);
 }

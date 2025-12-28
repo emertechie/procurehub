@@ -1,3 +1,4 @@
+using FluentValidation;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
 
@@ -7,10 +8,18 @@ public static class CreateDepartment
 {
     public record Request(string Name);
 
-    public class Handler(ApplicationDbContext dbContext)
-        : IRequestHandler<Request, int>
+    public class RequestValidator : AbstractValidator<Request>
     {
-        public async Task<int> HandleAsync(Request request, CancellationToken token)
+        public RequestValidator()
+        {
+            RuleFor(r => r.Name).NotEmpty();
+        }
+    }
+
+    public class Handler(ApplicationDbContext dbContext)
+        : IRequestHandler<Request, Guid>
+    {
+        public async Task<Guid> HandleAsync(Request request, CancellationToken token)
         {
             var department = new Department { Name = request.Name };
             var result = await dbContext.Departments.AddAsync(department, token);

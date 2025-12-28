@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ProcureHub.WebApi.Tests.Infrastructure;
+namespace ProcureHub.WebApi.Tests.Infrastructure.Helpers;
 
 public static class HelperExtensions
 {
@@ -18,25 +18,34 @@ public static class HelperExtensions
         }
     }
 
+    extension(Task<HttpResponseMessage> responseTask)
+    {
+        public async Task<T> ReadJsonAsync<T>(CancellationToken ct = default)
+        {
+            var response = await responseTask;
+            return await response.ReadJsonAsync<T>(ct);
+        }
+    }
+
     extension(HttpResponseMessage response)
     {
-        public Task<T?> AssertSuccessAndReadJsonAsync<T>(CancellationToken token)
+        public Task<T> ReadJsonAsync<T>(CancellationToken ct = default)
         {
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            return response.Content.ReadFromJsonAsync<T>(token);
+            response.EnsureSuccessStatusCode();
+            return response.Content.ReadFromJsonAsync<T>(ct)!;
         }
 
         public async Task<ProblemDetails> AssertProblemDetailsAsync(
             HttpStatusCode expectedStatus,
-            CancellationToken cancellationToken = default,
             string? title = null,
             string? detail = null,
-            string? instance = null)
+            string? instance = null,
+            CancellationToken ct = default)
         {
             Assert.Equal(expectedStatus, response.StatusCode);
             Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
 
-            var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>(cancellationToken);
+            var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>(ct);
             Assert.NotNull(problemDetails);
             Assert.Equal((int)expectedStatus, problemDetails.Status);
 
@@ -59,7 +68,7 @@ public static class HelperExtensions
         }
 
         public async Task<HttpValidationProblemDetails> AssertValidationProblemAsync(
-            CancellationToken cancellationToken = default,
+            CancellationToken ct = default,
             string? title = null,
             string? detail = null,
             IDictionary<string, string[]>? errors = null)
@@ -67,7 +76,7 @@ public static class HelperExtensions
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
 
-            var problemDetails = await response.Content.ReadFromJsonAsync<HttpValidationProblemDetails>(cancellationToken);
+            var problemDetails = await response.Content.ReadFromJsonAsync<HttpValidationProblemDetails>(ct);
 
             Assert.NotNull(problemDetails);
             Assert.Equal(400, problemDetails.Status);

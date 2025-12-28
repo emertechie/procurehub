@@ -18,8 +18,14 @@ public record Error
     public static Error Validation(string code, string message, Dictionary<string, string[]> errors)
         => new(code, message, ErrorType.Validation, errors);
 
+    public static Error Validation(string message)
+        => new("Validation.Error", message, ErrorType.Validation);
+
     public static Error NotFound(string code, string message)
         => new(code, message, ErrorType.NotFound);
+
+    public static Error NotFound(string message)
+        => new("NotFound", message, ErrorType.NotFound);
 
     public static Error Conflict(string code, string message)
         => new(code, message, ErrorType.Conflict);

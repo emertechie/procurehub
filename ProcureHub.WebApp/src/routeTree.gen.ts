@@ -14,6 +14,8 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as authAppLayoutRouteRouteImport } from './routes/(auth)/_app-layout/route'
 import { Route as authAppLayoutDashboardRouteImport } from './routes/(auth)/_app-layout/dashboard'
+import { Route as authAppLayoutAdminUsersIndexRouteImport } from './routes/(auth)/_app-layout/admin/users/index'
+import { Route as authAppLayoutAdminDepartmentsIndexRouteImport } from './routes/(auth)/_app-layout/admin/departments/index'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -39,18 +41,34 @@ const authAppLayoutDashboardRoute = authAppLayoutDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => authAppLayoutRouteRoute,
 } as any)
+const authAppLayoutAdminUsersIndexRoute =
+  authAppLayoutAdminUsersIndexRouteImport.update({
+    id: '/admin/users/',
+    path: '/admin/users/',
+    getParentRoute: () => authAppLayoutRouteRoute,
+  } as any)
+const authAppLayoutAdminDepartmentsIndexRoute =
+  authAppLayoutAdminDepartmentsIndexRouteImport.update({
+    id: '/admin/departments/',
+    path: '/admin/departments/',
+    getParentRoute: () => authAppLayoutRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof authAppLayoutDashboardRoute
+  '/admin/departments': typeof authAppLayoutAdminDepartmentsIndexRoute
+  '/admin/users': typeof authAppLayoutAdminUsersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof authAppLayoutDashboardRoute
+  '/admin/departments': typeof authAppLayoutAdminDepartmentsIndexRoute
+  '/admin/users': typeof authAppLayoutAdminUsersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -59,12 +77,26 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/(auth)/_app-layout': typeof authAppLayoutRouteRouteWithChildren
   '/(auth)/_app-layout/dashboard': typeof authAppLayoutDashboardRoute
+  '/(auth)/_app-layout/admin/departments/': typeof authAppLayoutAdminDepartmentsIndexRoute
+  '/(auth)/_app-layout/admin/users/': typeof authAppLayoutAdminUsersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/dashboard'
+    | '/admin/departments'
+    | '/admin/users'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/register' | '/dashboard'
+  to:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/dashboard'
+    | '/admin/departments'
+    | '/admin/users'
   id:
     | '__root__'
     | '/'
@@ -72,6 +104,8 @@ export interface FileRouteTypes {
     | '/register'
     | '/(auth)/_app-layout'
     | '/(auth)/_app-layout/dashboard'
+    | '/(auth)/_app-layout/admin/departments/'
+    | '/(auth)/_app-layout/admin/users/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -118,15 +152,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authAppLayoutDashboardRouteImport
       parentRoute: typeof authAppLayoutRouteRoute
     }
+    '/(auth)/_app-layout/admin/users/': {
+      id: '/(auth)/_app-layout/admin/users/'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof authAppLayoutAdminUsersIndexRouteImport
+      parentRoute: typeof authAppLayoutRouteRoute
+    }
+    '/(auth)/_app-layout/admin/departments/': {
+      id: '/(auth)/_app-layout/admin/departments/'
+      path: '/admin/departments'
+      fullPath: '/admin/departments'
+      preLoaderRoute: typeof authAppLayoutAdminDepartmentsIndexRouteImport
+      parentRoute: typeof authAppLayoutRouteRoute
+    }
   }
 }
 
 interface authAppLayoutRouteRouteChildren {
   authAppLayoutDashboardRoute: typeof authAppLayoutDashboardRoute
+  authAppLayoutAdminDepartmentsIndexRoute: typeof authAppLayoutAdminDepartmentsIndexRoute
+  authAppLayoutAdminUsersIndexRoute: typeof authAppLayoutAdminUsersIndexRoute
 }
 
 const authAppLayoutRouteRouteChildren: authAppLayoutRouteRouteChildren = {
   authAppLayoutDashboardRoute: authAppLayoutDashboardRoute,
+  authAppLayoutAdminDepartmentsIndexRoute:
+    authAppLayoutAdminDepartmentsIndexRoute,
+  authAppLayoutAdminUsersIndexRoute: authAppLayoutAdminUsersIndexRoute,
 }
 
 const authAppLayoutRouteRouteWithChildren =

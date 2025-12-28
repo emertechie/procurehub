@@ -20,7 +20,7 @@ public class AuthenticationTests(ApiTestHostFixture hostFixture, ITestOutputHelp
 
         // Try to register -> endpoint should not be available
         var unauthorizedRegRequest = JsonContent.Create(new { email = "joe@example.com", password = "Test1234!" });
-        var unauthorizedRegResp = await HttpClient.PostAsync("/register", unauthorizedRegRequest, CancellationToken);
+        var unauthorizedRegResp = await HttpClient.PostAsync("/register", unauthorizedRegRequest);
         Assert.Equal(HttpStatusCode.NotFound, unauthorizedRegResp.StatusCode);
     }
 
@@ -29,10 +29,10 @@ public class AuthenticationTests(ApiTestHostFixture hostFixture, ITestOutputHelp
     {
         // Login as the test admin (using credentials defined in WebApiTestFactory)
         var loginRequest = JsonContent.Create(new { email = "test-admin@procurehub.local", password = "TestAdmin123!" });
-        var loginResp = await HttpClient.PostAsync("/login", loginRequest, CancellationToken);
+        var loginResp = await HttpClient.PostAsync("/login", loginRequest);
         Assert.Equal(HttpStatusCode.OK, loginResp.StatusCode);
 
-        var loginResult = await loginResp.Content.ReadFromJsonAsync<LoginResponse>(CancellationToken);
+        var loginResult = await loginResp.Content.ReadFromJsonAsync<LoginResponse>();
         Assert.NotNull(loginResult);
         Assert.NotEmpty(loginResult.AccessToken);
 
@@ -40,14 +40,14 @@ public class AuthenticationTests(ApiTestHostFixture hostFixture, ITestOutputHelp
         HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult.AccessToken);
 
         // The /me endpoint not available for token access
-        var meResp = await HttpClient.GetAsync("/me", CancellationToken);
+        var meResp = await HttpClient.GetAsync("/me");
         Assert.Equal(HttpStatusCode.OK, meResp.StatusCode);
-        var meResult = await meResp.Content.ReadFromJsonAsync<MeResponse>(CancellationToken);
+        var meResult = await meResp.Content.ReadFromJsonAsync<MeResponse>();
         Assert.NotEmpty(meResult!.Id);
         Assert.Equal("test-admin@procurehub.local", meResult!.Email);
 
         // Make sure can call the /users endpoint
-        var usersResp = await HttpClient.GetAsync("/users", CancellationToken);
+        var usersResp = await HttpClient.GetAsync("/users");
         Assert.Equal(HttpStatusCode.OK, usersResp.StatusCode);
     }
 
@@ -56,20 +56,20 @@ public class AuthenticationTests(ApiTestHostFixture hostFixture, ITestOutputHelp
     {
         // Login as the test admin using cookie authentication
         var loginRequest = JsonContent.Create(new { email = "test-admin@procurehub.local", password = "TestAdmin123!" });
-        var loginResp = await HttpClient.PostAsync("/login?useCookies=true", loginRequest, CancellationToken);
+        var loginResp = await HttpClient.PostAsync("/login?useCookies=true", loginRequest);
         Assert.Equal(HttpStatusCode.OK, loginResp.StatusCode);
 
         // Cookie should be set automatically by HttpClient's cookie container
         // Test the /me endpoint which should work with cookie auth
-        var meResp = await HttpClient.GetAsync("/me", CancellationToken);
+        var meResp = await HttpClient.GetAsync("/me");
         Assert.Equal(HttpStatusCode.OK, meResp.StatusCode);
-        var meResult = await meResp.Content.ReadFromJsonAsync<MeResponse>(CancellationToken);
+        var meResult = await meResp.Content.ReadFromJsonAsync<MeResponse>();
         Assert.NotNull(meResult);
         Assert.NotEmpty(meResult.Id);
         Assert.Equal("test-admin@procurehub.local", meResult.Email);
 
         // Make sure can call the /users endpoint with cookie
-        var usersResp = await HttpClient.GetAsync("/users", CancellationToken);
+        var usersResp = await HttpClient.GetAsync("/users");
         Assert.Equal(HttpStatusCode.OK, usersResp.StatusCode);
     }
 
@@ -81,24 +81,24 @@ public class AuthenticationTests(ApiTestHostFixture hostFixture, ITestOutputHelp
     public async Task Logout_with_cookie_clears_authentication()
     {
         // Can't call /logout if not logged in
-        var unauthLogoutResp = await HttpClient.PostAsync("/logout", null, CancellationToken);
+        var unauthLogoutResp = await HttpClient.PostAsync("/logout", null);
         Assert.Equal(HttpStatusCode.Unauthorized, unauthLogoutResp.StatusCode);
 
         // Login with cookie
         var loginRequest = JsonContent.Create(new { email = "test-admin@procurehub.local", password = "TestAdmin123!" });
-        var loginResp = await HttpClient.PostAsync("/login?useCookies=true", loginRequest, CancellationToken);
+        var loginResp = await HttpClient.PostAsync("/login?useCookies=true", loginRequest);
         Assert.Equal(HttpStatusCode.OK, loginResp.StatusCode);
 
         // Verify we can access protected endpoint with cookie
-        var meResp = await HttpClient.GetAsync("/me", CancellationToken);
+        var meResp = await HttpClient.GetAsync("/me");
         Assert.Equal(HttpStatusCode.OK, meResp.StatusCode);
 
         // Logout
-        var logoutResp = await HttpClient.PostAsync("/logout", null, CancellationToken);
+        var logoutResp = await HttpClient.PostAsync("/logout", null);
         Assert.Equal(HttpStatusCode.OK, logoutResp.StatusCode);
 
         // After logout, cookie should be cleared and we should not be able to access protected endpoints
-        var meRespAfterLogout = await HttpClient.GetAsync("/me", CancellationToken);
+        var meRespAfterLogout = await HttpClient.GetAsync("/me");
         Assert.Equal(HttpStatusCode.Unauthorized, meRespAfterLogout.StatusCode);
     }
 
