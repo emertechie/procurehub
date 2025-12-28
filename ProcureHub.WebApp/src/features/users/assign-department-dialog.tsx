@@ -1,6 +1,5 @@
 import * as React from "react";
 import type { components } from "@/lib/api/schema";
-import { api } from "@/lib/api/client";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { useAssignUserToDepartment } from "./hooks";
 import { useDepartments } from "../departments";
 
@@ -60,6 +60,11 @@ export function AssignDepartmentDialog({
           departmentId: selectedDepartmentId,
         },
       });
+      toast.success(
+        selectedDepartmentId
+          ? "Department assigned successfully"
+          : "Department unassigned successfully",
+      );
       onOpenChange(false);
     } catch (error) {
       console.error("Failed to assign department:", error);
