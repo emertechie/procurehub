@@ -10,7 +10,21 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  MoreHorizontal,
+  Pencil,
+  Shield,
+  UserX,
+  UserCheck,
+  Building2,
+} from "lucide-react";
 import { useEnableUser, useDisableUser } from "./hooks";
 
 type User = components["schemas"]["QueryUsersResponse"];
@@ -20,6 +34,21 @@ interface UserTableProps {
   onEditUser: (user: User) => void;
   onManageRoles: (user: User) => void;
   onAssignDepartment: (user: User) => void;
+}
+
+function getInitials(firstName: string, lastName: string): string {
+  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+}
+
+function getRoleBadgeClasses(role: string): string {
+  const lowerRole = role.toLowerCase();
+  if (lowerRole.includes("manager") || lowerRole.includes("approver")) {
+    return "border-green-300 bg-green-50 text-green-700";
+  }
+  if (lowerRole.includes("admin") || lowerRole.includes("administrator")) {
+    return "border-amber-300 bg-amber-50 text-amber-700";
+  }
+  return "border-gray-300 bg-gray-100 text-gray-700";
 }
 
 export function UserTable({
@@ -47,19 +76,18 @@ export function UserTable({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Email</TableHead>
+          <TableHead>User</TableHead>
+          <TableHead>Role</TableHead>
           <TableHead>Department</TableHead>
-          <TableHead>Roles</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          <TableHead className="w-12"></TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {users.length === 0 ? (
           <TableRow>
             <TableCell
-              colSpan={6}
+              colSpan={5}
               className="text-center text-muted-foreground"
             >
               No users found
@@ -68,72 +96,97 @@ export function UserTable({
         ) : (
           users.map((user) => (
             <TableRow key={user.id}>
-              <TableCell className="font-medium">
-                {user.firstName} {user.lastName}
-              </TableCell>
-              <TableCell>{user.email}</TableCell>
               <TableCell>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {user.department ? (
-                    <Badge variant="outline">{user.department.name}</Badge>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">
-                      No department
+                <div className="flex items-center gap-3">
+                  <Avatar className="size-10">
+                    <AvatarFallback className="bg-gray-100 text-gray-600 text-sm font-medium">
+                      {getInitials(user.firstName, user.lastName)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span className="font-medium">
+                      {user.firstName} {user.lastName}
                     </span>
-                  )}
-                  <Button
-                    variant="link"
-                    size="sm"
-                    className="h-auto p-0 text-xs"
-                    onClick={() => onAssignDepartment(user)}
-                  >
-                    {user.department ? "Change" : "Assign"}
-                  </Button>
+                    <span className="text-sm text-muted-foreground">
+                      {user.email}
+                    </span>
+                  </div>
                 </div>
               </TableCell>
               <TableCell>
-                <div className="flex gap-1 flex-wrap items-center">
+                <div className="flex gap-1.5 flex-wrap">
                   {user.roles.length > 0 ? (
                     user.roles.map((role) => (
-                      <Badge key={role} variant="secondary">
+                      <Badge
+                        key={role}
+                        variant="outline"
+                        className={getRoleBadgeClasses(role)}
+                      >
                         {role}
                       </Badge>
                     ))
                   ) : (
-                    <span className="text-xs text-muted-foreground">
-                      No roles
-                    </span>
+                    <span className="text-sm text-muted-foreground">—</span>
                   )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 px-2 text-xs"
-                    onClick={() => onManageRoles(user)}
-                  >
-                    Manage
-                  </Button>
                 </div>
               </TableCell>
               <TableCell>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={!!user.enabledAt}
-                    onCheckedChange={() => handleToggleEnabled(user)}
-                    disabled={enableUser.isPending || disableUser.isPending}
-                  />
-                  <span className="text-sm">
-                    {user.enabledAt ? "Active" : "Disabled"}
-                  </span>
-                </div>
+                <span className="text-muted-foreground">
+                  {user.department?.name ?? "—"}
+                </span>
               </TableCell>
-              <TableCell className="text-right">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onEditUser(user)}
+              <TableCell>
+                <Badge
+                  variant="outline"
+                  className={
+                    user.enabledAt
+                      ? "border-green-300 bg-green-50 text-green-700"
+                      : "border-gray-300 bg-gray-100 text-gray-500"
+                  }
                 >
-                  Edit
-                </Button>
+                  {user.enabledAt ? "Active" : "Disabled"}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="size-8">
+                      <MoreHorizontal className="size-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => onEditUser(user)}>
+                      <Pencil className="size-4" />
+                      Edit User
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onManageRoles(user)}>
+                      <Shield className="size-4" />
+                      Change Role
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onAssignDepartment(user)}>
+                      <Building2 className="size-4" />
+                      Change Department
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      variant={user.enabledAt ? "destructive" : "default"}
+                      onClick={() => handleToggleEnabled(user)}
+                      disabled={enableUser.isPending || disableUser.isPending}
+                    >
+                      {user.enabledAt ? (
+                        <>
+                          <UserX className="size-4" />
+                          Deactivate
+                        </>
+                      ) : (
+                        <>
+                          <UserCheck className="size-4" />
+                          Activate
+                        </>
+                      )}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
           ))
