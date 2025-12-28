@@ -57,7 +57,9 @@ export function setFormFieldErrors<T extends FieldValues>(
     if (messages.length > 0) {
       form.setError(formField as Path<T>, {
         type: "server",
-        message: messages[0],
+        message: messages
+          .map((msg) => (msg.endsWith(".") ? msg.slice(0, -1) : msg))
+          .join(". "),
       });
     }
   }
