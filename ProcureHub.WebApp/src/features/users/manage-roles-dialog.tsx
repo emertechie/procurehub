@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { useAssignRole, useRemoveRole, useUser } from "./hooks";
 
 type User = components["schemas"]["QueryUsersResponse"];
@@ -67,6 +67,7 @@ export function ManageRolesDialog({
           },
         });
       }
+      toast.success("Role updated successfully");
     } catch (error) {
       console.error("Failed to toggle role:", error);
     }
@@ -84,23 +85,6 @@ export function ManageRolesDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="rounded-md border p-4">
-            <div className="mb-3 text-sm font-medium">Current Roles</div>
-            <div className="flex flex-wrap gap-2">
-              {currentUser.roles.length > 0 ? (
-                currentUser.roles.map((role) => (
-                  <Badge key={role} variant="secondary">
-                    {role}
-                  </Badge>
-                ))
-              ) : (
-                <span className="text-sm text-muted-foreground">
-                  No roles assigned
-                </span>
-              )}
-            </div>
-          </div>
-
           <div className="space-y-2">
             <div className="text-sm font-medium">Available Roles</div>
             {availableRoles.map((role) => (
