@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useAssignUserToDepartment } from "./hooks";
+import { useDepartments } from "../departments";
 
 type User = components["schemas"]["QueryUsersResponse"];
 
@@ -32,7 +33,7 @@ export function AssignDepartmentDialog({
   onOpenChange,
   user,
 }: AssignDepartmentDialogProps) {
-  const { data: departmentsData } = api.useQuery("get", "/departments");
+  const { data: departmentsData } = useDepartments();
   const assignDepartment = useAssignUserToDepartment();
   const [selectedDepartmentId, setSelectedDepartmentId] = React.useState<
     string | null
