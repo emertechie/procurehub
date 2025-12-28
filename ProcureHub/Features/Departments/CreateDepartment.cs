@@ -1,6 +1,7 @@
 using FluentValidation;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
+using static ProcureHub.Models.Department;
 
 namespace ProcureHub.Features.Departments;
 
@@ -12,7 +13,7 @@ public static class CreateDepartment
     {
         public RequestValidator()
         {
-            RuleFor(r => r.Name).NotEmpty();
+            RuleFor(r => r.Name).NotEmpty().MaximumLength(NameMaxLength);
         }
     }
 

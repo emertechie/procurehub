@@ -5,6 +5,7 @@ using ProcureHub.Common;
 using ProcureHub.Features.Users.Validation;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
+using static ProcureHub.Models.User;
 
 namespace ProcureHub.Features.Users;
 
@@ -18,8 +19,8 @@ public static class CreateUser
         {
             RuleFor(r => r.Email).NotEmpty().EmailAddress();
             RuleFor(r => r.Password).NotEmpty();
-            RuleFor(r => r.FirstName).NotEmpty();
-            RuleFor(r => r.LastName).NotEmpty();
+            RuleFor(r => r.FirstName).NotEmpty().MaximumLength(FirstNameMaxLength);
+            RuleFor(r => r.LastName).NotEmpty().MaximumLength(LastNameMaxLength);
         }
     }
 

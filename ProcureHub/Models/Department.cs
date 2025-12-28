@@ -6,9 +6,11 @@ namespace ProcureHub.Models;
 
 public class Department
 {
+    public const int NameMaxLength = 200;
+
     public Guid Id { get; set; }
 
-    [MaxLength(200)]
+    [MaxLength(NameMaxLength)]
     public required string Name { get; set; }
 
     public ICollection<User> Users { get; set; } = new HashSet<User>();

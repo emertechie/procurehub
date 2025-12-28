@@ -7,14 +7,17 @@ namespace ProcureHub.Models;
 
 public class User : IdentityUser
 {
+    public const int FirstNameMaxLength = 200;
+    public const int LastNameMaxLength = 200;
+
     public virtual ICollection<ApplicationUserRole>? UserRoles { get; set; }
 
     [Required]
-    [MaxLength(200)]
+    [MaxLength(FirstNameMaxLength)]
     public string FirstName { get; set; } = null!;
 
     [Required]
-    [MaxLength(200)]
+    [MaxLength(LastNameMaxLength)]
     public string LastName { get; set; } = null!;
 
     public Guid? DepartmentId { get; set; }

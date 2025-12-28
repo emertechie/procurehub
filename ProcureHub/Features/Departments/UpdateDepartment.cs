@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Common;
 using ProcureHub.Infrastructure;
+using static ProcureHub.Models.Department;
 
 namespace ProcureHub.Features.Departments;
 
@@ -14,7 +15,7 @@ public static class UpdateDepartment
         public RequestValidator()
         {
             RuleFor(r => r.Id).NotEmpty();
-            RuleFor(r => r.Name).NotEmpty();
+            RuleFor(r => r.Name).NotEmpty().MaximumLength(NameMaxLength);
         }
     }
 
