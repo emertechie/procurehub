@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Identity.Data;
 using ProcureHub.Features.Departments;
@@ -273,11 +273,12 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
 
         // Attempt 2: Admin tries to create user with same email - should fail
         var regResp2 = await HttpClient.PostAsync("/users", JsonContent.Create(newUserReq));
-        await regResp2.AssertValidationProblemAsync(
-            errors: new Dictionary<string, string[]>
-            {
-                ["DuplicateUserName"] = [$"Username '{email}' is already taken."]
-            });
+            await regResp2.AssertValidationProblemAsync(
+                errors: new Dictionary<string, string[]>
+                {
+                    ["Email"] = [$"Username '{email}' is already taken."]
+                });
+
 
         // Assert only 1 user record created
         var userList2 = await HttpClient.GetAsync($"/users?email={email}")

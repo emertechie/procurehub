@@ -1,4 +1,7 @@
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+using ProcureHub.Common;
+using ProcureHub.Features.Departments.Validation;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
 
@@ -17,14 +20,22 @@ public static class CreateDepartment
     }
 
     public class Handler(ApplicationDbContext dbContext)
-        : IRequestHandler<Request, Guid>
+        : IRequestHandler<Request, Result<Guid>>
     {
-        public async Task<Guid> HandleAsync(Request request, CancellationToken token)
+        public async Task<Result<Guid>> HandleAsync(Request request, CancellationToken token)
         {
             var department = new Department { Name = request.Name };
-            var result = await dbContext.Departments.AddAsync(department, token);
-            await dbContext.SaveChangesAsync(token);
-            return result.Entity.Id;
+            await dbContext.Departments.AddAsync(department, token);
+
+            try
+            {
+                await dbContext.SaveChangesAsync(token);
+                return Result.Success(department.Id);
+            }
+            catch (DbUpdateException ex) when (DatabaseErrors.IsUniqueConstraintViolation(ex, "IX_Departments_Name"))
+            {
+                return Result.Failure<Guid>(DepartmentErrors.DuplicateName(request.Name));
+            }
         }
     }
 }

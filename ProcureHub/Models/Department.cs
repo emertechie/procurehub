@@ -26,5 +26,8 @@ public class DepartmentEntityTypeConfiguration : IEntityTypeConfiguration<Depart
 
         builder.Property(d => d.Id)
             .HasDefaultValueSql("uuidv7()");
+
+        builder.HasIndex(d => d.Name)
+            .IsUnique();
     }
 }
