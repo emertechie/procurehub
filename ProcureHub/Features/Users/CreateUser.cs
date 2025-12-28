@@ -60,7 +60,7 @@ public static class CreateUser
         private static Error UserCreationFailed(IEnumerable<IdentityError> identityErrors)
         {
             var validationErrors = identityErrors
-                .GroupBy(e => e.Code)
+                .GroupBy(e => MapErrorCodeToFieldName(e.Code))
                 .ToDictionary(
                     g => g.Key,
                     g => g.Select(e => e.Description).ToArray()
@@ -72,5 +72,22 @@ public static class CreateUser
                 validationErrors
             );
         }
+
+        private static string MapErrorCodeToFieldName(string errorCode) => errorCode switch
+        {
+            "PasswordRequiresNonAlphanumeric" or
+            "PasswordRequiresDigit" or
+            "PasswordRequiresLower" or
+            "PasswordRequiresUpper" or
+            "PasswordTooShort" or
+            "PasswordRequiresUniqueChars" => "Password",
+
+            "DuplicateUserName" or
+            "DuplicateEmail" or
+            "InvalidEmail" or
+            "InvalidUserName" => "Email",
+
+            _ => errorCode
+        };
     }
 }
