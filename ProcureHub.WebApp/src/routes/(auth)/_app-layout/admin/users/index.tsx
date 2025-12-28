@@ -72,33 +72,23 @@ function AdminUsersPage() {
         <Button onClick={handleCreateUser}>Create User</Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Search Users</CardTitle>
-          <CardDescription>
-            Filter users by email address or view all users
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Search by email..."
-              value={searchEmail}
-              onChange={(e) => setSearchEmail(e.target.value)}
-              className="max-w-sm"
-            />
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSearchEmail("");
-                setPage(1);
-              }}
-            >
-              Clear
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex gap-2">
+        <Input
+          placeholder="Search users..."
+          value={searchEmail}
+          onChange={(e) => setSearchEmail(e.target.value)}
+          className="bg-white"
+        />
+        <Button
+          variant="outline"
+          onClick={() => {
+            setSearchEmail("");
+            setPage(1);
+          }}
+        >
+          Clear
+        </Button>
+      </div>
 
       <Card>
         <CardHeader>
