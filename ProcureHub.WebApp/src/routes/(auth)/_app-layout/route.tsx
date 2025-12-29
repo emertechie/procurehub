@@ -10,7 +10,6 @@ import {
   Home,
   LogOut,
   Package,
-  Settings,
   Users,
   CheckCircle,
 } from "lucide-react";
