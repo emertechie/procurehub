@@ -11,6 +11,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<Department> Departments { get; set; }
     public DbSet<Category> Categories { get; set; }
+    public DbSet<PurchaseRequest> PurchaseRequests { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
