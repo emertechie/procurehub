@@ -47,8 +47,10 @@ public class PurchaseRequestTestsWithSharedDb(
             new EndpointInfo("/purchase-requests/{id}", "GET", "GetPurchaseRequestById"),
             new EndpointInfo("/purchase-requests/{id}", "PUT", "UpdatePurchaseRequest"),
             new EndpointInfo("/purchase-requests/{id}/submit", "POST", "SubmitPurchaseRequest"),
-            new EndpointInfo("/purchase-requests/{id}/approve", "POST", "ApprovePurchaseRequest", new EndpointTestOptions { RequiresAdmin = true }),
-            new EndpointInfo("/purchase-requests/{id}/reject", "POST", "RejectPurchaseRequest", new EndpointTestOptions { RequiresAdmin = true }),
+            new EndpointInfo("/purchase-requests/{id}/approve", "POST", "ApprovePurchaseRequest",
+                new EndpointTestOptions { RequiresAdmin = true }),
+            new EndpointInfo("/purchase-requests/{id}/reject", "POST", "RejectPurchaseRequest",
+                new EndpointTestOptions { RequiresAdmin = true }),
             new EndpointInfo("/purchase-requests/{id}", "DELETE", "DeletePurchaseRequest")
         };
     }

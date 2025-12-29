@@ -30,7 +30,9 @@ public static class Endpoints
             {
                 var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (string.IsNullOrEmpty(userId))
+                {
                     return Results.Unauthorized();
+                }
 
                 var requestWithUser = request with { UserId = userId };
                 var result = await handler.HandleAsync(requestWithUser, token);
