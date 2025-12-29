@@ -20,3 +20,14 @@ builder.Property(d => d.Id)
   - Use shared static constants in the configuration class to avoid hard coding max length in multiple places
   - Good example: usage of `CategoryConfiguration.NameMaxLength`
   - Define constants like: `public const int NameMaxLength = 100;`
+
+# Request Handlers
+
+- Request handlers implement the `ProcureHub.Infrastructure.IRequestHandler<TRequest, TResponse>`
+- Place request handlers in the appropriate `ProcureHub/Features/{FeatureName}` folder
+- `GET`-related handlers should return a `PagedResult<Response>` for pageable queries, or just a plan `Response` DTO (or `Response[]`) for others
+- Mutation-related handlers should return a `ProcureHub.Common.Result<T>` type to indicate either success or failure
+  - Failure results use the `ProcureHub.Common.Error` type, which is not concerned with transport-specific error handling
+  - `Error`s are converted to a problem details response in the API with the `.ToProblemDetails()` extension method
+- Custom Error helpers or validation related types should go in a `Validation` folder within the feature folder
+  - Example: `ProcureHub/Features/Departments/Validation/DepartmentErrors.cs`
