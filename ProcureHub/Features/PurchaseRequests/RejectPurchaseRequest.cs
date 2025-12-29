@@ -21,7 +21,7 @@ public static class RejectPurchaseRequest
                 return Result.Failure(PurchaseRequestErrors.NotFound);
 
             if (purchaseRequest.Status != PurchaseRequestStatus.Pending)
-                return Result.Failure(PurchaseRequestErrors.NotPending);
+                return Result.Failure(PurchaseRequestErrors.CannotRejectNonPending);
 
             purchaseRequest.Status = PurchaseRequestStatus.Rejected;
             purchaseRequest.ReviewedAt = DateTime.UtcNow;

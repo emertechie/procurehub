@@ -21,7 +21,7 @@ public static class ApprovePurchaseRequest
                 return Result.Failure(PurchaseRequestErrors.NotFound);
 
             if (purchaseRequest.Status != PurchaseRequestStatus.Pending)
-                return Result.Failure(PurchaseRequestErrors.NotPending);
+                return Result.Failure(PurchaseRequestErrors.CannotApproveNonPending);
 
             purchaseRequest.Status = PurchaseRequestStatus.Approved;
             purchaseRequest.ReviewedAt = DateTime.UtcNow;

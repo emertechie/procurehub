@@ -20,11 +20,7 @@ public static class SubmitPurchaseRequest
                 return Result.Failure(PurchaseRequestErrors.NotFound);
 
             if (purchaseRequest.Status != PurchaseRequestStatus.Draft)
-                return Result.Failure(PurchaseRequestErrors.AlreadySubmitted);
-
-            // Validate required fields
-            if (string.IsNullOrWhiteSpace(purchaseRequest.Title) || purchaseRequest.EstimatedAmount <= 0)
-                return Result.Failure(PurchaseRequestErrors.MissingRequiredFields);
+                return Result.Failure(PurchaseRequestErrors.CannotSubmitNonDraft);
 
             purchaseRequest.Status = PurchaseRequestStatus.Pending;
             purchaseRequest.SubmittedAt = DateTime.UtcNow;

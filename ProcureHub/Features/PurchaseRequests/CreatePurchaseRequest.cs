@@ -48,6 +48,12 @@ public static class CreatePurchaseRequest
             if (!departmentExists)
                 return Result.Failure<Guid>(PurchaseRequestErrors.DepartmentNotFound);
 
+            // Generate request number
+            var year = DateTime.UtcNow.Year;
+            var count = await dbContext.PurchaseRequests
+                .CountAsync(pr => pr.RequestNumber.StartsWith($"PR-{year}-"), token);
+            var requestNumber = $"PR-{year}-{(count + 1):D3}";
+
             var now = DateTime.UtcNow;
             var purchaseRequest = new PurchaseRequest
             {
@@ -59,7 +65,7 @@ public static class CreatePurchaseRequest
                 DepartmentId = request.DepartmentId,
                 RequesterId = request.UserId,
                 Status = PurchaseRequestStatus.Draft,
-                RequestNumber = string.Empty, // Will be set by DB trigger on submit
+                RequestNumber = requestNumber,
                 CreatedAt = now,
                 UpdatedAt = now
             };

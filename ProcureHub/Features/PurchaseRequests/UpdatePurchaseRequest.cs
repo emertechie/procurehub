@@ -42,7 +42,7 @@ public static class UpdatePurchaseRequest
                 return Result.Failure(PurchaseRequestErrors.NotFound);
 
             if (purchaseRequest.Status != PurchaseRequestStatus.Draft)
-                return Result.Failure(PurchaseRequestErrors.NotDraft);
+                return Result.Failure(PurchaseRequestErrors.CannotUpdateNonDraft);
 
             // Verify category exists
             var categoryExists = await dbContext.Categories

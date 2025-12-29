@@ -20,7 +20,7 @@ public static class DeletePurchaseRequest
                 return Result.Failure(PurchaseRequestErrors.NotFound);
 
             if (purchaseRequest.Status != PurchaseRequestStatus.Draft)
-                return Result.Failure(PurchaseRequestErrors.CannotDelete);
+                return Result.Failure(PurchaseRequestErrors.CannotDeleteNonDraft);
 
             dbContext.PurchaseRequests.Remove(purchaseRequest);
             await dbContext.SaveChangesAsync(token);
