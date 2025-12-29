@@ -123,11 +123,6 @@ public class UserTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
         // Log in as admin to be able to manage users
         await LoginAsAdminAsync();
 
-        // Not a valid email
-        var respInvalidEmail = await HttpClient.GetAsync("/users?email=not-an-email");
-        await respInvalidEmail.AssertValidationProblemAsync(
-            errors: new Dictionary<string, string[]> { ["Email"] = ["'Email' is not a valid email address."] });
-
         // Page < 1
         var respInvalidPage = await HttpClient.GetAsync("/users?page=0");
         await respInvalidPage.AssertValidationProblemAsync(
@@ -273,11 +268,11 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
 
         // Attempt 2: Admin tries to create user with same email - should fail
         var regResp2 = await HttpClient.PostAsync("/users", JsonContent.Create(newUserReq));
-            await regResp2.AssertValidationProblemAsync(
-                errors: new Dictionary<string, string[]>
-                {
-                    ["Email"] = [$"Username '{email}' is already taken."]
-                });
+        await regResp2.AssertValidationProblemAsync(
+            errors: new Dictionary<string, string[]>
+            {
+                ["Email"] = [$"Username '{email}' is already taken."]
+            });
 
 
         // Assert only 1 user record created
@@ -496,5 +491,43 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         var user = await HttpClient.GetAsync($"/users/{userId}")
             .ReadJsonAsync<DataResponse<GetUserById.Response>>();
         Assert.Empty(user.Data.Roles);
+    }
+
+    [Fact]
+    public async Task Query_users_supports_partial_email_search()
+    {
+        await LoginAsAdminAsync();
+
+        // Create 3 users with different email patterns
+        var user1Req = ValidCreateRequest with { Email = "alice@example.com" };
+        var user2Req = ValidCreateRequest with { Email = "bob@example.com" };
+        var user3Req = ValidCreateRequest with { Email = "alice@different.com" };
+
+        await HttpClient.PostAsync("/users", JsonContent.Create(user1Req));
+        await HttpClient.PostAsync("/users", JsonContent.Create(user2Req));
+        await HttpClient.PostAsync("/users", JsonContent.Create(user3Req));
+
+        // Search by partial email "alice" - should match both alice users
+        var aliceResults = await HttpClient.GetAsync("/users?email=alice")
+            .ReadJsonAsync<PagedResponse<QueryUsers.Response>>();
+        Assert.Equal(2, aliceResults.Data.Count);
+        Assert.All(aliceResults.Data, u => Assert.StartsWith("alice", u.Email));
+
+        // Search by partial email "alice@ex" - should match alice@example.com only
+        var aliceExResults = await HttpClient.GetAsync("/users?email=alice@ex")
+            .ReadJsonAsync<PagedResponse<QueryUsers.Response>>();
+        var singleUser = Assert.Single(aliceExResults.Data);
+        Assert.Equal("alice@example.com", singleUser.Email);
+
+        // Search by partial email "bob" - should match bob@example.com only
+        var bobResults = await HttpClient.GetAsync("/users?email=bob")
+            .ReadJsonAsync<PagedResponse<QueryUsers.Response>>();
+        var bobUser = Assert.Single(bobResults.Data);
+        Assert.Equal("bob@example.com", bobUser.Email);
+
+        // Search with no email filter - should return all users (including admin)
+        var allResults = await HttpClient.GetAsync("/users")
+            .ReadJsonAsync<PagedResponse<QueryUsers.Response>>();
+        Assert.True(allResults.Data.Count >= 4); // At least 3 created + admin
     }
 }

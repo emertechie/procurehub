@@ -15,7 +15,6 @@ public static class QueryUsers
     {
         public RequestValidator()
         {
-            RuleFor(r => r.Email).EmailAddress();
             RuleFor(r => r.Page).GreaterThanOrEqualTo(1);
             RuleFor(r => r.PageSize).InclusiveBetween(1, Paging.MaxPageSize);
         }
@@ -45,7 +44,7 @@ public static class QueryUsers
             var query = dbContext.Users
                 .AsNoTracking()
                 .Where(s => string.IsNullOrWhiteSpace(request.Email) ||
-                            s.NormalizedEmail == normalizedEmail);
+                            s.NormalizedEmail!.StartsWith(normalizedEmail!));
 
             return await query
                 .OrderBy(u => u.Email)
