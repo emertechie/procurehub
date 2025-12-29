@@ -30,6 +30,10 @@ public static class RequestHandlerExtensions
             }
         }
 
+        // Wrap all handlers with validation decorator
+        services.Decorate(typeof(IRequestHandler<,>), typeof(ValidationRequestHandlerDecorator<,>));
+        services.TryDecorate(typeof(IRequestHandler<>), typeof(ValidationRequestHandlerDecorator<>));
+
         return services;
     }
 }

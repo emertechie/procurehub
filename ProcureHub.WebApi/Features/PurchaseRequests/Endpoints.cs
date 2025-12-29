@@ -7,7 +7,6 @@ using ProcureHub.Infrastructure;
 using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Helpers;
 using ProcureHub.WebApi.Responses;
-using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 namespace ProcureHub.WebApi.Features.PurchaseRequests;
 
@@ -18,7 +17,6 @@ public static class Endpoints
         var group = app.MapGroup("")
             .RequireAuthorization(AuthorizationPolicyNames.Authenticated)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
-            .AddFluentValidationAutoValidation()
             .WithTags("PurchaseRequests");
 
         group.MapPost("/purchase-requests", async (

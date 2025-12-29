@@ -94,11 +94,14 @@ public class RoleTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
     {
         await LoginAsAdminAsync();
 
-        // No user ID
+        // Empty UserId -> route mismatch (since route has "user-1")
         var reqNoUserId = new AssignRole.Request("", "role-1");
         var respNoUserId = await HttpClient.PostAsync("/users/user-1/roles", JsonContent.Create(reqNoUserId));
-        await respNoUserId.AssertValidationProblemAsync(
-            errors: new Dictionary<string, string[]> { ["UserId"] = ["'User Id' must not be empty."] });
+        await respNoUserId.AssertProblemDetailsAsync(
+            HttpStatusCode.BadRequest,
+            "Route ID mismatch",
+            "Route ID does not match request ID",
+            "POST /users/user-1/roles");
 
         // No role ID
         var reqNoRoleId = new AssignRole.Request("user-1", "");

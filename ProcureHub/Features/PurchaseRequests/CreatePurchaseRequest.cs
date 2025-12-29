@@ -29,6 +29,7 @@ public static class CreatePurchaseRequest
             RuleFor(r => r.BusinessJustification).MaximumLength(PurchaseRequestConfiguration.BusinessJustificationMaxLength);
             RuleFor(r => r.CategoryId).NotEmpty();
             RuleFor(r => r.DepartmentId).NotEmpty();
+            RuleFor(r => r.UserId).NotEmpty();
         }
     }
 

@@ -47,6 +47,8 @@ void RegisterServices(WebApplicationBuilder appBuilder)
         };
     });
 
+    builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+
     // Add services to the container.
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     appBuilder.Services.AddOpenApi(options =>
@@ -105,9 +107,6 @@ void RegisterServices(WebApplicationBuilder appBuilder)
 
     // Register all FluentValidation validators 
     appBuilder.Services.AddValidatorsFromAssemblyContaining<CreateUser.Request>();
-
-    // Automatically run FluentValidation validators on ASP.Net Minimal APIs:
-    builder.Services.AddFluentValidationAutoValidation();
 }
 
 async Task ConfigureApplication(WebApplication app)

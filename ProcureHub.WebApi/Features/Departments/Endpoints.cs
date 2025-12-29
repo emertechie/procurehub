@@ -5,7 +5,6 @@ using ProcureHub.Infrastructure;
 using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Helpers;
 using ProcureHub.WebApi.Responses;
-using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 namespace ProcureHub.WebApi.Features.Departments;
 
@@ -16,7 +15,6 @@ public static class Endpoints
         var group = app.MapGroup("")
             .RequireAuthorization(AuthorizationPolicyNames.Authenticated)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
-            .AddFluentValidationAutoValidation()
             .WithTags("Departments");
 
         group.MapPost("/departments", async (
