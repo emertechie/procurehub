@@ -17,6 +17,7 @@ import {
   AssignDepartmentDialog,
   useUsers,
 } from "@/features/users";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
 type User = components["schemas"]["QueryUsersResponse"];
 
@@ -26,6 +27,7 @@ export const Route = createFileRoute("/(auth)/_app-layout/admin/users/")({
 
 function AdminUsersPage() {
   const [searchEmail, setSearchEmail] = React.useState("");
+  const debouncedSearchEmail = useDebouncedValue(searchEmail);
   const [page, setPage] = React.useState(1);
   const pageSize = 20;
 
@@ -35,7 +37,7 @@ function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
 
   const { data, isPending, isError, error } = useUsers(
-    searchEmail,
+    debouncedSearchEmail,
     page,
     pageSize,
   );
