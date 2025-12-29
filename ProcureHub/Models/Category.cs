@@ -5,8 +5,6 @@ namespace ProcureHub.Models;
 
 public class Category
 {
-    public const int NameMaxLength = 100;
-
     public Guid Id { get; set; }
     public required string Name { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -15,6 +13,8 @@ public class Category
 
 public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 {
+    public const int NameMaxLength = 100;
+
     public void Configure(EntityTypeBuilder<Category> builder)
     {
         builder.ToTable("Categories");
@@ -24,7 +24,7 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
         builder.Property(c => c.Name)
             .IsRequired()
-            .HasMaxLength(Category.NameMaxLength);
+            .HasMaxLength(NameMaxLength);
 
         builder.HasIndex(c => c.Name)
             .IsUnique();

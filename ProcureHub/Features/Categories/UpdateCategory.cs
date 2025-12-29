@@ -15,7 +15,7 @@ public static class UpdateCategory
     {
         public RequestValidator()
         {
-            RuleFor(r => r.Name).NotEmpty().MaximumLength(Category.NameMaxLength);
+            RuleFor(r => r.Name).NotEmpty().MaximumLength(CategoryConfiguration.NameMaxLength);
         }
     }
 

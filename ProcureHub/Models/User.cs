@@ -6,9 +6,6 @@ namespace ProcureHub.Models;
 
 public class User : IdentityUser
 {
-    public const int FirstNameMaxLength = 200;
-    public const int LastNameMaxLength = 200;
-
     public virtual ICollection<UserRole>? UserRoles { get; set; }
 
     public string FirstName { get; set; } = null!;
@@ -28,19 +25,22 @@ public class User : IdentityUser
     public DateTime? DeletedAt { get; set; }
 }
 
-public class UserEntityTypeConfiguration : IEntityTypeConfiguration<User>
+public class UserConfiguration : IEntityTypeConfiguration<User>
 {
+    public const int FirstNameMaxLength = 200;
+    public const int LastNameMaxLength = 200;
+
     public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.ToTable("Users");
 
         builder.Property(u => u.FirstName)
             .IsRequired()
-            .HasMaxLength(User.FirstNameMaxLength);
+            .HasMaxLength(FirstNameMaxLength);
 
         builder.Property(u => u.LastName)
             .IsRequired()
-            .HasMaxLength(User.LastNameMaxLength);
+            .HasMaxLength(LastNameMaxLength);
 
         // Each User can have many entries in the UserRole join table
         builder.HasMany(e => e.UserRoles)

@@ -5,8 +5,6 @@ namespace ProcureHub.Models;
 
 public class Department
 {
-    public const int NameMaxLength = 200;
-
     public Guid Id { get; set; }
 
     public required string Name { get; set; }
@@ -18,8 +16,10 @@ public class Department
     public DateTime UpdatedAt { get; set; }
 }
 
-public class DepartmentEntityTypeConfiguration : IEntityTypeConfiguration<Department>
+public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
 {
+    public const int NameMaxLength = 200;
+
     public void Configure(EntityTypeBuilder<Department> builder)
     {
         builder.ToTable("Departments");
@@ -29,7 +29,7 @@ public class DepartmentEntityTypeConfiguration : IEntityTypeConfiguration<Depart
 
         builder.Property(d => d.Name)
             .IsRequired()
-            .HasMaxLength(Department.NameMaxLength);
+            .HasMaxLength(NameMaxLength);
 
         builder.HasIndex(d => d.Name)
             .IsUnique();

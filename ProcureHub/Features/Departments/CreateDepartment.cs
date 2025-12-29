@@ -4,7 +4,6 @@ using ProcureHub.Common;
 using ProcureHub.Features.Departments.Validation;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
-using static ProcureHub.Models.Department;
 
 namespace ProcureHub.Features.Departments;
 
@@ -16,7 +15,7 @@ public static class CreateDepartment
     {
         public RequestValidator()
         {
-            RuleFor(r => r.Name).NotEmpty().MaximumLength(NameMaxLength);
+            RuleFor(r => r.Name).NotEmpty().MaximumLength(DepartmentConfiguration.NameMaxLength);
         }
     }
 

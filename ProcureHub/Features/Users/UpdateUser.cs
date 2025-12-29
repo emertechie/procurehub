@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using ProcureHub.Common;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
-using static ProcureHub.Models.User;
 
 namespace ProcureHub.Features.Users;
 
@@ -19,8 +18,8 @@ public static class UpdateUser
         {
             RuleFor(r => r.Id).NotEmpty();
             RuleFor(r => r.Email).NotEmpty().EmailAddress();
-            RuleFor(r => r.FirstName).NotEmpty().MaximumLength(FirstNameMaxLength);
-            RuleFor(r => r.LastName).NotEmpty().MaximumLength(LastNameMaxLength);
+            RuleFor(r => r.FirstName).NotEmpty().MaximumLength(UserConfiguration.FirstNameMaxLength);
+            RuleFor(r => r.LastName).NotEmpty().MaximumLength(UserConfiguration.LastNameMaxLength);
         }
     }
 
