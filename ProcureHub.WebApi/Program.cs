@@ -66,7 +66,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
             options.Stores.MaxLengthForKeys = 128;
             options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
         })
-        .AddRoles<ApplicationRole>()
+        .AddRoles<Role>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
 
     // Add custom user sign-in validator
@@ -135,7 +135,7 @@ async Task ConfigureApplication(WebApplication app)
         await DataSeeder.SeedAsync(
             dbContext,
             scope.ServiceProvider.GetRequiredService<UserManager<User>>(),
-            scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>(),
+            scope.ServiceProvider.GetRequiredService<RoleManager<Role>>(),
             scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>(),
             app.Configuration.GetRequiredString("DevAdminUser:Email"),
             app.Configuration.GetRequiredString("DevAdminUser:Password"));

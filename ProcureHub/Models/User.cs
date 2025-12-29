@@ -10,7 +10,7 @@ public class User : IdentityUser
     public const int FirstNameMaxLength = 200;
     public const int LastNameMaxLength = 200;
 
-    public virtual ICollection<ApplicationUserRole>? UserRoles { get; set; }
+    public virtual ICollection<UserRole>? UserRoles { get; set; }
 
     [Required]
     [MaxLength(FirstNameMaxLength)]

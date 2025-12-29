@@ -6,7 +6,7 @@ using ProcureHub.Models;
 namespace ProcureHub;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-    : IdentityDbContext<User, ApplicationRole, string, IdentityUserClaim<string>, ApplicationUserRole,
+    : IdentityDbContext<User, Role, string, IdentityUserClaim<string>, UserRole,
         IdentityUserLogin<string>, IdentityRoleClaim<string>, IdentityUserToken<string>>(options)
 {
     public DbSet<Department> Departments { get; set; }

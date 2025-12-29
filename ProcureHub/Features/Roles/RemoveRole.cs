@@ -22,7 +22,7 @@ public static class RemoveRole
 
     public class Handler(
         UserManager<User> userManager,
-        RoleManager<ApplicationRole> roleManager,
+        RoleManager<Role> roleManager,
         ILogger<Handler> logger)
         : IRequestHandler<Request, Result>
     {

@@ -37,7 +37,7 @@ public static class DatabaseResetter
 
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>();
 
         await DataSeeder.SeedAsync(dbContext, userManager, roleManager, logger, adminEmail, adminPassword);
