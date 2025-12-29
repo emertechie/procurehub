@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,7 +9,6 @@ public class Department
 
     public Guid Id { get; set; }
 
-    [MaxLength(NameMaxLength)]
     public required string Name { get; set; }
 
     public ICollection<User> Users { get; set; } = new HashSet<User>();
@@ -28,6 +26,10 @@ public class DepartmentEntityTypeConfiguration : IEntityTypeConfiguration<Depart
 
         builder.Property(d => d.Id)
             .HasDefaultValueSql("uuidv7()");
+
+        builder.Property(d => d.Name)
+            .IsRequired()
+            .HasMaxLength(Department.NameMaxLength);
 
         builder.HasIndex(d => d.Name)
             .IsUnique();

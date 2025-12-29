@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -12,12 +11,8 @@ public class User : IdentityUser
 
     public virtual ICollection<UserRole>? UserRoles { get; set; }
 
-    [Required]
-    [MaxLength(FirstNameMaxLength)]
     public string FirstName { get; set; } = null!;
 
-    [Required]
-    [MaxLength(LastNameMaxLength)]
     public string LastName { get; set; } = null!;
 
     public Guid? DepartmentId { get; set; }
@@ -38,6 +33,14 @@ public class UserEntityTypeConfiguration : IEntityTypeConfiguration<User>
     public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.ToTable("Users");
+
+        builder.Property(u => u.FirstName)
+            .IsRequired()
+            .HasMaxLength(User.FirstNameMaxLength);
+
+        builder.Property(u => u.LastName)
+            .IsRequired()
+            .HasMaxLength(User.LastNameMaxLength);
 
         // Each User can have many entries in the UserRole join table
         builder.HasMany(e => e.UserRoles)
