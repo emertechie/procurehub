@@ -1,6 +1,6 @@
 using ProcureHub.Common;
 
-namespace ProcureHub.Features.PurchaseRequests;
+namespace ProcureHub.Features.PurchaseRequests.Validation;
 
 public static class PurchaseRequestErrors
 {

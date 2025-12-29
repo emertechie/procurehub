@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Common;
+using ProcureHub.Features.PurchaseRequests.Validation;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
 
