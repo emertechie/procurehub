@@ -3,6 +3,7 @@ import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import {
   BadgeCheck,
   Bell,
+  Building2,
   ChevronsUpDown,
   ClipboardList,
   FileText,
@@ -97,7 +98,7 @@ const navigation = {
     {
       title: "Departments",
       url: "/admin/departments",
-      icon: Settings,
+      icon: Building2,
     },
   ],
 };
