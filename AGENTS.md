@@ -8,6 +8,10 @@
 - For detailed project overview, see: `.context/procure_hub_project_overview.md`
 - For list of possible app use cases, see: `.context/all_use_cases.md`
 
+# Plans
+
+- Store plans in the `./plans` folder
+
 # Tech Stack
 
 - This is a full stack app using .Net (C#) for backend API and React (with TanStack Router) for frontend SPA
@@ -18,6 +22,7 @@
 
 ## API Notes
 
+- For guidance on core domain types like Models, Migrations, and VSA request handlers, see: `ProcureHub/AGENTS.md`
 - For guidance on how to map endpoints, see: `ProcureHub.WebApi/Features/AGENTS.md`
 
 # Architecture

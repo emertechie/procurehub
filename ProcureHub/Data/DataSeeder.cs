@@ -20,6 +20,9 @@ public sealed class DataSeeder
 
         // Seed initial admin user
         await SeedAdminUserAsync(dbContext, userManager, logger, adminEmail, adminPassword);
+
+        // Seed categories
+        await SeedCategoriesAsync(dbContext, logger);
     }
 
     private static async Task SeedRolesAsync(
@@ -75,5 +78,44 @@ public sealed class DataSeeder
 
         // Assign Admin role
         await userManager.AddToRoleAsync(adminUser, RoleNames.Admin);
+    }
+
+    private static async Task SeedCategoriesAsync(
+        ApplicationDbContext dbContext,
+        ILogger<DataSeeder> logger)
+    {
+        if (dbContext.Categories.Any())
+        {
+            return; // Categories already seeded
+        }
+
+        var categoryNames = new[]
+        {
+            "IT Equipment",
+            "IT Infrastructure",
+            "Software",
+            "Office Equipment",
+            "Marketing",
+            "Travel",
+            "Training",
+            "Professional Services",
+            "Office Supplies",
+            "Other"
+        };
+
+        var now = DateTime.UtcNow;
+        foreach (var name in categoryNames)
+        {
+            dbContext.Categories.Add(new Category
+            {
+                Id = Guid.NewGuid(),
+                Name = name,
+                CreatedAt = now,
+                UpdatedAt = now
+            });
+        }
+
+        await dbContext.SaveChangesAsync();
+        logger.LogWarning("Seeded {Count} categories", categoryNames.Length);
     }
 }
