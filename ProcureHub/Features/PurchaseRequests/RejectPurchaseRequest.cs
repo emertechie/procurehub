@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Common;
 using ProcureHub.Features.PurchaseRequests.Validation;
@@ -9,6 +10,15 @@ namespace ProcureHub.Features.PurchaseRequests;
 public static class RejectPurchaseRequest
 {
     public record Request(Guid Id, string UserId);
+
+    public class RequestValidator : AbstractValidator<Request>
+    {
+        public RequestValidator()
+        {
+            RuleFor(r => r.Id).NotEmpty();
+            RuleFor(r => r.UserId).NotEmpty();
+        }
+    }
 
     public class Handler(ApplicationDbContext dbContext)
         : IRequestHandler<Request, Result>

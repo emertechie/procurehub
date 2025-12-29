@@ -23,6 +23,7 @@ public static class UpdatePurchaseRequest
     {
         public RequestValidator()
         {
+            RuleFor(r => r.Id).NotEmpty();
             RuleFor(r => r.Title).NotEmpty().MaximumLength(PurchaseRequestConfiguration.TitleMaxLength);
             RuleFor(r => r.Description).MaximumLength(PurchaseRequestConfiguration.DescriptionMaxLength);
             RuleFor(r => r.EstimatedAmount).GreaterThan(0);

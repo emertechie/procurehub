@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Common;
 using ProcureHub.Features.PurchaseRequests.Validation;
@@ -9,6 +10,14 @@ namespace ProcureHub.Features.PurchaseRequests;
 public static class GetPurchaseRequestById
 {
     public record Request(Guid Id);
+
+    public class RequestValidator : AbstractValidator<Request>
+    {
+        public RequestValidator()
+        {
+            RuleFor(r => r.Id).NotEmpty();
+        }
+    }
 
     public record Response(
         Guid Id,
