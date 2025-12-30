@@ -2,6 +2,8 @@ using System.Net;
 using System.Net.Http.Json;
 using ProcureHub.Constants;
 using ProcureHub.Features.Categories;
+using ProcureHub.Features.Departments;
+using ProcureHub.Features.PurchaseRequests;
 using ProcureHub.WebApi.Responses;
 using ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
 using ProcureHub.WebApi.Tests.Infrastructure.Helpers;
@@ -312,13 +314,51 @@ public class CategoryTests(ApiTestHostFixture hostFixture, ITestOutputHelper tes
     [Fact]
     public async Task Cannot_delete_category_with_purchase_requests()
     {
-        // TODO: Implement once PurchaseRequest model is created
-        // This test should:
-        // 1. Create a category
-        // 2. Create a purchase request with that category
-        // 3. Attempt to delete the category
-        // 4. Assert that deletion fails with validation error
-        await Task.CompletedTask;
+        await LoginAsAdminAsync();
+
+        // Create category with unique name
+        var uniqueCategoryName = $"Test Category {Guid.NewGuid()}";
+        var createCatReq = new CreateCategory.Request(uniqueCategoryName);
+        var createCatResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createCatReq));
+        var createdCat = await createCatResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
+        var catId = createdCat.Id;
+
+        // Create department
+        var createDeptReq = new CreateDepartment.Request("IT Department");
+        var createDeptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createDeptReq));
+        var createdDept = await createDeptResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
+        var deptId = createdDept.Id;
+
+        // Create a requester user
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], deptId);
+
+        // Login as requester
+        await LoginAsync("requester@example.com", ValidPassword);
+
+        // Create a purchase request with this category
+        var createPrReq = new CreatePurchaseRequest.Request(
+            Title: "Test Purchase Request",
+            Description: "Test description",
+            EstimatedAmount: 1000m,
+            BusinessJustification: "Testing category deletion",
+            CategoryId: catId,
+            DepartmentId: deptId,
+            RequesterUserId: "will-be-replaced"
+        );
+        var createPrResp = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(createPrReq));
+        Assert.Equal(HttpStatusCode.Created, createPrResp.StatusCode);
+
+        // Login back as admin to attempt deletion
+        await LoginAsAdminAsync();
+
+        // Attempt to delete the category
+        var deleteResp = await HttpClient.DeleteAsync($"/categories/{catId}");
+
+        await deleteResp.AssertProblemDetailsAsync(
+            HttpStatusCode.BadRequest,
+            "Cannot delete category. It has one or more purchase requests. Please reassign requests before deleting.",
+            "Validation.Error",
+            $"DELETE /categories/{catId}");
     }
 
     [Fact]
