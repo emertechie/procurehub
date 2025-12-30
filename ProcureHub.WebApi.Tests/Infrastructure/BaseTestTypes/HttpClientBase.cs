@@ -31,16 +31,14 @@ public abstract class HttpClientBase : IHttpClientAuthHelper
 
     public HttpClient HttpClient { get; init; }
 
-    public async Task<string> CreateUserWithRoles(string email, string password, params string[] roles)
+    public async Task<string> CreateUserAsync(
+        string email,
+        string password,
+        string[]? roleNames = null,
+        Guid? departmentId = null
+    )
     {
-        return await UserHelper.CreateUserWithRole(HttpClient, email, password, roles);
-    }
-
-    public async Task AssignUserToDepartmentAsync(string userId, Guid departmentId)
-    {
-        var request = JsonContent.Create(new { Id = userId, DepartmentId = departmentId });
-        var response = await HttpClient.PatchAsync($"/users/{userId}/department", request);
-        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        return await UserHelper.CreateUserAsync(HttpClient, email, password, roleNames, departmentId);
     }
 
     public async Task AssignRoleToUserAsync(string userId, string roleName)

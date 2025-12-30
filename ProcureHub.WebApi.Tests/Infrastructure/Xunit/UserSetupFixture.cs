@@ -30,7 +30,7 @@ public class UserSetupFixture
         {
             await httpClientAuthHelper.LoginAsync(adminEmail, adminPassword);
 
-            await UserHelper.CreateUserWithRole(httpClient, userEmail, userPassword, roleName);
+            await UserHelper.CreateUserAsync(httpClient, userEmail, userPassword, [roleName]);
         }
         finally
         {

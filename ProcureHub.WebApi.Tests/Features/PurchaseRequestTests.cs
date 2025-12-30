@@ -1,12 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
-using ProcureHub.Common.Pagination;
 using ProcureHub.Constants;
 using ProcureHub.Features.Categories;
 using ProcureHub.Features.Departments;
 using ProcureHub.Features.PurchaseRequests;
-using ProcureHub.Features.Roles;
-using ProcureHub.Features.Users;
 using ProcureHub.Models;
 using ProcureHub.WebApi.Responses;
 using ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
@@ -281,7 +278,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync("Software");
         var departmentId = await CreateDepartmentAsync("IT");
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
 
         // Log in as a requester
         await LoginAsync("requester@example.com", ValidPassword);
@@ -322,7 +319,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     {
         await LoginAsAdminAsync();
         var departmentId = await CreateDepartmentAsync();
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
 
         await LoginAsync("requester@example.com", ValidPassword);
 
@@ -351,8 +348,9 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     public async Task Cannot_create_purchase_request_with_nonexistent_department()
     {
         await LoginAsAdminAsync();
+        var departmentId = await CreateDepartmentAsync();
         var categoryId = await CreateCategoryAsync();
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
 
         await LoginAsync("requester@example.com", ValidPassword);
 
@@ -383,7 +381,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync("New Category");
         var departmentId = await CreateDepartmentAsync("New Department");
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
 
         await LoginAsync("requester@example.com", ValidPassword);
         var prId = await CreatePurchaseRequestAsync(categoryId, departmentId, "Original Title", 1000);
@@ -415,7 +413,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
 
         await LoginAsync("requester@example.com", ValidPassword);
         var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
@@ -443,7 +441,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
 
         await LoginAsync("requester@example.com", ValidPassword);
         var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
@@ -470,7 +468,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
 
         await LoginAsync("requester@example.com", ValidPassword);
         var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
@@ -506,9 +504,8 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
-        string approverUserId = await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver);
-        await AssignUserToDepartmentAsync(approverUserId, departmentId);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
+        string approverUserId = await CreateUserAsync("approver@example.com", ValidPassword, [RoleNames.Approver], departmentId);
 
         // Log in as a requester
         await LoginAsync("requester@example.com", ValidPassword);
@@ -546,8 +543,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
-        string userId = await CreateUserWithRoles("requester-approver@example.com", ValidPassword, RoleNames.Requester, RoleNames.Approver);
-        await AssignUserToDepartmentAsync(userId, departmentId);
+        await CreateUserAsync("requester-approver@example.com", ValidPassword, [RoleNames.Requester, RoleNames.Approver], departmentId);
 
         // Log in as a user with Approver role who will create their own request
         await LoginAsync("requester-approver@example.com", ValidPassword);
@@ -582,9 +578,8 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
-        string approverUserId = await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver);
-        await AssignUserToDepartmentAsync(approverUserId, departmentId);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
+        string approverUserId = await CreateUserAsync("approver@example.com", ValidPassword, [RoleNames.Approver], departmentId);
 
         await LoginAsync("requester@example.com", ValidPassword);
         var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
@@ -616,8 +611,8 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
-        await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
+        await CreateUserAsync("approver@example.com", ValidPassword, [RoleNames.Approver], departmentId);
 
         await LoginAsync("requester@example.com", ValidPassword);
         var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
@@ -641,8 +636,8 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
-        await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
+        await CreateUserAsync("approver@example.com", ValidPassword, [RoleNames.Approver], departmentId);
 
         await LoginAsync("requester@example.com", ValidPassword);
         var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
@@ -666,7 +661,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
 
         await LoginAsync("requester@example.com", ValidPassword);
         var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
@@ -690,7 +685,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
 
         await LoginAsync("requester@example.com", ValidPassword);
         var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
@@ -720,8 +715,8 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
-        await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
+        await CreateUserAsync("approver@example.com", ValidPassword, [RoleNames.Approver], departmentId);
 
         await LoginAsync("requester@example.com", ValidPassword);
         var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
@@ -754,8 +749,8 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
-        await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
+        await CreateUserAsync("approver@example.com", ValidPassword, [RoleNames.Approver], departmentId);
 
         await LoginAsync("requester@example.com", ValidPassword);
         var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
@@ -788,8 +783,8 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
-        await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
+        await CreateUserAsync("approver@example.com", ValidPassword, [RoleNames.Approver], departmentId);
 
         // Create multiple purchase requests in different states
         await LoginAsync("requester@example.com", ValidPassword);
@@ -836,7 +831,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
 
         await LoginAsync("requester@example.com", ValidPassword);
         var laptopId = await CreatePurchaseRequestAsync(categoryId, departmentId, "New Laptop Purchase", 1500);
@@ -861,7 +856,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
 
         await LoginAsync("requester@example.com", ValidPassword);
 
@@ -888,7 +883,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     public async Task Delete_purchase_request_returns_not_found_for_nonexistent_request()
     {
         await LoginAsAdminAsync();
-        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester]);
 
         await LoginAsync("requester@example.com", ValidPassword);
 
@@ -913,12 +908,10 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         var dept2Id = await CreateDepartmentAsync("Dept2");
 
         // Create requester in dept1
-        var requester1Id = await CreateUserWithRoles("requester1@example.com", ValidPassword, RoleNames.Requester);
-        await AssignUserToDepartmentAsync(requester1Id, dept1Id);
+        var requester1Id = await CreateUserAsync("requester1@example.com", ValidPassword, [RoleNames.Requester], dept1Id);
 
         // Create requester in dept2
-        var requester2Id = await CreateUserWithRoles("requester2@example.com", ValidPassword, RoleNames.Requester);
-        await AssignUserToDepartmentAsync(requester2Id, dept2Id);
+        var requester2Id = await CreateUserAsync("requester2@example.com", ValidPassword, [RoleNames.Requester], dept2Id);
 
         // Login as requester1 and create PR
         await LoginAsync("requester1@example.com", ValidPassword);
@@ -953,11 +946,8 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         var deptId = await CreateDepartmentAsync();
 
         // Create two requesters in same department
-        var requester1Id = await CreateUserWithRoles("requester1@example.com", ValidPassword, RoleNames.Requester);
-        await AssignUserToDepartmentAsync(requester1Id, deptId);
-
-        var requester2Id = await CreateUserWithRoles("requester2@example.com", ValidPassword, RoleNames.Requester);
-        await AssignUserToDepartmentAsync(requester2Id, deptId);
+        var requester1Id = await CreateUserAsync("requester1@example.com", ValidPassword, [RoleNames.Requester], deptId);
+        var requester2Id = await CreateUserAsync("requester2@example.com", ValidPassword, [RoleNames.Requester], deptId);
 
         // Login as requester1 and create PR
         await LoginAsync("requester1@example.com", ValidPassword);
@@ -995,16 +985,13 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         var dept2Id = await CreateDepartmentAsync("Dept2");
 
         // Create approver assigned to dept1
-        var approverId = await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver);
-        await AssignUserToDepartmentAsync(approverId, dept1Id);
+        var approverId = await CreateUserAsync("approver@example.com", ValidPassword, [RoleNames.Approver], dept1Id);
 
         // Create requester in dept1
-        var requester1Id = await CreateUserWithRoles("requester1@example.com", ValidPassword, RoleNames.Requester);
-        await AssignUserToDepartmentAsync(requester1Id, dept1Id);
+        var requester1Id = await CreateUserAsync("requester1@example.com", ValidPassword, [RoleNames.Requester], dept1Id);
 
         // Create requester in dept2
-        var requester2Id = await CreateUserWithRoles("requester2@example.com", ValidPassword, RoleNames.Requester);
-        await AssignUserToDepartmentAsync(requester2Id, dept2Id);
+        var requester2Id = await CreateUserAsync("requester2@example.com", ValidPassword, [RoleNames.Requester], dept2Id);
 
         // Login as requester1 and create PR in dept1
         await LoginAsync("requester1@example.com", ValidPassword);
@@ -1054,11 +1041,10 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         var deptId = await CreateDepartmentAsync();
 
         // Create approver WITHOUT department assignment, but with Requester role too
-        var approverId = await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver, RoleNames.Requester);
+        var approverId = await CreateUserAsync("approver@example.com", ValidPassword, [RoleNames.Approver, RoleNames.Requester]);
 
         // Create another requester and PR
-        var requesterId = await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
-        await AssignUserToDepartmentAsync(requesterId, deptId);
+        var requesterId = await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], deptId);
 
         await LoginAsync("requester@example.com", ValidPassword);
         var otherUserPrId = await CreatePurchaseRequestAsync(categoryId, deptId, "Other user's request");

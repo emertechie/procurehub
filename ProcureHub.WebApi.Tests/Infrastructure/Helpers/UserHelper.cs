@@ -6,11 +6,12 @@ using ProcureHub.WebApi.Tests.Infrastructure.Helpers;
 
 public static class UserHelper
 {
-    public static async Task<string> CreateUserWithRole(
+    public static async Task<string> CreateUserAsync(
         HttpClient httpClient,
         string userEmail,
         string userPassword,
-        params string[] roleNames
+        string[]? roleNames = null,
+        Guid? departmentId = null
     )
     {
         // Create user
@@ -22,13 +23,20 @@ public static class UserHelper
         var rolesResp = await httpClient.GetAsync("/roles");
         var roles = await rolesResp.ReadJsonAsync<DataResponse<List<QueryRoles.Role>>>();
 
-        foreach (var roleName in roleNames)
+        foreach (var roleName in roleNames ?? [])
         {
             var role = roles.Data.First(r => r.Name == roleName);
 
             // Assign role
             var assignRoleReq = new AssignRole.Request(createdUser.Id, role.Id);
             await httpClient.PostAsync($"/users/{createdUser.Id}/roles", JsonContent.Create(assignRoleReq));
+        }
+
+        if (departmentId.HasValue)
+        {
+            // Assign department
+            var assignDeptReq = new { Id = createdUser.Id, DepartmentId = departmentId.Value };
+            await httpClient.PatchAsync($"/users/{createdUser.Id}/department", JsonContent.Create(assignDeptReq));
         }
 
         return createdUser.Id;
