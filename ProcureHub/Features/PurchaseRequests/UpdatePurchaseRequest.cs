@@ -46,18 +46,6 @@ public static class UpdatePurchaseRequest
             if (purchaseRequest.Status != PurchaseRequestStatus.Draft)
                 return Result.Failure(PurchaseRequestErrors.CannotUpdateNonDraft);
 
-            // Verify category exists
-            var categoryExists = await dbContext.Categories
-                .AnyAsync(c => c.Id == request.CategoryId, token);
-            if (!categoryExists)
-                return Result.Failure(PurchaseRequestErrors.CategoryNotFound);
-
-            // Verify department exists
-            var departmentExists = await dbContext.Departments
-                .AnyAsync(d => d.Id == request.DepartmentId, token);
-            if (!departmentExists)
-                return Result.Failure(PurchaseRequestErrors.DepartmentNotFound);
-
             purchaseRequest.Title = request.Title;
             purchaseRequest.Description = request.Description;
             purchaseRequest.EstimatedAmount = request.EstimatedAmount;
@@ -66,7 +54,18 @@ public static class UpdatePurchaseRequest
             purchaseRequest.DepartmentId = request.DepartmentId;
             purchaseRequest.UpdatedAt = DateTime.UtcNow;
 
-            await dbContext.SaveChangesAsync(token);
+            try
+            {
+                await dbContext.SaveChangesAsync(token);
+            }
+            catch (DbUpdateException ex) when (DatabaseException.IsForeignKeyViolation(ex, "FK_PurchaseRequests_Categories_CategoryId"))
+            {
+                return Result.Failure<Guid>(PurchaseRequestErrors.CategoryNotFound);
+            }
+            catch (DbUpdateException ex) when (DatabaseException.IsForeignKeyViolation(ex, "FK_PurchaseRequests_Departments_DepartmentId"))
+            {
+                return Result.Failure<Guid>(PurchaseRequestErrors.DepartmentNotFound);
+            }
 
             return Result.Success();
         }
