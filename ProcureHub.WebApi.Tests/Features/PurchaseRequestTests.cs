@@ -1,9 +1,12 @@
 using System.Net;
 using System.Net.Http.Json;
 using ProcureHub.Common.Pagination;
+using ProcureHub.Constants;
 using ProcureHub.Features.Categories;
 using ProcureHub.Features.Departments;
 using ProcureHub.Features.PurchaseRequests;
+using ProcureHub.Features.Roles;
+using ProcureHub.Features.Users;
 using ProcureHub.Models;
 using ProcureHub.WebApi.Responses;
 using ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
@@ -25,12 +28,18 @@ public class PurchaseRequestTestsWithSharedDb(
         IClassFixture<UserSetupFixture>,
         IAsyncLifetime
 {
-    private const string ValidUserEmail = "user1@example.com";
-    private const string ValidUserPassword = "Test1234!";
+    private const string RequesterUserEmail = "user1@example.com";
+    private const string RequesterUserPassword = "Test1234!";
 
     public async ValueTask InitializeAsync()
     {
-        await userSetupFixture.EnsureUserCreated(this, AdminEmail, AdminPassword, ValidUserEmail, ValidUserPassword);
+        await userSetupFixture.EnsureUserCreated(this,
+            AdminEmail,
+            AdminPassword,
+            RequesterUserEmail,
+            RequesterUserPassword,
+            RoleNames.Requester
+        );
     }
 
     public ValueTask DisposeAsync()
@@ -75,7 +84,7 @@ public class PurchaseRequestTestsWithSharedDb(
     public async Task Purchase_request_endpoints_enforce_admin_authorization_correctly(EndpointInfo endpoint)
     {
         // Log in as a regular user, not an admin
-        await LoginAsync(ValidUserEmail, ValidUserPassword);
+        await LoginAsync(RequesterUserEmail, RequesterUserPassword);
 
         var testId = Guid.NewGuid();
 
@@ -109,7 +118,7 @@ public class PurchaseRequestTestsWithSharedDb(
     [Fact]
     public async Task Test_CreatePurchaseRequest_validation()
     {
-        await LoginAsync(ValidUserEmail, ValidUserPassword);
+        await LoginAsync(RequesterUserEmail, RequesterUserPassword);
 
         // No title
         var reqNoTitle = new CreatePurchaseRequest.Request(
@@ -119,7 +128,7 @@ public class PurchaseRequestTestsWithSharedDb(
             BusinessJustification: "Business need",
             CategoryId: Guid.NewGuid(),
             DepartmentId: Guid.NewGuid(),
-            UserId: "user-id"
+            RequesterUserId: "user-id"
         );
         var respNoTitle = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(reqNoTitle));
         await respNoTitle.AssertValidationProblemAsync(
@@ -133,7 +142,7 @@ public class PurchaseRequestTestsWithSharedDb(
             BusinessJustification: "Business need",
             CategoryId: Guid.NewGuid(),
             DepartmentId: Guid.NewGuid(),
-            UserId: "user-id"
+            RequesterUserId: "user-id"
         );
         var respZeroAmount = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(reqZeroAmount));
         await respZeroAmount.AssertValidationProblemAsync(
@@ -155,7 +164,7 @@ public class PurchaseRequestTestsWithSharedDb(
     [Fact]
     public async Task Test_UpdatePurchaseRequest_validation()
     {
-        await LoginAsync(ValidUserEmail, ValidUserPassword);
+        await LoginAsync(RequesterUserEmail, RequesterUserPassword);
 
         // No title
         var reqNoTitle = new UpdatePurchaseRequest.Request(
@@ -246,23 +255,19 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     }
 
     private async Task<Guid> CreatePurchaseRequestAsync(
+        Guid categoryId,
+        Guid departmentId,
         string title = "New Laptop",
-        decimal amount = 1500,
-        Guid? categoryId = null,
-        Guid? departmentId = null)
+        decimal amount = 1500)
     {
-        var catId = categoryId ?? await CreateCategoryAsync();
-        var deptId = departmentId ?? await CreateDepartmentAsync();
-
-        await LoginAsAdminAsync();
         var createReq = new CreatePurchaseRequest.Request(
             Title: title,
             Description: "Need new laptop for development",
             EstimatedAmount: amount,
             BusinessJustification: "Current laptop is outdated",
-            CategoryId: catId,
-            DepartmentId: deptId,
-            UserId: "will-be-replaced"
+            CategoryId: categoryId,
+            DepartmentId: departmentId,
+            RequesterUserId: "will-be-replaced"
         );
         var createResp = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(createReq));
         Assert.Equal(HttpStatusCode.Created, createResp.StatusCode);
@@ -273,10 +278,13 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     [Fact]
     public async Task Can_create_and_fetch_purchase_request()
     {
+        await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync("Software");
         var departmentId = await CreateDepartmentAsync("IT");
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
 
-        await LoginAsAdminAsync();
+        // Log in as a requester
+        await LoginAsync("requester@example.com", ValidPassword);
 
         // Create purchase request
         var createReq = new CreatePurchaseRequest.Request(
@@ -286,7 +294,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
             BusinessJustification: "New hire requires productivity tools",
             CategoryId: categoryId,
             DepartmentId: departmentId,
-            UserId: "will-be-replaced"
+            RequesterUserId: "will-be-replaced"
         );
         var createResp = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(createReq));
         Assert.Equal(HttpStatusCode.Created, createResp.StatusCode);
@@ -300,7 +308,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         Assert.Equal(prId, getPrResp.Data.Id);
         Assert.Equal("Microsoft Office License", getPrResp.Data.Title);
         Assert.Equal(500, getPrResp.Data.EstimatedAmount);
-        Assert.Equal(Models.PurchaseRequestStatus.Draft, getPrResp.Data.Status);
+        Assert.Equal(PurchaseRequestStatus.Draft, getPrResp.Data.Status);
         Assert.Null(getPrResp.Data.SubmittedAt);
 
         // Query - should appear in list
@@ -312,8 +320,11 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     [Fact]
     public async Task Cannot_create_purchase_request_with_nonexistent_category()
     {
-        var departmentId = await CreateDepartmentAsync();
         await LoginAsAdminAsync();
+        var departmentId = await CreateDepartmentAsync();
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+
+        await LoginAsync("requester@example.com", ValidPassword);
 
         var nonexistentCategoryId = Guid.NewGuid();
         var createReq = new CreatePurchaseRequest.Request(
@@ -323,7 +334,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
             BusinessJustification: "Test",
             CategoryId: nonexistentCategoryId,
             DepartmentId: departmentId,
-            UserId: "will-be-replaced"
+            RequesterUserId: "will-be-replaced"
         );
         var createResp = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(createReq));
 
@@ -339,8 +350,11 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     [Fact]
     public async Task Cannot_create_purchase_request_with_nonexistent_department()
     {
-        var categoryId = await CreateCategoryAsync();
         await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+
+        await LoginAsync("requester@example.com", ValidPassword);
 
         var nonexistentDepartmentId = Guid.NewGuid();
         var createReq = new CreatePurchaseRequest.Request(
@@ -350,7 +364,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
             BusinessJustification: "Test",
             CategoryId: categoryId,
             DepartmentId: nonexistentDepartmentId,
-            UserId: "will-be-replaced"
+            RequesterUserId: "will-be-replaced"
         );
         var createResp = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(createReq));
 
@@ -366,11 +380,13 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     [Fact]
     public async Task Can_update_draft_purchase_request()
     {
-        var prId = await CreatePurchaseRequestAsync("Original Title", 1000);
+        await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync("New Category");
         var departmentId = await CreateDepartmentAsync("New Department");
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
 
-        await LoginAsAdminAsync();
+        await LoginAsync("requester@example.com", ValidPassword);
+        var prId = await CreatePurchaseRequestAsync(categoryId, departmentId, "Original Title", 1000);
 
         // Update the purchase request
         var updateReq = new UpdatePurchaseRequest.Request(
@@ -390,20 +406,24 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
             .ReadJsonAsync<DataResponse<GetPurchaseRequestById.Response>>();
         Assert.Equal("Updated Title", getResp.Data.Title);
         Assert.Equal(2000, getResp.Data.EstimatedAmount);
-        Assert.Equal(Models.PurchaseRequestStatus.Draft, getResp.Data.Status);
+        Assert.Equal(PurchaseRequestStatus.Draft, getResp.Data.Status);
     }
 
     [Fact]
     public async Task Can_submit_draft_purchase_request()
     {
-        var prId = await CreatePurchaseRequestAsync();
-
         await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var departmentId = await CreateDepartmentAsync();
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+
+        await LoginAsync("requester@example.com", ValidPassword);
+        var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
 
         // Verify initial state is Draft
         var getDraft = await HttpClient.GetAsync($"/purchase-requests/{prId}")
             .ReadJsonAsync<DataResponse<GetPurchaseRequestById.Response>>();
-        Assert.Equal(Models.PurchaseRequestStatus.Draft, getDraft.Data.Status);
+        Assert.Equal(PurchaseRequestStatus.Draft, getDraft.Data.Status);
         Assert.Null(getDraft.Data.SubmittedAt);
 
         // Submit the request
@@ -413,16 +433,20 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         // Verify new state is Pending with SubmittedAt set
         var getPending = await HttpClient.GetAsync($"/purchase-requests/{prId}")
             .ReadJsonAsync<DataResponse<GetPurchaseRequestById.Response>>();
-        Assert.Equal(Models.PurchaseRequestStatus.Pending, getPending.Data.Status);
+        Assert.Equal(PurchaseRequestStatus.Pending, getPending.Data.Status);
         Assert.NotNull(getPending.Data.SubmittedAt);
     }
 
     [Fact]
     public async Task Cannot_submit_already_pending_purchase_request()
     {
-        var prId = await CreatePurchaseRequestAsync();
-
         await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var departmentId = await CreateDepartmentAsync();
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+
+        await LoginAsync("requester@example.com", ValidPassword);
+        var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
 
         // Submit the first time
         var submitResp = await HttpClient.PostAsync($"/purchase-requests/{prId}/submit", null);
@@ -443,11 +467,13 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     [Fact]
     public async Task Cannot_update_non_draft_purchase_request()
     {
-        var prId = await CreatePurchaseRequestAsync();
+        await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
 
-        await LoginAsAdminAsync();
+        await LoginAsync("requester@example.com", ValidPassword);
+        var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
 
         // Submit to change status to Pending
         await HttpClient.PostAsync($"/purchase-requests/{prId}/submit", null);
@@ -474,21 +500,31 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     }
 
     [Fact]
-    public async Task Admin_can_approve_pending_purchase_request()
+    public async Task Approver_can_approve_pending_purchase_request()
     {
-        var prId = await CreatePurchaseRequestAsync();
-
+        // Log in as admin and set up related entities and users
         await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var departmentId = await CreateDepartmentAsync();
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        string approverUserId = await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver);
 
-        // Submit to make it Pending
+        // Log in as a requester
+        await LoginAsync("requester@example.com", ValidPassword);
+
+        // Create and submit a PR to make it Pending
+        var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
         await HttpClient.PostAsync($"/purchase-requests/{prId}/submit", null);
 
         // Verify Pending status
         var getPending = await HttpClient.GetAsync($"/purchase-requests/{prId}")
             .ReadJsonAsync<DataResponse<GetPurchaseRequestById.Response>>();
-        Assert.Equal(Models.PurchaseRequestStatus.Pending, getPending.Data.Status);
+        Assert.Equal(PurchaseRequestStatus.Pending, getPending.Data.Status);
         Assert.Null(getPending.Data.ReviewedAt);
         Assert.Null(getPending.Data.ReviewedBy);
+
+        // Log in as approver
+        await LoginAsync("approver@example.com", ValidPassword);
 
         // Approve
         var approveResp = await HttpClient.PostAsync($"/purchase-requests/{prId}/approve", null);
@@ -497,17 +533,58 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         // Verify Approved status with ReviewedAt and ReviewedBy set
         var getApproved = await HttpClient.GetAsync($"/purchase-requests/{prId}")
             .ReadJsonAsync<DataResponse<GetPurchaseRequestById.Response>>();
-        Assert.Equal(Models.PurchaseRequestStatus.Approved, getApproved.Data.Status);
+        Assert.Equal(PurchaseRequestStatus.Approved, getApproved.Data.Status);
         Assert.NotNull(getApproved.Data.ReviewedAt);
-        Assert.NotNull(getApproved.Data.ReviewedBy);
+        Assert.Equal(approverUserId, getApproved.Data.ReviewedBy?.Id);
     }
 
     [Fact]
-    public async Task Admin_can_reject_pending_purchase_request()
+    public async Task Cannot_approve_own_purchase_request()
     {
-        var prId = await CreatePurchaseRequestAsync();
-
+        // Log in as admin and set up related entities and users
         await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var departmentId = await CreateDepartmentAsync();
+        await CreateUserWithRoles("requester-approver@example.com", ValidPassword, RoleNames.Requester, RoleNames.Approver);
+
+        // Log in as a user with Approver role who will create their own request
+        await LoginAsync("requester-approver@example.com", ValidPassword);
+
+        // Create and submit a PR as this user
+        var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
+        await HttpClient.PostAsync($"/purchase-requests/{prId}/submit", null);
+
+        // Verify Pending status
+        var getPending = await HttpClient.GetAsync($"/purchase-requests/{prId}")
+            .ReadJsonAsync<DataResponse<GetPurchaseRequestById.Response>>();
+        Assert.Equal(PurchaseRequestStatus.Pending, getPending.Data.Status);
+
+        // Try to approve own request (still logged in as the requester)
+        var approveResp = await HttpClient.PostAsync($"/purchase-requests/{prId}/approve", null);
+
+        await approveResp.AssertProblemDetailsAsync(
+            HttpStatusCode.BadRequest,
+            "Cannot approve your own request",
+            "PurchaseRequest.CannotApproveOwnRequest",
+            $"POST /purchase-requests/{prId}/approve");
+
+        // Verify still Pending
+        var getStillPending = await HttpClient.GetAsync($"/purchase-requests/{prId}")
+            .ReadJsonAsync<DataResponse<GetPurchaseRequestById.Response>>();
+        Assert.Equal(PurchaseRequestStatus.Pending, getStillPending.Data.Status);
+    }
+
+    [Fact]
+    public async Task Approver_can_reject_pending_purchase_request()
+    {
+        await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var departmentId = await CreateDepartmentAsync();
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        string approverUserId = await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver);
+
+        await LoginAsync("requester@example.com", ValidPassword);
+        var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
 
         // Submit to make it Pending
         await HttpClient.PostAsync($"/purchase-requests/{prId}/submit", null);
@@ -515,28 +592,35 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         // Verify Pending status
         var getPending = await HttpClient.GetAsync($"/purchase-requests/{prId}")
             .ReadJsonAsync<DataResponse<GetPurchaseRequestById.Response>>();
-        Assert.Equal(Models.PurchaseRequestStatus.Pending, getPending.Data.Status);
+        Assert.Equal(PurchaseRequestStatus.Pending, getPending.Data.Status);
 
-        // Reject
+        // Login as approver and reject
+        await LoginAsync("approver@example.com", ValidPassword);
         var rejectResp = await HttpClient.PostAsync($"/purchase-requests/{prId}/reject", null);
         Assert.Equal(HttpStatusCode.NoContent, rejectResp.StatusCode);
 
         // Verify Rejected status with ReviewedAt and ReviewedBy set
         var getRejected = await HttpClient.GetAsync($"/purchase-requests/{prId}")
             .ReadJsonAsync<DataResponse<GetPurchaseRequestById.Response>>();
-        Assert.Equal(Models.PurchaseRequestStatus.Rejected, getRejected.Data.Status);
+        Assert.Equal(PurchaseRequestStatus.Rejected, getRejected.Data.Status);
         Assert.NotNull(getRejected.Data.ReviewedAt);
-        Assert.NotNull(getRejected.Data.ReviewedBy);
+        Assert.Equal(approverUserId, getRejected.Data.ReviewedBy?.Id);
     }
 
     [Fact]
     public async Task Cannot_approve_draft_purchase_request()
     {
-        var prId = await CreatePurchaseRequestAsync();
-
         await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var departmentId = await CreateDepartmentAsync();
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver);
 
-        // Try to approve without submitting first
+        await LoginAsync("requester@example.com", ValidPassword);
+        var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
+
+        // Login as approver and try to approve without submitting first
+        await LoginAsync("approver@example.com", ValidPassword);
         var approveResp = await HttpClient.PostAsync($"/purchase-requests/{prId}/approve", null);
 
         await approveResp.AssertValidationProblemAsync(
@@ -551,11 +635,17 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     [Fact]
     public async Task Cannot_reject_draft_purchase_request()
     {
-        var prId = await CreatePurchaseRequestAsync();
-
         await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var departmentId = await CreateDepartmentAsync();
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver);
 
-        // Try to reject without submitting first
+        await LoginAsync("requester@example.com", ValidPassword);
+        var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
+
+        // Login as approver and try to reject without submitting first
+        await LoginAsync("approver@example.com", ValidPassword);
         var rejectResp = await HttpClient.PostAsync($"/purchase-requests/{prId}/reject", null);
 
         await rejectResp.AssertValidationProblemAsync(
@@ -570,9 +660,13 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     [Fact]
     public async Task Can_delete_draft_purchase_request()
     {
-        var prId = await CreatePurchaseRequestAsync();
-
         await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var departmentId = await CreateDepartmentAsync();
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+
+        await LoginAsync("requester@example.com", ValidPassword);
+        var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
 
         // Verify exists
         var getBefore = await HttpClient.GetAsync($"/purchase-requests/{prId}");
@@ -590,9 +684,13 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     [Fact]
     public async Task Cannot_delete_pending_purchase_request()
     {
-        var prId = await CreatePurchaseRequestAsync();
-
         await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var departmentId = await CreateDepartmentAsync();
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+
+        await LoginAsync("requester@example.com", ValidPassword);
+        var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
 
         // Submit to make it Pending
         await HttpClient.PostAsync($"/purchase-requests/{prId}/submit", null);
@@ -616,13 +714,24 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     [Fact]
     public async Task Cannot_delete_approved_purchase_request()
     {
-        var prId = await CreatePurchaseRequestAsync();
-
         await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var departmentId = await CreateDepartmentAsync();
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver);
 
-        // Submit and approve
+        await LoginAsync("requester@example.com", ValidPassword);
+        var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
+
+        // Submit
         await HttpClient.PostAsync($"/purchase-requests/{prId}/submit", null);
+
+        // Login as approver and approve
+        await LoginAsync("approver@example.com", ValidPassword);
         await HttpClient.PostAsync($"/purchase-requests/{prId}/approve", null);
+
+        // Login back as requester to try delete
+        await LoginAsync("requester@example.com", ValidPassword);
 
         // Try to delete
         var deleteResp = await HttpClient.DeleteAsync($"/purchase-requests/{prId}");
@@ -639,13 +748,24 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     [Fact]
     public async Task Cannot_delete_rejected_purchase_request()
     {
-        var prId = await CreatePurchaseRequestAsync();
-
         await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var departmentId = await CreateDepartmentAsync();
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver);
 
-        // Submit and reject
+        await LoginAsync("requester@example.com", ValidPassword);
+        var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
+
+        // Submit
         await HttpClient.PostAsync($"/purchase-requests/{prId}/submit", null);
+
+        // Login as approver and reject
+        await LoginAsync("approver@example.com", ValidPassword);
         await HttpClient.PostAsync($"/purchase-requests/{prId}/reject", null);
+
+        // Login back as requester to try delete
+        await LoginAsync("requester@example.com", ValidPassword);
 
         // Try to delete
         var deleteResp = await HttpClient.DeleteAsync($"/purchase-requests/{prId}");
@@ -662,20 +782,28 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     [Fact]
     public async Task Can_query_purchase_requests_by_status()
     {
+        await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver);
 
         // Create multiple purchase requests in different states
-        var draftId = await CreatePurchaseRequestAsync("Draft Request", 1000, categoryId, departmentId);
-        var pendingId = await CreatePurchaseRequestAsync("Pending Request", 2000, categoryId, departmentId);
-        var approvedId = await CreatePurchaseRequestAsync("Approved Request", 3000, categoryId, departmentId);
-
-        await LoginAsAdminAsync();
+        await LoginAsync("requester@example.com", ValidPassword);
+        var draftId = await CreatePurchaseRequestAsync(categoryId, departmentId, "Draft Request", 1000);
+        var pendingId = await CreatePurchaseRequestAsync(categoryId, departmentId, "Pending Request", 2000);
+        var approvedId = await CreatePurchaseRequestAsync(categoryId, departmentId, "Approved Request", 3000);
 
         // Submit pending and approved requests
         await HttpClient.PostAsync($"/purchase-requests/{pendingId}/submit", null);
         await HttpClient.PostAsync($"/purchase-requests/{approvedId}/submit", null);
+
+        // Login as approver to approve
+        await LoginAsync("approver@example.com", ValidPassword);
         await HttpClient.PostAsync($"/purchase-requests/{approvedId}/approve", null);
+
+        // Login as requester to query
+        await LoginAsync("requester@example.com", ValidPassword);
 
         // Query by Draft status
         var draftQuery = await HttpClient.GetAsync("/purchase-requests?status=Draft")
@@ -702,13 +830,14 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     [Fact]
     public async Task Can_search_purchase_requests_by_title()
     {
+        await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
 
-        var laptopId = await CreatePurchaseRequestAsync("New Laptop Purchase", 1500, categoryId, departmentId);
-        var softwareId = await CreatePurchaseRequestAsync("Software License", 500, categoryId, departmentId);
-
-        await LoginAsAdminAsync();
+        await LoginAsync("requester@example.com", ValidPassword);
+        var laptopId = await CreatePurchaseRequestAsync(categoryId, departmentId, "New Laptop Purchase", 1500);
+        var softwareId = await CreatePurchaseRequestAsync(categoryId, departmentId, "Software License", 500);
 
         // Search for "laptop"
         var laptopSearch = await HttpClient.GetAsync("/purchase-requests?search=laptop")
@@ -726,10 +855,12 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     [Fact]
     public async Task Update_purchase_request_returns_not_found_for_nonexistent_request()
     {
+        await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
 
-        await LoginAsAdminAsync();
+        await LoginAsync("requester@example.com", ValidPassword);
 
         var nonexistentId = Guid.NewGuid();
         var updateReq = new UpdatePurchaseRequest.Request(
@@ -754,6 +885,9 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     public async Task Delete_purchase_request_returns_not_found_for_nonexistent_request()
     {
         await LoginAsAdminAsync();
+        await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+
+        await LoginAsync("requester@example.com", ValidPassword);
 
         var nonexistentId = Guid.NewGuid();
         var deleteResp = await HttpClient.DeleteAsync($"/purchase-requests/{nonexistentId}");
