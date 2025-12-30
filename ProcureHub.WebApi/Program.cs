@@ -105,7 +105,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
         options.AddPolicy(RolePolicyNames.ApproverOnly, policy => { policy.RequireRole(RoleNames.Approver); });
     });
 
-    appBuilder.Services.AddRequestHandlers();
+    appBuilder.Services.AddDomainServices();
 
     // Register all FluentValidation validators 
     appBuilder.Services.AddValidatorsFromAssemblyContaining<CreateUser.Request>();

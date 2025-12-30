@@ -1,4 +1,3 @@
-using System.Data.Common;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Common;
@@ -34,16 +33,12 @@ public static class CreatePurchaseRequest
         }
     }
 
-    public class Handler(ApplicationDbContext dbContext)
+    public class Handler(ApplicationDbContext dbContext, PurchaseRequestNumberGenerator purchaseRequestNumberGenerator)
         : IRequestHandler<Request, Result<Guid>>
     {
         public async Task<Result<Guid>> HandleAsync(Request request, CancellationToken token)
         {
-            // Generate request number
-            var year = DateTime.UtcNow.Year;
-            var count = await dbContext.PurchaseRequests
-                .CountAsync(pr => pr.RequestNumber.StartsWith($"PR-{year}-"), token);
-            var requestNumber = $"PR-{year}-{(count + 1):D3}";
+            var requestNumber = await purchaseRequestNumberGenerator.GenerateAsync(token);
 
             var now = DateTime.UtcNow;
             var purchaseRequest = new PurchaseRequest

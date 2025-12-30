@@ -4,14 +4,24 @@ namespace ProcureHub.Infrastructure;
 
 public static class RequestHandlerExtensions
 {
+    // PurchaseRequestNumberGenerator
+    public static IServiceCollection AddDomainServices(this IServiceCollection services)
+    {
+        services.AddScoped<PurchaseRequestNumberGenerator>();
+        services.AddRequestHandlers();
+
+        return services;
+    }
+
     /// <summary>
     /// Scans the current assembly for concrete classes implementing
     /// <see cref="IRequestHandler{TRequest}"/> or <see cref="IRequestHandler{TRequest, TResponse}"/>
     /// and registers them as transient services in the provided <paramref name="services"/> collection.
+    /// Also decorates all handlers with <see cref="ValidationRequestHandlerDecorator{TRequest, TResponse}"/>
     /// </summary>
     /// <param name="services">The DI service collection to add handler registrations to.</param>
     /// <returns>The same <see cref="IServiceCollection"/> instance, for chaining.</returns>
-    public static IServiceCollection AddRequestHandlers(this IServiceCollection services)
+    private static IServiceCollection AddRequestHandlers(this IServiceCollection services)
     {
         var assembly = typeof(RequestHandlerExtensions).Assembly;
         var types = assembly.GetTypes()
