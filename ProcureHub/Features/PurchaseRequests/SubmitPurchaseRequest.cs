@@ -26,10 +26,12 @@ public static class SubmitPurchaseRequest
                 .FirstOrDefaultAsync(pr => pr.Id == request.Id, token);
 
             if (purchaseRequest is null)
+            {
                 return Result.Failure(PurchaseRequestErrors.NotFound);
+            }
 
             var result = purchaseRequest.Submit();
-            if (!result.IsSuccess)
+            if (result.IsFailure)
             {
                 return result;
             }

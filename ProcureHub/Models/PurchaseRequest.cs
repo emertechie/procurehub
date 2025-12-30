@@ -80,6 +80,13 @@ public class PurchaseRequest
         return Result.Success();
     }
 
+    public Result CanUpdate()
+    {
+        return Status == PurchaseRequestStatus.Draft
+            ? Result.Success()
+            : Result.Failure(PurchaseRequestErrors.CannotUpdateNonDraft);
+    }
+
     public Result CanDelete()
     {
         return Status == PurchaseRequestStatus.Draft

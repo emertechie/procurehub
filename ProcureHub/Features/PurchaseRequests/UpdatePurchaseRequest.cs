@@ -41,10 +41,15 @@ public static class UpdatePurchaseRequest
                 .FirstOrDefaultAsync(pr => pr.Id == request.Id, token);
 
             if (purchaseRequest is null)
+            {
                 return Result.Failure(PurchaseRequestErrors.NotFound);
+            }
 
-            if (purchaseRequest.Status != PurchaseRequestStatus.Draft)
-                return Result.Failure(PurchaseRequestErrors.CannotUpdateNonDraft);
+            var result = purchaseRequest.CanUpdate();
+            if (result.IsFailure)
+            {
+                return result;
+            }
 
             purchaseRequest.Title = request.Title;
             purchaseRequest.Description = request.Description;
