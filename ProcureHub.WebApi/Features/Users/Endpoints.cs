@@ -14,7 +14,7 @@ public static class Endpoints
     public static void ConfigureUsersEndpoints(this WebApplication app)
     {
         var group = app.MapGroup("")
-            .RequireAuthorization(AuthorizationPolicyNames.Authenticated, RolePolicyNames.AdminOnly)
+            .RequireAuthorization(AuthorizationPolicyNames.Authenticated, RolePolicyNames.Admin)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .WithTags("Users");
 

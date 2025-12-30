@@ -39,7 +39,7 @@ public static class Endpoints
                     newId => Results.Created($"/purchase-requests/{newId}", new EntityCreatedResponse<string>(newId.ToString())),
                     error => error.ToProblemDetails());
             })
-            .RequireAuthorization(RolePolicyNames.RequesterOnly)
+            .RequireAuthorization(RolePolicyNames.Requester)
             .WithName(nameof(CreatePurchaseRequest))
             .Produces<EntityCreatedResponse<string>>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
@@ -112,7 +112,7 @@ public static class Endpoints
                     error => error.ToProblemDetails()
                 );
             })
-            .RequireAuthorization(RolePolicyNames.RequesterOnly)
+            .RequireAuthorization(RolePolicyNames.Requester)
             .WithName(nameof(UpdatePurchaseRequest))
             .Produces(StatusCodes.Status204NoContent)
             .ProducesValidationProblem()
@@ -130,7 +130,7 @@ public static class Endpoints
                     error => error.ToProblemDetails()
                 );
             })
-            .RequireAuthorization(RolePolicyNames.RequesterOnly)
+            .RequireAuthorization(RolePolicyNames.Requester)
             .WithName(nameof(SubmitPurchaseRequest))
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
@@ -154,7 +154,7 @@ public static class Endpoints
                     error => error.ToProblemDetails()
                 );
             })
-            .RequireAuthorization(RolePolicyNames.ApproverOnly)
+            .RequireAuthorization(RolePolicyNames.Approver)
             .WithName(nameof(ApprovePurchaseRequest))
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
@@ -178,7 +178,7 @@ public static class Endpoints
                     error => error.ToProblemDetails()
                 );
             })
-            .RequireAuthorization(RolePolicyNames.ApproverOnly)
+            .RequireAuthorization(RolePolicyNames.Approver)
             .WithName(nameof(RejectPurchaseRequest))
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
@@ -195,7 +195,7 @@ public static class Endpoints
                     error => error.ToProblemDetails()
                 );
             })
-            .RequireAuthorization(RolePolicyNames.RequesterOnly)
+            .RequireAuthorization(RolePolicyNames.Requester)
             .WithName(nameof(DeletePurchaseRequest))
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);

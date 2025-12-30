@@ -2,7 +2,7 @@ namespace ProcureHub.WebApi.Constants;
 
 public static class RolePolicyNames
 {
-    public const string AdminOnly = "AdminOnly";
-    public const string RequesterOnly = "RequesterOnly";
-    public const string ApproverOnly = "ApproverOnly";
+    public const string Admin = "Admin";
+    public const string Requester = "Requester";
+    public const string Approver = "Approver";
 }
