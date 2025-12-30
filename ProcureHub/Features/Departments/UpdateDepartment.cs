@@ -38,7 +38,7 @@ public static class UpdateDepartment
                 await dbContext.SaveChangesAsync(token);
                 return Result.Success();
             }
-            catch (DbUpdateException ex) when (DatabaseException.IsUniqueConstraintViolation(ex, "IX_Departments_Name"))
+            catch (DbUpdateException ex) when (ex.IsUniqueConstraintViolation("IX_Departments_Name"))
             {
                 return Result.Failure(DepartmentErrors.DuplicateName(request.Name));
             }

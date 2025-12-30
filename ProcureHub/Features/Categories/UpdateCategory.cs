@@ -40,7 +40,7 @@ public static class UpdateCategory
                 await dbContext.SaveChangesAsync(token);
                 return Result.Success();
             }
-            catch (DbUpdateException ex) when (DatabaseException.IsUniqueConstraintViolation(ex, "IX_Categories_Name"))
+            catch (DbUpdateException ex) when (ex.IsUniqueConstraintViolation("IX_Categories_Name"))
             {
                 return Result.Failure(CategoryErrors.DuplicateName(request.Name));
             }

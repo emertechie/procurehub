@@ -27,7 +27,7 @@ public static class DeleteCategory
             {
                 await dbContext.SaveChangesAsync(token);
             }
-            catch (DbUpdateException ex) when (DatabaseException.IsForeignKeyRestrictViolation(ex, "FK_PurchaseRequests_Categories_CategoryId"))
+            catch (DbUpdateException ex) when (ex.IsForeignKeyRestrictViolation("FK_PurchaseRequests_Categories_CategoryId"))
             {
                 return Result.Failure(Error.Validation(
                     $"Cannot delete category. It has one or more purchase requests. Please reassign requests before deleting."));

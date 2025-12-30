@@ -63,11 +63,11 @@ public static class UpdatePurchaseRequest
             {
                 await dbContext.SaveChangesAsync(token);
             }
-            catch (DbUpdateException ex) when (DatabaseException.IsForeignKeyViolation(ex, "FK_PurchaseRequests_Categories_CategoryId"))
+            catch (DbUpdateException ex) when (ex.IsForeignKeyViolation("FK_PurchaseRequests_Categories_CategoryId"))
             {
                 return Result.Failure<Guid>(PurchaseRequestErrors.CategoryNotFound);
             }
-            catch (DbUpdateException ex) when (DatabaseException.IsForeignKeyViolation(ex, "FK_PurchaseRequests_Departments_DepartmentId"))
+            catch (DbUpdateException ex) when (ex.IsForeignKeyViolation("FK_PurchaseRequests_Departments_DepartmentId"))
             {
                 return Result.Failure<Guid>(PurchaseRequestErrors.DepartmentNotFound);
             }
