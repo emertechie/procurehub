@@ -34,6 +34,7 @@
                 string id
             ) =>
 ```
+- Enums can be bound automatically like: `[FromQuery] Models.PurchaseRequestStatus? status,`
 - Each endpoint must assign an operation name using `.WithName`
 - Each endpoint must define all possible return values using `.Produces` calls. Example: `.ProducesValidationProblem()`, `.Produces<GetUserById.Response>()`, etc
 - If an `IRequestHandler` returns a `PagedResult<T>`, use `PagedResponse.From(pagedResult);` to return result from endpoint handler.

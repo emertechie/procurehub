@@ -47,16 +47,13 @@ public static class Endpoints
         group.MapGet("/purchase-requests", async (
                 [FromServices] IRequestHandler<QueryPurchaseRequests.Request, PagedResult<QueryPurchaseRequests.Response>> handler,
                 CancellationToken token,
-                [FromQuery] string? status,
+                [FromQuery] Models.PurchaseRequestStatus? status,
                 [FromQuery] string? search,
                 [FromQuery] int? page,
                 [FromQuery] int? pageSize
             ) =>
             {
-                var statusEnum = string.IsNullOrWhiteSpace(status)
-                    ? (Models.PurchaseRequestStatus?)null
-                    : Enum.Parse<Models.PurchaseRequestStatus>(status, true);
-                var request = new QueryPurchaseRequests.Request(statusEnum, search, page, pageSize);
+                var request = new QueryPurchaseRequests.Request(status, search, page, pageSize);
                 var pagedResult = await handler.HandleAsync(request, token);
                 return PagedResponse.From(pagedResult);
             })
