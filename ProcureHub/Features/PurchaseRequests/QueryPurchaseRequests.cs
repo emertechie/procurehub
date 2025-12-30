@@ -5,6 +5,7 @@ using ProcureHub.Common.Pagination;
 using ProcureHub.Constants;
 using ProcureHub.Features.PurchaseRequests.Validation;
 using ProcureHub.Infrastructure;
+using ProcureHub.Infrastructure.Authentication;
 using ProcureHub.Models;
 
 namespace ProcureHub.Features.PurchaseRequests;
@@ -51,48 +52,29 @@ public static class QueryPurchaseRequests
     public record RequesterInfo(string Id, string Email, string FirstName, string LastName);
     public record ReviewerInfo(string Id, string Email, string FirstName, string LastName);
 
-    public class Handler(ApplicationDbContext dbContext)
+    public class Handler(ApplicationDbContext dbContext, ICurrentUser currentUser)
         : IRequestHandler<Request, Result<PagedResult<Response>>>
     {
         public async Task<Result<PagedResult<Response>>> HandleAsync(Request request, CancellationToken token)
         {
-            // Get user context with roles and department
-            var user = await dbContext.Users
+            if (!currentUser.UserId.HasValue)
+            {
+                return Result.Failure<PagedResult<Response>>(Error.Unauthorized());
+            }
+
+            var currentUserId = currentUser.UserId.Value.ToString();
+            var isAdmin = currentUser.Roles.Contains(RoleNames.Admin);
+            var isApprover = currentUser.Roles.Contains(RoleNames.Approver);
+
+            Guid? currentUserDeptId = await dbContext.Users
                 .AsNoTracking()
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => u.Id == request.UserId, token);
-
-            if (user is null)
-                return Result.Failure<PagedResult<Response>>(PurchaseRequestErrors.Unauthorized);
-
-            var userRoles = user.UserRoles!.Select(ur => ur.Role.Name!).ToArray();
-            var isAdmin = userRoles.Contains(RoleNames.Admin);
-            var isApprover = userRoles.Contains(RoleNames.Approver);
+                .Where(u => u.Id == currentUserId)
+                .Select(u => u.DepartmentId)
+                .FirstAsync(token);
 
             var query = dbContext.PurchaseRequests
                 .AsNoTracking()
-                .Include(pr => pr.Category)
-                .Include(pr => pr.Department)
-                .Include(pr => pr.Requester)
-                .Include(pr => pr.ReviewedBy)
-                .AsQueryable();
-
-            // Apply role-based filtering
-            if (!isAdmin)
-            {
-                if (isApprover && user.DepartmentId.HasValue)
-                {
-                    // Approvers with department see department requests + own requests
-                    query = query.Where(pr => pr.DepartmentId == user.DepartmentId.Value
-                        || pr.RequesterId == request.UserId);
-                }
-                else
-                {
-                    // Requesters and approvers without department see only their own requests
-                    query = query.Where(pr => pr.RequesterId == request.UserId);
-                }
-            }
+                .WhereUserAllowedToViewPurchaseRequest(currentUserId, currentUserDeptId, isAdmin, isApprover);
 
             if (request.Status.HasValue)
             {

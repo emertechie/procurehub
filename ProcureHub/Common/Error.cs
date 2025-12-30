@@ -33,8 +33,14 @@ public record Error
     public static Error Failure(string code, string message)
         => new(code, message, ErrorType.Failure);
 
+    public static Error Unauthorized(string message)
+        => new("Unauthorized", message, ErrorType.Unauthorized);
+
     public static Error Unauthorized(string code, string message)
         => new(code, message, ErrorType.Unauthorized);
+
+    public static Error Unauthorized()
+        => new("Unauthorized", "User is not authorized.", ErrorType.Unauthorized);
 }
 
 public enum ErrorType
