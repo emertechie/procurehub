@@ -1,6 +1,4 @@
-using System.Net;
-using System.Net.Http.Json;
-using ProcureHub.Features.Users;
+using System.Collections.Concurrent;
 using ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
 
 namespace ProcureHub.WebApi.Tests.Infrastructure.Xunit;
@@ -10,28 +8,33 @@ namespace ProcureHub.WebApi.Tests.Infrastructure.Xunit;
 /// </summary>
 public class UserSetupFixture
 {
-    private bool _userCreated;
+    private ConcurrentDictionary<string, bool> _createdUsers = new();
 
     public async Task EnsureUserCreated(
         IHttpClientAuthHelper httpClientAuthHelper,
         string adminEmail,
         string adminPassword,
         string userEmail,
-        string userPassword
+        string userPassword,
+        string roleName
     )
     {
-        if (!_userCreated)
+        if (!_createdUsers.TryAdd($"{userEmail}-${roleName}", true))
+        {
+            return;
+        }
+
+        var httpClient = httpClientAuthHelper.HttpClient;
+
+        try
         {
             await httpClientAuthHelper.LoginAsync(adminEmail, adminPassword);
 
-            // Create a user (So we can log in as that user to test endpoints need admin auth)
-            var createRequest = new CreateUser.Request(userEmail, userPassword, "Some", "User");
-            var createResp = await httpClientAuthHelper.HttpClient.PostAsync("/users", JsonContent.Create(createRequest));
-            Assert.Equal(HttpStatusCode.Created, createResp.StatusCode);
-
+            await UserHelper.CreateUserWithRole(httpClient, userEmail, userPassword, roleName);
+        }
+        finally
+        {
             await httpClientAuthHelper.LogoutAsync();
-
-            _userCreated = true;
         }
     }
 }

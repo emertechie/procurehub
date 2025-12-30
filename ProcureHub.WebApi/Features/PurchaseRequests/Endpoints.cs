@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Mvc;
 using ProcureHub.Common;
 using ProcureHub.Common.Pagination;
@@ -26,18 +27,19 @@ public static class Endpoints
                 CancellationToken token
             ) =>
             {
-                var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
+                var requesterUserId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(requesterUserId))
                 {
                     return Results.Unauthorized();
                 }
 
-                var requestWithUser = request with { UserId = userId };
+                var requestWithUser = request with { RequesterUserId = requesterUserId };
                 var result = await handler.HandleAsync(requestWithUser, token);
                 return result.Match(
                     newId => Results.Created($"/purchase-requests/{newId}", new EntityCreatedResponse<string>(newId.ToString())),
                     error => error.ToProblemDetails());
             })
+            .RequireAuthorization(RolePolicyNames.RequesterOnly)
             .WithName(nameof(CreatePurchaseRequest))
             .Produces<EntityCreatedResponse<string>>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
@@ -96,6 +98,7 @@ public static class Endpoints
                     error => error.ToProblemDetails()
                 );
             })
+            .RequireAuthorization(RolePolicyNames.RequesterOnly)
             .WithName(nameof(UpdatePurchaseRequest))
             .Produces(StatusCodes.Status204NoContent)
             .ProducesValidationProblem()
@@ -113,6 +116,7 @@ public static class Endpoints
                     error => error.ToProblemDetails()
                 );
             })
+            .RequireAuthorization(RolePolicyNames.RequesterOnly)
             .WithName(nameof(SubmitPurchaseRequest))
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
@@ -124,19 +128,19 @@ public static class Endpoints
                 Guid id
             ) =>
             {
-                var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
+                var reviewerUserId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(reviewerUserId))
                 {
                     return Results.Unauthorized();
                 }
 
-                var result = await handler.HandleAsync(new ApprovePurchaseRequest.Request(id, userId), token);
+                var result = await handler.HandleAsync(new ApprovePurchaseRequest.Request(id, reviewerUserId), token);
                 return result.Match(
                     Results.NoContent,
                     error => error.ToProblemDetails()
                 );
             })
-            .RequireAuthorization(RolePolicyNames.AdminOnly)
+            .RequireAuthorization(RolePolicyNames.ApproverOnly)
             .WithName(nameof(ApprovePurchaseRequest))
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
@@ -160,7 +164,7 @@ public static class Endpoints
                     error => error.ToProblemDetails()
                 );
             })
-            .RequireAuthorization(RolePolicyNames.AdminOnly)
+            .RequireAuthorization(RolePolicyNames.ApproverOnly)
             .WithName(nameof(RejectPurchaseRequest))
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
@@ -177,6 +181,7 @@ public static class Endpoints
                     error => error.ToProblemDetails()
                 );
             })
+            .RequireAuthorization(RolePolicyNames.RequesterOnly)
             .WithName(nameof(DeletePurchaseRequest))
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);

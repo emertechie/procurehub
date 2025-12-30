@@ -21,6 +21,7 @@ public static class PurchaseRequestErrors
     {
         ["Status"] = ["Can only approve purchase requests in Pending status."]
     });
+    public static readonly Error CannotApproveOwnRequest = Error.Validation("PurchaseRequest.CannotApproveOwnRequest", "Cannot approve your own request");
     public static readonly Error CannotRejectNonPending = Error.Validation("PurchaseRequest.InvalidStatusTransition", "Invalid status transition", new Dictionary<string, string[]>
     {
         ["Status"] = ["Can only reject purchase requests in Pending status."]

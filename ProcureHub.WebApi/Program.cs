@@ -101,6 +101,8 @@ void RegisterServices(WebApplicationBuilder appBuilder)
 
         // Role-based policies
         options.AddPolicy(RolePolicyNames.AdminOnly, policy => { policy.RequireRole(RoleNames.Admin); });
+        options.AddPolicy(RolePolicyNames.RequesterOnly, policy => { policy.RequireRole(RoleNames.Requester); });
+        options.AddPolicy(RolePolicyNames.ApproverOnly, policy => { policy.RequireRole(RoleNames.Approver); });
     });
 
     appBuilder.Services.AddRequestHandlers();

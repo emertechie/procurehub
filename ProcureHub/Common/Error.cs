@@ -15,7 +15,7 @@ public record Error
         ValidationErrors = validationErrors;
     }
 
-    public static Error Validation(string code, string message, Dictionary<string, string[]> errors)
+    public static Error Validation(string code, string message, Dictionary<string, string[]>? errors = null)
         => new(code, message, ErrorType.Validation, errors);
 
     public static Error Validation(string message)

@@ -16,7 +16,7 @@ public static class CreatePurchaseRequest
         string? BusinessJustification,
         Guid CategoryId,
         Guid DepartmentId,
-        string UserId
+        string RequesterUserId
     );
 
     public class RequestValidator : AbstractValidator<Request>
@@ -29,7 +29,7 @@ public static class CreatePurchaseRequest
             RuleFor(r => r.BusinessJustification).MaximumLength(PurchaseRequestConfiguration.BusinessJustificationMaxLength);
             RuleFor(r => r.CategoryId).NotEmpty();
             RuleFor(r => r.DepartmentId).NotEmpty();
-            RuleFor(r => r.UserId).NotEmpty();
+            RuleFor(r => r.RequesterUserId).NotEmpty();
         }
     }
 
@@ -65,7 +65,7 @@ public static class CreatePurchaseRequest
                 BusinessJustification = request.BusinessJustification,
                 CategoryId = request.CategoryId,
                 DepartmentId = request.DepartmentId,
-                RequesterId = request.UserId,
+                RequesterId = request.RequesterUserId,
                 Status = PurchaseRequestStatus.Draft,
                 RequestNumber = requestNumber,
                 CreatedAt = now,

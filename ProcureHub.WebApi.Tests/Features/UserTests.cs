@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Identity.Data;
+using ProcureHub.Constants;
 using ProcureHub.Features.Departments;
 using ProcureHub.Features.Users;
 using ProcureHub.WebApi.Responses;
@@ -20,14 +21,20 @@ public class UserTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
         IClassFixture<UserSetupFixture>,
         IAsyncLifetime
 {
-    private const string ValidUserEmail = "user1@example.com";
-    private const string ValidUserPassword = "Test1234!";
+    private const string RequesterUserEmail = "user1@example.com";
+    private const string RequesterUserPassword = "Test1234!";
 
-    private static readonly CreateUser.Request ValidUserCreateRequest = new(ValidUserEmail, ValidUserPassword, "Some", "User");
+    private static readonly CreateUser.Request ValidUserCreateRequest = new(RequesterUserEmail, RequesterUserPassword, "Some", "User");
 
     public async ValueTask InitializeAsync()
     {
-        await userSetupFixture.EnsureUserCreated(this, AdminEmail, AdminPassword, ValidUserEmail, ValidUserPassword);
+        await userSetupFixture.EnsureUserCreated(this,
+            AdminEmail,
+            AdminPassword,
+            RequesterUserEmail,
+            RequesterUserPassword,
+            RoleNames.Requester
+        );
     }
 
     public ValueTask DisposeAsync()
@@ -70,7 +77,7 @@ public class UserTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
     public async Task All_user_endpoints_require_admin_authorization(EndpointInfo endpoint)
     {
         // Log in as a regular user, not an admin
-        await LoginAsync(ValidUserEmail, ValidUserPassword);
+        await LoginAsync(RequesterUserEmail, RequesterUserPassword);
 
         const string testId = "test-id";
 

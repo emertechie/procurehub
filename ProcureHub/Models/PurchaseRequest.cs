@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using ProcureHub.Common;
+using ProcureHub.Features.PurchaseRequests.Validation;
 
 namespace ProcureHub.Models;
 
@@ -26,6 +28,26 @@ public class PurchaseRequest
     public Department Department { get; set; } = null!;
     public User Requester { get; set; } = null!;
     public User? ReviewedBy { get; set; }
+
+    public Result Approve(string reviewerUserId)
+    {
+        if (Status != PurchaseRequestStatus.Pending)
+        {
+            return Result.Failure(PurchaseRequestErrors.CannotApproveNonPending);
+        }
+
+        if (reviewerUserId == RequesterId)
+        {
+            return Result.Failure(PurchaseRequestErrors.CannotApproveOwnRequest);
+        }
+
+        Status = PurchaseRequestStatus.Approved;
+        ReviewedAt = DateTime.UtcNow;
+        ReviewedById = reviewerUserId;
+        UpdatedAt = DateTime.UtcNow;
+        
+        return Result.Success();
+    }
 }
 
 public enum PurchaseRequestStatus

@@ -9,14 +9,14 @@ namespace ProcureHub.Features.PurchaseRequests;
 
 public static class ApprovePurchaseRequest
 {
-    public record Request(Guid Id, string UserId);
+    public record Request(Guid Id, string ReviewerUserId);
 
     public class RequestValidator : AbstractValidator<Request>
     {
         public RequestValidator()
         {
             RuleFor(r => r.Id).NotEmpty();
-            RuleFor(r => r.UserId).NotEmpty();
+            RuleFor(r => r.ReviewerUserId).NotEmpty();
         }
     }
 
@@ -29,15 +29,15 @@ public static class ApprovePurchaseRequest
                 .FirstOrDefaultAsync(pr => pr.Id == request.Id, token);
 
             if (purchaseRequest is null)
+            {
                 return Result.Failure(PurchaseRequestErrors.NotFound);
+            }
 
-            if (purchaseRequest.Status != PurchaseRequestStatus.Pending)
-                return Result.Failure(PurchaseRequestErrors.CannotApproveNonPending);
-
-            purchaseRequest.Status = PurchaseRequestStatus.Approved;
-            purchaseRequest.ReviewedAt = DateTime.UtcNow;
-            purchaseRequest.ReviewedById = request.UserId;
-            purchaseRequest.UpdatedAt = DateTime.UtcNow;
+            var result = purchaseRequest.Approve(request.ReviewerUserId);
+            if (result.IsFailure)
+            {
+                return result;
+            }
 
             await dbContext.SaveChangesAsync(token);
 

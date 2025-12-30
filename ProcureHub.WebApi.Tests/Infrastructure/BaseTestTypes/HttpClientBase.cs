@@ -11,8 +11,11 @@ namespace ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
 /// </summary>
 public abstract class HttpClientBase : IHttpClientAuthHelper
 {
+    // Note: Admin user gets seeded in ResetDatabaseFixture
     public const string AdminEmail = "test-admin@procurehub.local";
-    public const string AdminPassword = "TestAdmin123!";
+    public const string AdminPassword = ValidPassword;
+
+    public const string ValidPassword = "Password1!";
 
     protected readonly ApiTestHost ApiTestHost;
 
@@ -24,6 +27,11 @@ public abstract class HttpClientBase : IHttpClientAuthHelper
     }
 
     public HttpClient HttpClient { get; init; }
+
+    public async Task<string> CreateUserWithRoles(string email, string password, params string[] roles)
+    {
+        return await UserHelper.CreateUserWithRole(HttpClient, email, password, roles);
+    }
 
     public async Task LoginAsync(string email, string password)
     {

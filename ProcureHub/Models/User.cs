@@ -6,7 +6,7 @@ namespace ProcureHub.Models;
 
 public class User : IdentityUser
 {
-    public virtual ICollection<UserRole>? UserRoles { get; set; }
+    public virtual ICollection<UserRole> UserRoles { get; set; } = [];
 
     public string FirstName { get; set; } = null!;
 

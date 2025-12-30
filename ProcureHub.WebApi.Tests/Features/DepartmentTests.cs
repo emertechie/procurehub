@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using ProcureHub.Constants;
 using ProcureHub.Features.Departments;
 using ProcureHub.Features.Users;
 using ProcureHub.WebApi.Responses;
@@ -22,12 +23,18 @@ public class DepartmentTestsWithSharedDb(
         IClassFixture<UserSetupFixture>,
         IAsyncLifetime
 {
-    private const string ValidUserEmail = "user1@example.com";
-    private const string ValidUserPassword = "Test1234!";
+    private const string RequesterUserEmail = "user1@example.com";
+    private const string RequesterUserPassword = "Test1234!";
 
     public async ValueTask InitializeAsync()
     {
-        await userSetupFixture.EnsureUserCreated(this, AdminEmail, AdminPassword, ValidUserEmail, ValidUserPassword);
+        await userSetupFixture.EnsureUserCreated(this,
+            AdminEmail,
+            AdminPassword,
+            RequesterUserEmail,
+            RequesterUserPassword,
+            RoleNames.Requester
+        );
     }
 
     public ValueTask DisposeAsync()
@@ -67,7 +74,7 @@ public class DepartmentTestsWithSharedDb(
     public async Task Department_endpoints_enforce_admin_authorization_correctly(EndpointInfo endpoint)
     {
         // Log in as a regular user, not an admin
-        await LoginAsync(ValidUserEmail, ValidUserPassword);
+        await LoginAsync(RequesterUserEmail, RequesterUserPassword);
 
         var testId = Guid.NewGuid();
 
