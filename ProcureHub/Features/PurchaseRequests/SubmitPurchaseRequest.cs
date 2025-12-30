@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using ProcureHub.Common;
 using ProcureHub.Features.PurchaseRequests.Validation;
 using ProcureHub.Infrastructure;
-using ProcureHub.Models;
 
 namespace ProcureHub.Features.PurchaseRequests;
 
@@ -29,20 +28,10 @@ public static class SubmitPurchaseRequest
             if (purchaseRequest is null)
                 return Result.Failure(PurchaseRequestErrors.NotFound);
 
-            if (purchaseRequest.Status != PurchaseRequestStatus.Draft)
-                return Result.Failure(PurchaseRequestErrors.CannotSubmitNonDraft);
-
-            purchaseRequest.Status = PurchaseRequestStatus.Pending;
-            purchaseRequest.SubmittedAt = DateTime.UtcNow;
-            purchaseRequest.UpdatedAt = DateTime.UtcNow;
-
-            // Generate request number if not already set
-            if (string.IsNullOrEmpty(purchaseRequest.RequestNumber))
+            var result = purchaseRequest.Submit();
+            if (!result.IsSuccess)
             {
-                var year = DateTime.UtcNow.Year;
-                var count = await dbContext.PurchaseRequests
-                    .CountAsync(pr => pr.RequestNumber.StartsWith($"PR-{year}-"), token);
-                purchaseRequest.RequestNumber = $"PR-{year}-{(count + 1):D3}";
+                return result;
             }
 
             await dbContext.SaveChangesAsync(token);

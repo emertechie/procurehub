@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using ProcureHub.Common;
 using ProcureHub.Features.PurchaseRequests.Validation;
 using ProcureHub.Infrastructure;
-using ProcureHub.Models;
 
 namespace ProcureHub.Features.PurchaseRequests;
 
@@ -31,13 +30,11 @@ public static class RejectPurchaseRequest
             if (purchaseRequest is null)
                 return Result.Failure(PurchaseRequestErrors.NotFound);
 
-            if (purchaseRequest.Status != PurchaseRequestStatus.Pending)
-                return Result.Failure(PurchaseRequestErrors.CannotRejectNonPending);
-
-            purchaseRequest.Status = PurchaseRequestStatus.Rejected;
-            purchaseRequest.ReviewedAt = DateTime.UtcNow;
-            purchaseRequest.ReviewedById = request.ReviewerUserId;
-            purchaseRequest.UpdatedAt = DateTime.UtcNow;
+            var result = purchaseRequest.Reject(request.ReviewerUserId);
+            if (!result.IsSuccess)
+            {
+                return result;
+            }
 
             await dbContext.SaveChangesAsync(token);
 

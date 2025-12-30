@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using ProcureHub.Common;
 using ProcureHub.Features.PurchaseRequests.Validation;
 using ProcureHub.Infrastructure;
-using ProcureHub.Models;
 
 namespace ProcureHub.Features.PurchaseRequests;
 
@@ -29,8 +28,11 @@ public static class DeletePurchaseRequest
             if (purchaseRequest is null)
                 return Result.Failure(PurchaseRequestErrors.NotFound);
 
-            if (purchaseRequest.Status != PurchaseRequestStatus.Draft)
-                return Result.Failure(PurchaseRequestErrors.CannotDeleteNonDraft);
+            var result = purchaseRequest.CanDelete();
+            if (!result.IsSuccess)
+            {
+                return result;
+            }
 
             dbContext.PurchaseRequests.Remove(purchaseRequest);
             await dbContext.SaveChangesAsync(token);

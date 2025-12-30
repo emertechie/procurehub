@@ -29,6 +29,22 @@ public class PurchaseRequest
     public User Requester { get; set; } = null!;
     public User? ReviewedBy { get; set; }
 
+    // Domain logic methods
+
+    public Result Submit()
+    {
+        if (Status != PurchaseRequestStatus.Draft)
+        {
+            return Result.Failure(PurchaseRequestErrors.CannotSubmitNonDraft);
+        }
+
+        Status = PurchaseRequestStatus.Pending;
+        SubmittedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+
+        return Result.Success();
+    }
+
     public Result Approve(string reviewerUserId)
     {
         if (Status != PurchaseRequestStatus.Pending)
@@ -45,8 +61,30 @@ public class PurchaseRequest
         ReviewedAt = DateTime.UtcNow;
         ReviewedById = reviewerUserId;
         UpdatedAt = DateTime.UtcNow;
-        
+
         return Result.Success();
+    }
+
+    public Result Reject(string reviewerUserId)
+    {
+        if (Status != PurchaseRequestStatus.Pending)
+        {
+            return Result.Failure(PurchaseRequestErrors.CannotRejectNonPending);
+        }
+
+        Status = PurchaseRequestStatus.Rejected;
+        ReviewedAt = DateTime.UtcNow;
+        ReviewedById = reviewerUserId;
+        UpdatedAt = DateTime.UtcNow;
+
+        return Result.Success();
+    }
+
+    public Result CanDelete()
+    {
+        return Status == PurchaseRequestStatus.Draft
+            ? Result.Success()
+            : Result.Failure(PurchaseRequestErrors.CannotDeleteNonDraft);
     }
 }
 
