@@ -39,8 +39,10 @@ public class PurchaseRequest
         }
 
         Status = PurchaseRequestStatus.Pending;
-        SubmittedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
+
+        var now = DateTime.UtcNow;
+        SubmittedAt = now;
+        UpdatedAt = now;
 
         return Result.Success();
     }
@@ -58,9 +60,11 @@ public class PurchaseRequest
         }
 
         Status = PurchaseRequestStatus.Approved;
-        ReviewedAt = DateTime.UtcNow;
         ReviewedById = reviewerUserId;
-        UpdatedAt = DateTime.UtcNow;
+
+        var now = DateTime.UtcNow;
+        ReviewedAt = now;
+        UpdatedAt = now;
 
         return Result.Success();
     }
@@ -73,9 +77,11 @@ public class PurchaseRequest
         }
 
         Status = PurchaseRequestStatus.Rejected;
-        ReviewedAt = DateTime.UtcNow;
         ReviewedById = reviewerUserId;
-        UpdatedAt = DateTime.UtcNow;
+
+        var now = DateTime.UtcNow;
+        ReviewedAt = now;
+        UpdatedAt = now;
 
         return Result.Success();
     }
