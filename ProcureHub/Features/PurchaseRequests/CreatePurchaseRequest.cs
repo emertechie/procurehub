@@ -1,3 +1,4 @@
+using System.Data.Common;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Common;
@@ -38,18 +39,6 @@ public static class CreatePurchaseRequest
     {
         public async Task<Result<Guid>> HandleAsync(Request request, CancellationToken token)
         {
-            // Verify category exists
-            var categoryExists = await dbContext.Categories
-                .AnyAsync(c => c.Id == request.CategoryId, token);
-            if (!categoryExists)
-                return Result.Failure<Guid>(PurchaseRequestErrors.CategoryNotFound);
-
-            // Verify department exists
-            var departmentExists = await dbContext.Departments
-                .AnyAsync(d => d.Id == request.DepartmentId, token);
-            if (!departmentExists)
-                return Result.Failure<Guid>(PurchaseRequestErrors.DepartmentNotFound);
-
             // Generate request number
             var year = DateTime.UtcNow.Year;
             var count = await dbContext.PurchaseRequests
@@ -73,7 +62,19 @@ public static class CreatePurchaseRequest
             };
 
             await dbContext.PurchaseRequests.AddAsync(purchaseRequest, token);
-            await dbContext.SaveChangesAsync(token);
+
+            try
+            {
+                await dbContext.SaveChangesAsync(token);
+            }
+            catch (DbUpdateException ex) when (DatabaseException.IsForeignKeyViolation(ex, "FK_PurchaseRequests_Categories_CategoryId"))
+            {
+                return Result.Failure<Guid>(PurchaseRequestErrors.CategoryNotFound);
+            }
+            catch (DbUpdateException ex) when (DatabaseException.IsForeignKeyViolation(ex, "FK_PurchaseRequests_Departments_DepartmentId"))
+            {
+                return Result.Failure<Guid>(PurchaseRequestErrors.DepartmentNotFound);
+            }
 
             return Result.Success(purchaseRequest.Id);
         }

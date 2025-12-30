@@ -11,4 +11,11 @@ public static class DatabaseException
             pgEx.SqlState == "23505" &&
             pgEx.ConstraintName == constraintName;
     }
+
+    public static bool IsForeignKeyViolation(DbUpdateException ex, string constraintName)
+    {
+        return ex.InnerException is PostgresException pgEx &&
+            pgEx.SqlState == "23503" &&
+            pgEx.ConstraintName == constraintName;
+    }
 }
