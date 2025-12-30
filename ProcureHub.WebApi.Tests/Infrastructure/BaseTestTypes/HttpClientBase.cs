@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using ProcureHub.Features.Roles;
+using ProcureHub.Models;
 using ProcureHub.WebApi.Responses;
 using ProcureHub.WebApi.Tests.Infrastructure.Helpers;
 using ProcureHub.WebApi.Tests.Infrastructure.Xunit;
@@ -43,15 +44,7 @@ public abstract class HttpClientBase : IHttpClientAuthHelper
 
     public async Task AssignRoleToUserAsync(string userId, string roleName)
     {
-        // First get role by name
-        var getRolesResp = await HttpClient.GetAsync("/roles")
-            .ReadJsonAsync<DataResponse<QueryRoles.Role[]>>();
-        var role = getRolesResp.Data.FirstOrDefault(r => r.Name == roleName);
-        Assert.NotNull(role);
-
-        var request = JsonContent.Create(new { UserId = userId, RoleId = role.Id });
-        var response = await HttpClient.PostAsync($"/users/{userId}/roles", request);
-        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        await UserHelper.AssignRoleToUserAsync(HttpClient, userId, roleName);
     }
 
     public async Task LoginAsync(string email, string password)

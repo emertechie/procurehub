@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using ProcureHub.Features.Roles;
 using ProcureHub.Features.Users;
@@ -29,16 +30,31 @@ public static class UserHelper
 
             // Assign role
             var assignRoleReq = new AssignRole.Request(createdUser.Id, role.Id);
-            await httpClient.PostAsync($"/users/{createdUser.Id}/roles", JsonContent.Create(assignRoleReq));
+            var assignRoleResp = await httpClient.PostAsync($"/users/{createdUser.Id}/roles", JsonContent.Create(assignRoleReq));
+            Assert.Equal(HttpStatusCode.NoContent, assignRoleResp.StatusCode);
         }
 
         if (departmentId.HasValue)
         {
             // Assign department
             var assignDeptReq = new { Id = createdUser.Id, DepartmentId = departmentId.Value };
-            await httpClient.PatchAsync($"/users/{createdUser.Id}/department", JsonContent.Create(assignDeptReq));
+            var assignDepResp = await httpClient.PatchAsync($"/users/{createdUser.Id}/department", JsonContent.Create(assignDeptReq));
+            Assert.Equal(HttpStatusCode.NoContent, assignDepResp.StatusCode);
         }
 
         return createdUser.Id;
+    }
+
+    public static async Task AssignRoleToUserAsync(HttpClient httpClient, string userId, string roleName)
+    {
+        // First get role by name
+        var getRolesResp = await httpClient.GetAsync("/roles")
+            .ReadJsonAsync<DataResponse<QueryRoles.Role[]>>();
+        var role = getRolesResp.Data.FirstOrDefault(r => r.Name == roleName);
+        Assert.NotNull(role);
+
+        var request = JsonContent.Create(new { UserId = userId, RoleId = role.Id });
+        var response = await httpClient.PostAsync($"/users/{userId}/roles", request);
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
 }
