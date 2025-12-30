@@ -313,8 +313,8 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
 
         // Query - should appear in list
         var queryResp = await HttpClient.GetAsync("/purchase-requests")
-            .ReadJsonAsync<DataResponse<PagedResult<QueryPurchaseRequests.Response>>>();
-        Assert.Contains(queryResp.Data.Data, pr => pr.Id == prId);
+            .ReadJsonAsync<PagedResponse<QueryPurchaseRequests.Response>>();
+        Assert.Contains(queryResp.Data, pr => pr.Id == prId);
     }
 
     [Fact]
@@ -807,24 +807,24 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
 
         // Query by Draft status
         var draftQuery = await HttpClient.GetAsync("/purchase-requests?status=Draft")
-            .ReadJsonAsync<DataResponse<PagedResult<QueryPurchaseRequests.Response>>>();
-        Assert.Contains(draftQuery.Data.Data, pr => pr.Id == draftId);
-        Assert.DoesNotContain(draftQuery.Data.Data, pr => pr.Id == pendingId);
-        Assert.DoesNotContain(draftQuery.Data.Data, pr => pr.Id == approvedId);
+            .ReadJsonAsync<PagedResponse<QueryPurchaseRequests.Response>>();
+        Assert.Contains(draftQuery.Data, pr => pr.Id == draftId);
+        Assert.DoesNotContain(draftQuery.Data, pr => pr.Id == pendingId);
+        Assert.DoesNotContain(draftQuery.Data, pr => pr.Id == approvedId);
 
         // Query by Pending status
         var pendingQuery = await HttpClient.GetAsync("/purchase-requests?status=Pending")
-            .ReadJsonAsync<DataResponse<PagedResult<QueryPurchaseRequests.Response>>>();
-        Assert.DoesNotContain(pendingQuery.Data.Data, pr => pr.Id == draftId);
-        Assert.Contains(pendingQuery.Data.Data, pr => pr.Id == pendingId);
-        Assert.DoesNotContain(pendingQuery.Data.Data, pr => pr.Id == approvedId);
+            .ReadJsonAsync<PagedResponse<QueryPurchaseRequests.Response>>();
+        Assert.DoesNotContain(pendingQuery.Data, pr => pr.Id == draftId);
+        Assert.Contains(pendingQuery.Data, pr => pr.Id == pendingId);
+        Assert.DoesNotContain(pendingQuery.Data, pr => pr.Id == approvedId);
 
         // Query by Approved status
         var approvedQuery = await HttpClient.GetAsync("/purchase-requests?status=Approved")
-            .ReadJsonAsync<DataResponse<PagedResult<QueryPurchaseRequests.Response>>>();
-        Assert.DoesNotContain(approvedQuery.Data.Data, pr => pr.Id == draftId);
-        Assert.DoesNotContain(approvedQuery.Data.Data, pr => pr.Id == pendingId);
-        Assert.Contains(approvedQuery.Data.Data, pr => pr.Id == approvedId);
+            .ReadJsonAsync<PagedResponse<QueryPurchaseRequests.Response>>();
+        Assert.DoesNotContain(approvedQuery.Data, pr => pr.Id == draftId);
+        Assert.DoesNotContain(approvedQuery.Data, pr => pr.Id == pendingId);
+        Assert.Contains(approvedQuery.Data, pr => pr.Id == approvedId);
     }
 
     [Fact]
@@ -841,15 +841,15 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
 
         // Search for "laptop"
         var laptopSearch = await HttpClient.GetAsync("/purchase-requests?search=laptop")
-            .ReadJsonAsync<DataResponse<PagedResult<QueryPurchaseRequests.Response>>>();
-        Assert.Contains(laptopSearch.Data.Data, pr => pr.Id == laptopId);
-        Assert.DoesNotContain(laptopSearch.Data.Data, pr => pr.Id == softwareId);
+            .ReadJsonAsync<PagedResponse<QueryPurchaseRequests.Response>>();
+        Assert.Contains(laptopSearch.Data, pr => pr.Id == laptopId);
+        Assert.DoesNotContain(laptopSearch.Data, pr => pr.Id == softwareId);
 
         // Search for "software"
         var softwareSearch = await HttpClient.GetAsync("/purchase-requests?search=software")
-            .ReadJsonAsync<DataResponse<PagedResult<QueryPurchaseRequests.Response>>>();
-        Assert.DoesNotContain(softwareSearch.Data.Data, pr => pr.Id == laptopId);
-        Assert.Contains(softwareSearch.Data.Data, pr => pr.Id == softwareId);
+            .ReadJsonAsync<PagedResponse<QueryPurchaseRequests.Response>>();
+        Assert.DoesNotContain(softwareSearch.Data, pr => pr.Id == laptopId);
+        Assert.Contains(softwareSearch.Data, pr => pr.Id == softwareId);
     }
 
     [Fact]

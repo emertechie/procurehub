@@ -36,4 +36,5 @@
 ```
 - Each endpoint must assign an operation name using `.WithName`
 - Each endpoint must define all possible return values using `.Produces` calls. Example: `.ProducesValidationProblem()`, `.Produces<GetUserById.Response>()`, etc
-- Good example: `ProcureHub.WebApi/Features/Users/Endpoints.cs`
+- If an `IRequestHandler` returns a `PagedResult<T>`, use `PagedResponse.From(pagedResult);` to return result from endpoint handler.
+- Good example to follow: `ProcureHub.WebApi/Features/Users/Endpoints.cs`

@@ -57,8 +57,8 @@ public static class Endpoints
                     ? (Models.PurchaseRequestStatus?)null
                     : Enum.Parse<Models.PurchaseRequestStatus>(status, true);
                 var request = new QueryPurchaseRequests.Request(statusEnum, search, page, pageSize);
-                var result = await handler.HandleAsync(request, token);
-                return Results.Ok(DataResponse.From(result));
+                var pagedResult = await handler.HandleAsync(request, token);
+                return PagedResponse.From(pagedResult);
             })
             .WithName(nameof(QueryPurchaseRequests))
             .Produces<DataResponse<PagedResult<QueryPurchaseRequests.Response>>>()
