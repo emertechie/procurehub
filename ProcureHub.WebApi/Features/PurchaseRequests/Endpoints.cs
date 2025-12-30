@@ -45,7 +45,8 @@ public static class Endpoints
             .ProducesValidationProblem();
 
         group.MapGet("/purchase-requests", async (
-                [FromServices] IRequestHandler<QueryPurchaseRequests.Request, PagedResult<QueryPurchaseRequests.Response>> handler,
+                [FromServices] IRequestHandler<QueryPurchaseRequests.Request, Result<PagedResult<QueryPurchaseRequests.Response>>> handler,
+                ClaimsPrincipal user,
                 CancellationToken token,
                 [FromQuery] Models.PurchaseRequestStatus? status,
                 [FromQuery] string? search,
@@ -53,9 +54,18 @@ public static class Endpoints
                 [FromQuery] int? pageSize
             ) =>
             {
-                var request = new QueryPurchaseRequests.Request(status, search, page, pageSize);
-                var pagedResult = await handler.HandleAsync(request, token);
-                return PagedResponse.From(pagedResult);
+                var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Results.Unauthorized();
+                }
+
+                var request = new QueryPurchaseRequests.Request(status, search, page, pageSize, userId);
+                var result = await handler.HandleAsync(request, token);
+                return result.Match(
+                    pagedResult => Results.Ok(PagedResponse.From(pagedResult)),
+                    error => error.ToProblemDetails()
+                );
             })
             .WithName(nameof(QueryPurchaseRequests))
             .Produces<DataResponse<PagedResult<QueryPurchaseRequests.Response>>>()
@@ -63,11 +73,18 @@ public static class Endpoints
 
         group.MapGet("/purchase-requests/{id:guid}", async (
                 [FromServices] IRequestHandler<GetPurchaseRequestById.Request, Result<GetPurchaseRequestById.Response>> handler,
+                ClaimsPrincipal user,
                 CancellationToken token,
                 Guid id
             ) =>
             {
-                var result = await handler.HandleAsync(new GetPurchaseRequestById.Request(id), token);
+                var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Results.Unauthorized();
+                }
+
+                var result = await handler.HandleAsync(new GetPurchaseRequestById.Request(id, userId), token);
                 return result.Match(
                     response => Results.Ok(DataResponse.From(response)),
                     error => error.ToProblemDetails()

@@ -1,6 +1,9 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using ProcureHub.Features.Roles;
+using ProcureHub.WebApi.Responses;
+using ProcureHub.WebApi.Tests.Infrastructure.Helpers;
 using ProcureHub.WebApi.Tests.Infrastructure.Xunit;
 
 namespace ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
@@ -31,6 +34,26 @@ public abstract class HttpClientBase : IHttpClientAuthHelper
     public async Task<string> CreateUserWithRoles(string email, string password, params string[] roles)
     {
         return await UserHelper.CreateUserWithRole(HttpClient, email, password, roles);
+    }
+
+    public async Task AssignUserToDepartmentAsync(string userId, Guid departmentId)
+    {
+        var request = JsonContent.Create(new { Id = userId, DepartmentId = departmentId });
+        var response = await HttpClient.PatchAsync($"/users/{userId}/department", request);
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    public async Task AssignRoleToUserAsync(string userId, string roleName)
+    {
+        // First get role by name
+        var getRolesResp = await HttpClient.GetAsync("/roles")
+            .ReadJsonAsync<DataResponse<QueryRoles.Role[]>>();
+        var role = getRolesResp.Data.FirstOrDefault(r => r.Name == roleName);
+        Assert.NotNull(role);
+
+        var request = JsonContent.Create(new { UserId = userId, RoleId = role.Id });
+        var response = await HttpClient.PostAsync($"/users/{userId}/roles", request);
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
 
     public async Task LoginAsync(string email, string password)

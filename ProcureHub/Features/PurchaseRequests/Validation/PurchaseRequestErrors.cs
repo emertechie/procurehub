@@ -38,4 +38,5 @@ public static class PurchaseRequestErrors
     {
         ["DepartmentId"] = ["The specified department does not exist."]
     });
+    public static readonly Error Unauthorized = Error.Unauthorized("PurchaseRequest.Unauthorized", "You are not authorized to access this purchase request");
 }

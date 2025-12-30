@@ -508,6 +508,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         var departmentId = await CreateDepartmentAsync();
         await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
         string approverUserId = await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver);
+        await AssignUserToDepartmentAsync(approverUserId, departmentId);
 
         // Log in as a requester
         await LoginAsync("requester@example.com", ValidPassword);
@@ -545,7 +546,8 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         var categoryId = await CreateCategoryAsync();
         var departmentId = await CreateDepartmentAsync();
-        await CreateUserWithRoles("requester-approver@example.com", ValidPassword, RoleNames.Requester, RoleNames.Approver);
+        string userId = await CreateUserWithRoles("requester-approver@example.com", ValidPassword, RoleNames.Requester, RoleNames.Approver);
+        await AssignUserToDepartmentAsync(userId, departmentId);
 
         // Log in as a user with Approver role who will create their own request
         await LoginAsync("requester-approver@example.com", ValidPassword);
@@ -582,6 +584,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         var departmentId = await CreateDepartmentAsync();
         await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
         string approverUserId = await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver);
+        await AssignUserToDepartmentAsync(approverUserId, departmentId);
 
         await LoginAsync("requester@example.com", ValidPassword);
         var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
@@ -898,4 +901,190 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
             "NotFound",
             $"DELETE /purchase-requests/{nonexistentId}");
     }
+
+    #region Authorization Tests
+
+    [Fact]
+    public async Task Admin_can_see_all_purchase_requests()
+    {
+        await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var dept1Id = await CreateDepartmentAsync("Dept1");
+        var dept2Id = await CreateDepartmentAsync("Dept2");
+
+        // Create requester in dept1
+        var requester1Id = await CreateUserWithRoles("requester1@example.com", ValidPassword, RoleNames.Requester);
+        await AssignUserToDepartmentAsync(requester1Id, dept1Id);
+
+        // Create requester in dept2
+        var requester2Id = await CreateUserWithRoles("requester2@example.com", ValidPassword, RoleNames.Requester);
+        await AssignUserToDepartmentAsync(requester2Id, dept2Id);
+
+        // Login as requester1 and create PR
+        await LoginAsync("requester1@example.com", ValidPassword);
+        var pr1Id = await CreatePurchaseRequestAsync(categoryId, dept1Id, "Request from Dept1");
+
+        // Login as requester2 and create PR
+        await LoginAsync("requester2@example.com", ValidPassword);
+        var pr2Id = await CreatePurchaseRequestAsync(categoryId, dept2Id, "Request from Dept2");
+
+        // Login as admin
+        await LoginAsAdminAsync();
+
+        // Admin should see both requests
+        var queryResp = await HttpClient.GetAsync("/purchase-requests")
+            .ReadJsonAsync<PagedResponse<QueryPurchaseRequests.Response>>();
+        Assert.Contains(queryResp.Data, pr => pr.Id == pr1Id);
+        Assert.Contains(queryResp.Data, pr => pr.Id == pr2Id);
+
+        // Admin should access both by ID
+        var getPr1Resp = await HttpClient.GetAsync($"/purchase-requests/{pr1Id}");
+        Assert.Equal(HttpStatusCode.OK, getPr1Resp.StatusCode);
+
+        var getPr2Resp = await HttpClient.GetAsync($"/purchase-requests/{pr2Id}");
+        Assert.Equal(HttpStatusCode.OK, getPr2Resp.StatusCode);
+    }
+
+    [Fact]
+    public async Task Requester_can_only_see_own_requests()
+    {
+        await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var deptId = await CreateDepartmentAsync();
+
+        // Create two requesters in same department
+        var requester1Id = await CreateUserWithRoles("requester1@example.com", ValidPassword, RoleNames.Requester);
+        await AssignUserToDepartmentAsync(requester1Id, deptId);
+
+        var requester2Id = await CreateUserWithRoles("requester2@example.com", ValidPassword, RoleNames.Requester);
+        await AssignUserToDepartmentAsync(requester2Id, deptId);
+
+        // Login as requester1 and create PR
+        await LoginAsync("requester1@example.com", ValidPassword);
+        var pr1Id = await CreatePurchaseRequestAsync(categoryId, deptId, "Request from Requester1");
+
+        // Login as requester2 and create PR
+        await LoginAsync("requester2@example.com", ValidPassword);
+        var pr2Id = await CreatePurchaseRequestAsync(categoryId, deptId, "Request from Requester2");
+
+        // Requester2 should see only own request
+        var queryResp = await HttpClient.GetAsync("/purchase-requests")
+            .ReadJsonAsync<PagedResponse<QueryPurchaseRequests.Response>>();
+        Assert.DoesNotContain(queryResp.Data, pr => pr.Id == pr1Id);
+        Assert.Contains(queryResp.Data, pr => pr.Id == pr2Id);
+
+        // Requester2 should not access requester1's PR
+        var getPr1Resp = await HttpClient.GetAsync($"/purchase-requests/{pr1Id}");
+        await getPr1Resp.AssertProblemDetailsAsync(
+            HttpStatusCode.NotFound,
+            "Purchase request not found",
+            "NotFound",
+            $"GET /purchase-requests/{pr1Id}");
+
+        // Requester2 should access own PR
+        var getPr2Resp = await HttpClient.GetAsync($"/purchase-requests/{pr2Id}");
+        Assert.Equal(HttpStatusCode.OK, getPr2Resp.StatusCode);
+    }
+
+    [Fact]
+    public async Task Approver_with_department_can_see_department_requests_and_own_requests()
+    {
+        await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var dept1Id = await CreateDepartmentAsync("Dept1");
+        var dept2Id = await CreateDepartmentAsync("Dept2");
+
+        // Create approver assigned to dept1
+        var approverId = await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver);
+        await AssignUserToDepartmentAsync(approverId, dept1Id);
+
+        // Create requester in dept1
+        var requester1Id = await CreateUserWithRoles("requester1@example.com", ValidPassword, RoleNames.Requester);
+        await AssignUserToDepartmentAsync(requester1Id, dept1Id);
+
+        // Create requester in dept2
+        var requester2Id = await CreateUserWithRoles("requester2@example.com", ValidPassword, RoleNames.Requester);
+        await AssignUserToDepartmentAsync(requester2Id, dept2Id);
+
+        // Login as requester1 and create PR in dept1
+        await LoginAsync("requester1@example.com", ValidPassword);
+        var pr1Id = await CreatePurchaseRequestAsync(categoryId, dept1Id, "Request from Dept1");
+
+        // Login as requester2 and create PR in dept2
+        await LoginAsync("requester2@example.com", ValidPassword);
+        var pr2Id = await CreatePurchaseRequestAsync(categoryId, dept2Id, "Request from Dept2");
+
+        // Add Requester role to approver so they can create PR
+        await LoginAsAdminAsync();
+        await AssignRoleToUserAsync(approverId, RoleNames.Requester);
+
+        // Login as approver and create PR in dept2 (different from their assigned dept)
+        await LoginAsync("approver@example.com", ValidPassword);
+        var pr3Id = await CreatePurchaseRequestAsync(categoryId, dept2Id, "Approver's own request in Dept2");
+
+        // Approver should see dept1 requests + own requests (even if in different dept)
+        var queryResp = await HttpClient.GetAsync("/purchase-requests")
+            .ReadJsonAsync<PagedResponse<QueryPurchaseRequests.Response>>();
+        Assert.Contains(queryResp.Data, pr => pr.Id == pr1Id); // Dept1 request
+        Assert.DoesNotContain(queryResp.Data, pr => pr.Id == pr2Id); // Dept2 request (not theirs)
+        Assert.Contains(queryResp.Data, pr => pr.Id == pr3Id); // Own request in Dept2
+
+        // Approver should access dept1 PR
+        var getPr1Resp = await HttpClient.GetAsync($"/purchase-requests/{pr1Id}");
+        Assert.Equal(HttpStatusCode.OK, getPr1Resp.StatusCode);
+
+        // Approver should NOT access dept2 PR (not theirs)
+        var getPr2Resp = await HttpClient.GetAsync($"/purchase-requests/{pr2Id}");
+        await getPr2Resp.AssertProblemDetailsAsync(
+            HttpStatusCode.NotFound,
+            "Purchase request not found",
+            "NotFound",
+            $"GET /purchase-requests/{pr2Id}");
+
+        // Approver should access own PR in dept2
+        var getPr3Resp = await HttpClient.GetAsync($"/purchase-requests/{pr3Id}");
+        Assert.Equal(HttpStatusCode.OK, getPr3Resp.StatusCode);
+    }
+
+    [Fact]
+    public async Task Approver_without_department_can_only_see_own_requests()
+    {
+        await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var deptId = await CreateDepartmentAsync();
+
+        // Create approver WITHOUT department assignment, but with Requester role too
+        var approverId = await CreateUserWithRoles("approver@example.com", ValidPassword, RoleNames.Approver, RoleNames.Requester);
+
+        // Create another requester and PR
+        var requesterId = await CreateUserWithRoles("requester@example.com", ValidPassword, RoleNames.Requester);
+        await AssignUserToDepartmentAsync(requesterId, deptId);
+
+        await LoginAsync("requester@example.com", ValidPassword);
+        var otherUserPrId = await CreatePurchaseRequestAsync(categoryId, deptId, "Other user's request");
+
+        // Login as approver without department and create own request
+        await LoginAsync("approver@example.com", ValidPassword);
+        var ownPrId = await CreatePurchaseRequestAsync(categoryId, deptId, "Approver's own request");
+
+        // Query should return only own request, not other user's request
+        var queryResp = await HttpClient.GetAsync("/purchase-requests")
+            .ReadJsonAsync<PagedResponse<QueryPurchaseRequests.Response>>();
+        Assert.Contains(queryResp.Data, pr => pr.Id == ownPrId);
+        Assert.DoesNotContain(queryResp.Data, pr => pr.Id == otherUserPrId);
+
+        // GetById should work for own request
+        var getOwnResp = await HttpClient.GetAsync($"/purchase-requests/{ownPrId}");
+        Assert.Equal(HttpStatusCode.OK, getOwnResp.StatusCode);
+
+        // GetById should NOT work for other user's request
+        var getOtherResp = await HttpClient.GetAsync($"/purchase-requests/{otherUserPrId}");
+        await getOtherResp.AssertProblemDetailsAsync(
+            HttpStatusCode.NotFound,
+            "Purchase request not found",
+            "NotFound",
+            $"GET /purchase-requests/{otherUserPrId}");
+    }
+
+    #endregion
 }

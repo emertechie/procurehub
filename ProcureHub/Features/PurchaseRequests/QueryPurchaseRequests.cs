@@ -1,6 +1,9 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using ProcureHub.Common;
 using ProcureHub.Common.Pagination;
+using ProcureHub.Constants;
+using ProcureHub.Features.PurchaseRequests.Validation;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
 
@@ -12,7 +15,8 @@ public static class QueryPurchaseRequests
         PurchaseRequestStatus? Status,
         string? Search,
         int? Page,
-        int? PageSize
+        int? PageSize,
+        string UserId
     );
 
     public class RequestValidator : AbstractValidator<Request>
@@ -48,10 +52,24 @@ public static class QueryPurchaseRequests
     public record ReviewerInfo(string Id, string Email, string FirstName, string LastName);
 
     public class Handler(ApplicationDbContext dbContext)
-        : IRequestHandler<Request, PagedResult<Response>>
+        : IRequestHandler<Request, Result<PagedResult<Response>>>
     {
-        public async Task<PagedResult<Response>> HandleAsync(Request request, CancellationToken token)
+        public async Task<Result<PagedResult<Response>>> HandleAsync(Request request, CancellationToken token)
         {
+            // Get user context with roles and department
+            var user = await dbContext.Users
+                .AsNoTracking()
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.Id == request.UserId, token);
+
+            if (user is null)
+                return Result.Failure<PagedResult<Response>>(PurchaseRequestErrors.Unauthorized);
+
+            var userRoles = user.UserRoles!.Select(ur => ur.Role.Name!).ToArray();
+            var isAdmin = userRoles.Contains(RoleNames.Admin);
+            var isApprover = userRoles.Contains(RoleNames.Approver);
+
             var query = dbContext.PurchaseRequests
                 .AsNoTracking()
                 .Include(pr => pr.Category)
@@ -59,6 +77,22 @@ public static class QueryPurchaseRequests
                 .Include(pr => pr.Requester)
                 .Include(pr => pr.ReviewedBy)
                 .AsQueryable();
+
+            // Apply role-based filtering
+            if (!isAdmin)
+            {
+                if (isApprover && user.DepartmentId.HasValue)
+                {
+                    // Approvers with department see department requests + own requests
+                    query = query.Where(pr => pr.DepartmentId == user.DepartmentId.Value
+                        || pr.RequesterId == request.UserId);
+                }
+                else
+                {
+                    // Requesters and approvers without department see only their own requests
+                    query = query.Where(pr => pr.RequesterId == request.UserId);
+                }
+            }
 
             if (request.Status.HasValue)
             {
@@ -73,7 +107,7 @@ public static class QueryPurchaseRequests
                     pr.RequestNumber.ToLower().Contains(search));
             }
 
-            return await query
+            var pagedResult = await query
                 .OrderByDescending(pr => pr.CreatedAt)
                 .ToPagedResultAsync(
                     pr => new Response(
@@ -98,6 +132,8 @@ public static class QueryPurchaseRequests
                     request.Page,
                     request.PageSize,
                     token);
+
+            return Result.Success(pagedResult);
         }
     }
 }

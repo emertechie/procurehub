@@ -29,6 +29,7 @@
 
 - Use "Allman" style braces
 - Always insert braces after an `if` statement
+- In a multi-line conditional statement, put the `||` or `&&` operators at the start of subsequent line(s)
 
 # Architecture
 
