@@ -10,6 +10,7 @@ using ProcureHub.Data;
 using ProcureHub.Features.Users;
 using ProcureHub.Features.Users.Validation;
 using ProcureHub.Infrastructure;
+using ProcureHub.Infrastructure.Authentication;
 using ProcureHub.Models;
 using ProcureHub.WebApi;
 using ProcureHub.WebApi.Authentication;
@@ -106,6 +107,9 @@ void RegisterServices(WebApplicationBuilder appBuilder)
     });
 
     appBuilder.Services.AddDomainServices();
+
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddScoped<ICurrentUser, CurrentUserFromHttpContext>();
 
     // Register all FluentValidation validators 
     appBuilder.Services.AddValidatorsFromAssemblyContaining<CreateUser.Request>();
