@@ -2,6 +2,7 @@ using MartinCostello.Logging.XUnit;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -21,6 +22,15 @@ public class ApiTestHost(string connectionString)
         // Sent env to "Test" to skip seeding data in the API's Program.cs - since
         // any data seeded there is wiped out in the `ResetDatabaseAsync` call.
         builder.UseEnvironment("Test");
+
+        // Load test appsettings.json to override WebApi appsettings
+        builder.ConfigureAppConfiguration((context, config) =>
+        {
+            config.AddJsonFile(
+                Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json"),
+                optional: false,
+                reloadOnChange: false);
+        });
 
         builder.ConfigureLogging(logging => { logging.AddXUnit(this); });
 

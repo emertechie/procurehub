@@ -7,7 +7,7 @@ public class ResetDatabaseFixture(ApiTestHostFixture hostFixture) : IAsyncLifeti
     public async ValueTask InitializeAsync()
     {
         await DatabaseResetter.ResetDatabaseAsync();
-        await DatabaseResetter.SeedDataAsync(hostFixture.ApiTestHost.Services, HttpClientBase.AdminEmail, HttpClientBase.AdminPassword);
+        await DatabaseResetter.SeedDataAsync(hostFixture.ApiTestHost.Services);
     }
 
     public ValueTask DisposeAsync()

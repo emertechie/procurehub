@@ -13,7 +13,7 @@ public abstract class HttpClientAndDbResetBase(ApiTestHostFixture hostFixture, I
     public async ValueTask InitializeAsync()
     {
         await DatabaseResetter.ResetDatabaseAsync();
-        await DatabaseResetter.SeedDataAsync(ApiTestHost.Services, AdminEmail, AdminPassword);
+        await DatabaseResetter.SeedDataAsync(ApiTestHost.Services);
     }
 
     public ValueTask DisposeAsync()

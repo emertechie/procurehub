@@ -136,14 +136,14 @@ async Task ConfigureApplication(WebApplication app)
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         await dbContext.Database.MigrateAsync();
 
-        // Seed database with roles and initial admin user
-        await DataSeeder.SeedAsync(
+        // Seed database with roles, users, and initial data
+        var seeder = new DataSeeder(
             dbContext,
             scope.ServiceProvider.GetRequiredService<UserManager<User>>(),
             scope.ServiceProvider.GetRequiredService<RoleManager<Role>>(),
-            scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>(),
-            app.Configuration.GetRequiredString("DevAdminUser:Email"),
-            app.Configuration.GetRequiredString("DevAdminUser:Password"));
+            app.Configuration,
+            scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>());
+        await seeder.SeedAsync();
     }
 
     app.UseHttpsRedirection();
