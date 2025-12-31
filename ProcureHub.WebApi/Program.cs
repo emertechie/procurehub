@@ -1,3 +1,5 @@
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
@@ -17,7 +19,6 @@ using ProcureHub.WebApi.Authentication;
 using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Features.Auth;
 using ProcureHub.WebApi.Helpers;
-using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 using User = ProcureHub.Models.User;
 
 // Customize FluentValidation messages
@@ -50,12 +51,38 @@ void RegisterServices(WebApplicationBuilder appBuilder)
 
     builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
 
+    // Configure JSON serialization to use string enum values
+    builder.Services.ConfigureHttpJsonOptions(options =>
+    {
+        options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
     // Add services to the container.
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     appBuilder.Services.AddOpenApi(options =>
     {
         options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1;
         options.CreateSchemaReferenceId = CreateOpenApiSchemaReferenceId;
+
+        // Transform enum schemas to use string values instead of integers
+        options.AddSchemaTransformer((schema, context, cancellationToken) =>
+        {
+            var type = context.JsonTypeInfo.Type;
+
+            // Handle nullable enums (e.g., PurchaseRequestStatus?)
+            var underlyingType = Nullable.GetUnderlyingType(type);
+            var enumType = underlyingType?.IsEnum == true ? underlyingType : (type.IsEnum ? type : null);
+
+            if (enumType != null)
+            {
+                schema.Type = JsonSchemaType.String;
+                schema.Enum = Enum.GetNames(enumType)
+                    .Select(name => (JsonNode)JsonValue.Create(name)!)
+                    .ToList();
+            }
+
+            return Task.CompletedTask;
+        });
     });
 
     var connectionString = appBuilder.Configuration.GetConnectionString("DefaultConnection") ??
