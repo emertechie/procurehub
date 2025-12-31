@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Link } from "@tanstack/react-router";
 import type { PurchaseRequest, PurchaseRequestStatusValue } from "./types";
 import { PurchaseRequestStatus } from "./types";
 import {
@@ -86,7 +87,13 @@ export function PurchaseRequestTable({
           requests.map((request) => (
             <TableRow key={request.id}>
               <TableCell className="font-mono text-sm text-muted-foreground">
-                {request.requestNumber}
+                <Link
+                  to="/requests/$id/edit"
+                  params={{ id: request.id }}
+                  className="hover:underline"
+                >
+                  {request.requestNumber}
+                </Link>
               </TableCell>
               <TableCell className="font-medium">{request.title}</TableCell>
               <TableCell>{request.category.name}</TableCell>
