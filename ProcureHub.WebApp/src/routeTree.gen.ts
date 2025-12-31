@@ -15,8 +15,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as authAppLayoutRouteRouteImport } from './routes/(auth)/_app-layout/route'
 import { Route as authAppLayoutDashboardRouteImport } from './routes/(auth)/_app-layout/dashboard'
 import { Route as authAppLayoutRequestsIndexRouteImport } from './routes/(auth)/_app-layout/requests/index'
+import { Route as authAppLayoutRequestsNewRouteImport } from './routes/(auth)/_app-layout/requests/new'
 import { Route as authAppLayoutAdminUsersIndexRouteImport } from './routes/(auth)/_app-layout/admin/users/index'
 import { Route as authAppLayoutAdminDepartmentsIndexRouteImport } from './routes/(auth)/_app-layout/admin/departments/index'
+import { Route as authAppLayoutRequestsIdEditRouteImport } from './routes/(auth)/_app-layout/requests/$id/edit'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -48,6 +50,12 @@ const authAppLayoutRequestsIndexRoute =
     path: '/requests/',
     getParentRoute: () => authAppLayoutRouteRoute,
   } as any)
+const authAppLayoutRequestsNewRoute =
+  authAppLayoutRequestsNewRouteImport.update({
+    id: '/requests/new',
+    path: '/requests/new',
+    getParentRoute: () => authAppLayoutRouteRoute,
+  } as any)
 const authAppLayoutAdminUsersIndexRoute =
   authAppLayoutAdminUsersIndexRouteImport.update({
     id: '/admin/users/',
@@ -60,13 +68,21 @@ const authAppLayoutAdminDepartmentsIndexRoute =
     path: '/admin/departments/',
     getParentRoute: () => authAppLayoutRouteRoute,
   } as any)
+const authAppLayoutRequestsIdEditRoute =
+  authAppLayoutRequestsIdEditRouteImport.update({
+    id: '/requests/$id/edit',
+    path: '/requests/$id/edit',
+    getParentRoute: () => authAppLayoutRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof authAppLayoutDashboardRoute
+  '/requests/new': typeof authAppLayoutRequestsNewRoute
   '/requests': typeof authAppLayoutRequestsIndexRoute
+  '/requests/$id/edit': typeof authAppLayoutRequestsIdEditRoute
   '/admin/departments': typeof authAppLayoutAdminDepartmentsIndexRoute
   '/admin/users': typeof authAppLayoutAdminUsersIndexRoute
 }
@@ -75,7 +91,9 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof authAppLayoutDashboardRoute
+  '/requests/new': typeof authAppLayoutRequestsNewRoute
   '/requests': typeof authAppLayoutRequestsIndexRoute
+  '/requests/$id/edit': typeof authAppLayoutRequestsIdEditRoute
   '/admin/departments': typeof authAppLayoutAdminDepartmentsIndexRoute
   '/admin/users': typeof authAppLayoutAdminUsersIndexRoute
 }
@@ -86,7 +104,9 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/(auth)/_app-layout': typeof authAppLayoutRouteRouteWithChildren
   '/(auth)/_app-layout/dashboard': typeof authAppLayoutDashboardRoute
+  '/(auth)/_app-layout/requests/new': typeof authAppLayoutRequestsNewRoute
   '/(auth)/_app-layout/requests/': typeof authAppLayoutRequestsIndexRoute
+  '/(auth)/_app-layout/requests/$id/edit': typeof authAppLayoutRequestsIdEditRoute
   '/(auth)/_app-layout/admin/departments/': typeof authAppLayoutAdminDepartmentsIndexRoute
   '/(auth)/_app-layout/admin/users/': typeof authAppLayoutAdminUsersIndexRoute
 }
@@ -97,7 +117,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/dashboard'
+    | '/requests/new'
     | '/requests'
+    | '/requests/$id/edit'
     | '/admin/departments'
     | '/admin/users'
   fileRoutesByTo: FileRoutesByTo
@@ -106,7 +128,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/dashboard'
+    | '/requests/new'
     | '/requests'
+    | '/requests/$id/edit'
     | '/admin/departments'
     | '/admin/users'
   id:
@@ -116,7 +140,9 @@ export interface FileRouteTypes {
     | '/register'
     | '/(auth)/_app-layout'
     | '/(auth)/_app-layout/dashboard'
+    | '/(auth)/_app-layout/requests/new'
     | '/(auth)/_app-layout/requests/'
+    | '/(auth)/_app-layout/requests/$id/edit'
     | '/(auth)/_app-layout/admin/departments/'
     | '/(auth)/_app-layout/admin/users/'
   fileRoutesById: FileRoutesById
@@ -172,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authAppLayoutRequestsIndexRouteImport
       parentRoute: typeof authAppLayoutRouteRoute
     }
+    '/(auth)/_app-layout/requests/new': {
+      id: '/(auth)/_app-layout/requests/new'
+      path: '/requests/new'
+      fullPath: '/requests/new'
+      preLoaderRoute: typeof authAppLayoutRequestsNewRouteImport
+      parentRoute: typeof authAppLayoutRouteRoute
+    }
     '/(auth)/_app-layout/admin/users/': {
       id: '/(auth)/_app-layout/admin/users/'
       path: '/admin/users'
@@ -186,19 +219,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authAppLayoutAdminDepartmentsIndexRouteImport
       parentRoute: typeof authAppLayoutRouteRoute
     }
+    '/(auth)/_app-layout/requests/$id/edit': {
+      id: '/(auth)/_app-layout/requests/$id/edit'
+      path: '/requests/$id/edit'
+      fullPath: '/requests/$id/edit'
+      preLoaderRoute: typeof authAppLayoutRequestsIdEditRouteImport
+      parentRoute: typeof authAppLayoutRouteRoute
+    }
   }
 }
 
 interface authAppLayoutRouteRouteChildren {
   authAppLayoutDashboardRoute: typeof authAppLayoutDashboardRoute
+  authAppLayoutRequestsNewRoute: typeof authAppLayoutRequestsNewRoute
   authAppLayoutRequestsIndexRoute: typeof authAppLayoutRequestsIndexRoute
+  authAppLayoutRequestsIdEditRoute: typeof authAppLayoutRequestsIdEditRoute
   authAppLayoutAdminDepartmentsIndexRoute: typeof authAppLayoutAdminDepartmentsIndexRoute
   authAppLayoutAdminUsersIndexRoute: typeof authAppLayoutAdminUsersIndexRoute
 }
 
 const authAppLayoutRouteRouteChildren: authAppLayoutRouteRouteChildren = {
   authAppLayoutDashboardRoute: authAppLayoutDashboardRoute,
+  authAppLayoutRequestsNewRoute: authAppLayoutRequestsNewRoute,
   authAppLayoutRequestsIndexRoute: authAppLayoutRequestsIndexRoute,
+  authAppLayoutRequestsIdEditRoute: authAppLayoutRequestsIdEditRoute,
   authAppLayoutAdminDepartmentsIndexRoute:
     authAppLayoutAdminDepartmentsIndexRoute,
   authAppLayoutAdminUsersIndexRoute: authAppLayoutAdminUsersIndexRoute,

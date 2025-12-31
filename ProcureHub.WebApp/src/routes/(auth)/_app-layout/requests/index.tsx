@@ -1,5 +1,6 @@
 import * as React from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { Plus } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/(auth)/_app-layout/requests/")({
 });
 
 function MyRequestsPage() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = React.useState("");
   const debouncedSearch = useDebouncedValue(searchQuery);
   const [selectedStatus, setSelectedStatus] =
@@ -42,19 +44,18 @@ function MyRequestsPage() {
   };
 
   const handleViewRequest = (request: { id: string }) => {
-    // TODO: Navigate to request detail page
-    console.log("View request:", request.id);
+    navigate({ to: "/requests/$id/edit", params: { id: request.id } });
   };
 
   const totalCount =
-    typeof data?.data?.totalCount === "string"
-      ? parseInt(data.data.totalCount, 10)
-      : (data?.data?.totalCount ?? 0);
+    typeof data?.pagination?.totalCount === "string"
+      ? parseInt(data.pagination.totalCount, 10)
+      : (data?.pagination?.totalCount ?? 0);
 
   const currentPageSize =
-    typeof data?.data?.pageSize === "string"
-      ? parseInt(data.data.pageSize, 10)
-      : (data?.data?.pageSize ?? pageSize);
+    typeof data?.pagination?.pageSize === "string"
+      ? parseInt(data.pagination.pageSize, 10)
+      : (data?.pagination?.pageSize ?? pageSize);
 
   const totalPages = Math.ceil(totalCount / currentPageSize);
 
@@ -67,6 +68,12 @@ function MyRequestsPage() {
             View and manage your purchase requests
           </p>
         </div>
+        <Button asChild>
+          <Link to="/requests/new">
+            <Plus className="mr-2 h-4 w-4" />
+            New Request
+          </Link>
+        </Button>
       </div>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -105,7 +112,7 @@ function MyRequestsPage() {
           <CardDescription>
             {isPending
               ? "Loading..."
-              : `Showing ${data?.data?.data?.length ?? 0} of ${totalCount} requests`}
+              : `Showing ${data?.data?.length ?? 0} of ${totalCount} requests`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -120,7 +127,7 @@ function MyRequestsPage() {
           ) : (
             <>
               <PurchaseRequestTable
-                requests={data?.data?.data ?? []}
+                requests={data?.data ?? []}
                 onViewRequest={handleViewRequest}
               />
               {totalPages > 1 && (

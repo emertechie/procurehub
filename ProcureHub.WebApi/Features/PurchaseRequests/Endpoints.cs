@@ -68,7 +68,7 @@ public static class Endpoints
                 );
             })
             .WithName(nameof(QueryPurchaseRequests))
-            .Produces<DataResponse<PagedResult<QueryPurchaseRequests.Response>>>()
+            .Produces<PagedResponse<QueryPurchaseRequests.Response>>()
             .ProducesValidationProblem();
 
         group.MapGet("/purchase-requests/{id:guid}", async (
