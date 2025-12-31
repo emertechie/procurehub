@@ -624,6 +624,118 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["QueryCategories"];
+        put?: never;
+        post: operations["CreateCategory"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/categories/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetCategoryById"];
+        put: operations["UpdateCategory"];
+        post?: never;
+        delete: operations["DeleteCategory"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/purchase-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["QueryPurchaseRequests"];
+        put?: never;
+        post: operations["CreatePurchaseRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/purchase-requests/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetPurchaseRequestById"];
+        put: operations["UpdatePurchaseRequest"];
+        post?: never;
+        delete: operations["DeletePurchaseRequest"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/purchase-requests/{id}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["SubmitPurchaseRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/purchase-requests/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ApprovePurchaseRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/purchase-requests/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["RejectPurchaseRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/roles": {
         parameters: {
             query?: never;
@@ -691,8 +803,23 @@ export interface components {
             id: string;
             departmentId: null | components["schemas"]["NullableOfGuid"];
         };
+        CreateCategoryRequest: {
+            name: string;
+        };
         CreateDepartmentRequest: {
             name: string;
+        };
+        CreatePurchaseRequestRequest: {
+            title: string;
+            description: null | string;
+            /** Format: double */
+            estimatedAmount: number | string;
+            businessJustification: null | string;
+            /** Format: uuid */
+            categoryId: string;
+            /** Format: uuid */
+            departmentId: string;
+            requesterUserId: string;
         };
         CreateUserRequest: {
             email: string;
@@ -700,11 +827,23 @@ export interface components {
             firstName: string;
             lastName: string;
         };
+        DataResponseOfGetCategoryByIdResponse: {
+            data: components["schemas"]["GetCategoryByIdResponse"];
+        };
         DataResponseOfGetDepartmentByIdResponse: {
             data: components["schemas"]["GetDepartmentByIdResponse"];
         };
+        DataResponseOfGetPurchaseRequestByIdResponse: {
+            data: components["schemas"]["GetPurchaseRequestByIdResponse"];
+        };
         DataResponseOfGetUserByIdResponse: {
             data: components["schemas"]["GetUserByIdResponse"];
+        };
+        "DataResponseOfPagedResult`1": {
+            data: components["schemas"]["PagedResultOfQueryPurchaseRequestsResponse"];
+        };
+        DataResponseOfQueryCategoriesResponseArray: {
+            data: components["schemas"]["QueryCategoriesResponse"][];
         };
         DataResponseOfQueryDepartmentsResponseArray: {
             data: components["schemas"]["QueryDepartmentsResponse"][];
@@ -718,10 +857,62 @@ export interface components {
         ForgotPasswordRequest: {
             email: string;
         };
+        GetCategoryByIdResponse: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         GetDepartmentByIdResponse: {
             /** Format: uuid */
             id: string;
             name: string;
+        };
+        GetPurchaseRequestByIdCategoryInfo: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        GetPurchaseRequestByIdDepartmentInfo: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        GetPurchaseRequestByIdRequesterInfo: {
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+        };
+        GetPurchaseRequestByIdResponse: {
+            /** Format: uuid */
+            id: string;
+            requestNumber: string;
+            title: string;
+            description: null | string;
+            /** Format: double */
+            estimatedAmount: number | string;
+            businessJustification: null | string;
+            category: components["schemas"]["GetPurchaseRequestByIdCategoryInfo"];
+            department: components["schemas"]["GetPurchaseRequestByIdDepartmentInfo"];
+            requester: components["schemas"]["GetPurchaseRequestByIdRequesterInfo"];
+            status: components["schemas"]["PurchaseRequestStatus"];
+            submittedAt: null | components["schemas"]["NullableOfDateTime"];
+            reviewedAt: null | components["schemas"]["NullableOfDateTime"];
+            reviewedBy: null | components["schemas"]["GetPurchaseRequestByIdReviewerInfo"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        GetPurchaseRequestByIdReviewerInfo: {
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
         };
         GetUserByIdDepartment: {
             /** Format: uuid */
@@ -762,6 +953,7 @@ export interface components {
             email: string;
             isEmailConfirmed: boolean;
         };
+        IReadOnlyListOfQueryPurchaseRequestsResponse: components["schemas"]["QueryPurchaseRequestsResponse"][];
         IReadOnlyListOfQueryUsersResponse: components["schemas"]["QueryUsersResponse"][];
         LoginRequest: {
             email: string;
@@ -776,9 +968,20 @@ export interface components {
         NullableOfGuid: string;
         /** Format: int32 */
         NullableOfInt32: number | string;
+        /** @enum {string} */
+        NullableOfPurchaseRequestStatus: "Draft" | "Pending" | "Approved" | "Rejected";
         PagedResponseOfQueryUsersResponse: {
             data: components["schemas"]["IReadOnlyListOfQueryUsersResponse"];
             pagination: components["schemas"]["Pagination"];
+        };
+        PagedResultOfQueryPurchaseRequestsResponse: {
+            data: components["schemas"]["IReadOnlyListOfQueryPurchaseRequestsResponse"];
+            /** Format: int32 */
+            page: number | string;
+            /** Format: int32 */
+            pageSize: number | string;
+            /** Format: int32 */
+            totalCount: number | string;
         };
         Pagination: {
             /** Format: int32 */
@@ -795,10 +998,60 @@ export interface components {
             detail?: null | string;
             instance?: null | string;
         };
+        /** @enum {string} */
+        PurchaseRequestStatus: "Draft" | "Pending" | "Approved" | "Rejected";
+        QueryCategoriesResponse: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
         QueryDepartmentsResponse: {
             /** Format: uuid */
             id: string;
             name: string;
+        };
+        QueryPurchaseRequestsCategoryInfo: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        QueryPurchaseRequestsDepartmentInfo: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
+        QueryPurchaseRequestsRequesterInfo: {
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+        };
+        QueryPurchaseRequestsResponse: {
+            /** Format: uuid */
+            id: string;
+            requestNumber: string;
+            title: string;
+            description: null | string;
+            /** Format: double */
+            estimatedAmount: number | string;
+            businessJustification: null | string;
+            category: components["schemas"]["QueryPurchaseRequestsCategoryInfo"];
+            department: components["schemas"]["QueryPurchaseRequestsDepartmentInfo"];
+            requester: components["schemas"]["QueryPurchaseRequestsRequesterInfo"];
+            status: components["schemas"]["PurchaseRequestStatus"];
+            submittedAt: null | components["schemas"]["NullableOfDateTime"];
+            reviewedAt: null | components["schemas"]["NullableOfDateTime"];
+            reviewedBy: null | components["schemas"]["QueryPurchaseRequestsReviewerInfo"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        QueryPurchaseRequestsReviewerInfo: {
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
         };
         QueryRolesRole: {
             id: string;
@@ -853,10 +1106,28 @@ export interface components {
             isTwoFactorEnabled: boolean;
             isMachineRemembered: boolean;
         };
+        UpdateCategoryRequest: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
         UpdateDepartmentRequest: {
             /** Format: uuid */
             id: string;
             name: string;
+        };
+        UpdatePurchaseRequestRequest: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            description: null | string;
+            /** Format: double */
+            estimatedAmount: number | string;
+            businessJustification: null | string;
+            /** Format: uuid */
+            categoryId: string;
+            /** Format: uuid */
+            departmentId: string;
         };
         UpdateUserRequest: {
             id: string;
@@ -1364,6 +1635,516 @@ export interface operations {
         };
     };
     DeleteDepartment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QueryCategories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DataResponseOfQueryCategoriesResponseArray"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    CreateCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCategoryRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EntityCreatedResponseOfString"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    GetCategoryById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DataResponseOfGetCategoryByIdResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdateCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCategoryRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QueryPurchaseRequests: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["NullableOfPurchaseRequestStatus"];
+                search?: string;
+                page?: components["schemas"]["NullableOfInt32"];
+                pageSize?: components["schemas"]["NullableOfInt32"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DataResponseOfPagedResult`1"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    CreatePurchaseRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePurchaseRequestRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EntityCreatedResponseOfString"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    GetPurchaseRequestById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DataResponseOfGetPurchaseRequestByIdResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UpdatePurchaseRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePurchaseRequestRequest"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeletePurchaseRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SubmitPurchaseRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ApprovePurchaseRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RejectPurchaseRequest: {
         parameters: {
             query?: never;
             header?: never;

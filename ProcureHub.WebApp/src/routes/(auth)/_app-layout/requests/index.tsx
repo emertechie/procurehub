@@ -1,0 +1,159 @@
+import * as React from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  PurchaseRequestTable,
+  StatusFilter,
+  usePurchaseRequests,
+  type PurchaseRequestStatusValue,
+} from "@/features/purchase-requests";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+
+export const Route = createFileRoute("/(auth)/_app-layout/requests/")({
+  component: MyRequestsPage,
+});
+
+function MyRequestsPage() {
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const debouncedSearch = useDebouncedValue(searchQuery);
+  const [selectedStatus, setSelectedStatus] =
+    React.useState<PurchaseRequestStatusValue | null>(null);
+  const [page, setPage] = React.useState(1);
+  const pageSize = 20;
+
+  const { data, isPending, isError, error } = usePurchaseRequests(
+    selectedStatus ?? undefined,
+    debouncedSearch,
+    page,
+    pageSize,
+  );
+
+  const handleStatusChange = (status: PurchaseRequestStatusValue | null) => {
+    setSelectedStatus(status);
+    setPage(1);
+  };
+
+  const handleViewRequest = (request: { id: string }) => {
+    // TODO: Navigate to request detail page
+    console.log("View request:", request.id);
+  };
+
+  const totalCount =
+    typeof data?.data?.totalCount === "string"
+      ? parseInt(data.data.totalCount, 10)
+      : (data?.data?.totalCount ?? 0);
+
+  const currentPageSize =
+    typeof data?.data?.pageSize === "string"
+      ? parseInt(data.data.pageSize, 10)
+      : (data?.data?.pageSize ?? pageSize);
+
+  const totalPages = Math.ceil(totalCount / currentPageSize);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">My Requests</h1>
+          <p className="text-muted-foreground text-sm">
+            View and manage your purchase requests
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex gap-2">
+          <Input
+            placeholder="Search by title or ID..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
+            className="w-64 bg-white"
+          />
+          {searchQuery && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearchQuery("");
+                setPage(1);
+              }}
+            >
+              Clear
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <StatusFilter
+        selectedStatus={selectedStatus}
+        onStatusChange={handleStatusChange}
+      />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Purchase Requests</CardTitle>
+          <CardDescription>
+            {isPending
+              ? "Loading..."
+              : `Showing ${data?.data?.data?.length ?? 0} of ${totalCount} requests`}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isPending ? (
+            <div className="flex items-center justify-center py-8 text-muted-foreground">
+              Loading requests...
+            </div>
+          ) : isError ? (
+            <div className="flex items-center justify-center py-8 text-red-500">
+              Error loading requests: {error?.detail ?? "Unknown error"}
+            </div>
+          ) : (
+            <>
+              <PurchaseRequestTable
+                requests={data?.data?.data ?? []}
+                onViewRequest={handleViewRequest}
+              />
+              {totalPages > 1 && (
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">
+                    Page {page} of {totalPages}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page <= 1}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setPage((p) => Math.min(totalPages, p + 1))
+                      }
+                      disabled={page >= totalPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
