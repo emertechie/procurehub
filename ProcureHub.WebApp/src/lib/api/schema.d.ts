@@ -871,9 +871,6 @@ export interface components {
         DataResponseOfGetUserByIdResponse: {
             data: components["schemas"]["GetUserByIdResponse"];
         };
-        "DataResponseOfPagedResult`1": {
-            data: components["schemas"]["PagedResultOfQueryPurchaseRequestsResponse"];
-        };
         DataResponseOfQueryCategoriesResponseArray: {
             data: components["schemas"]["QueryCategoriesResponse"][];
         };
@@ -1012,18 +1009,13 @@ export interface components {
         NullableOfInt32: number | string;
         /** @enum {string} */
         NullableOfPurchaseRequestStatus: "Draft" | "Pending" | "Approved" | "Rejected";
+        PagedResponseOfQueryPurchaseRequestsResponse: {
+            data: components["schemas"]["IReadOnlyListOfQueryPurchaseRequestsResponse"];
+            pagination: components["schemas"]["Pagination"];
+        };
         PagedResponseOfQueryUsersResponse: {
             data: components["schemas"]["IReadOnlyListOfQueryUsersResponse"];
             pagination: components["schemas"]["Pagination"];
-        };
-        PagedResultOfQueryPurchaseRequestsResponse: {
-            data: components["schemas"]["IReadOnlyListOfQueryPurchaseRequestsResponse"];
-            /** Format: int32 */
-            page: number | string;
-            /** Format: int32 */
-            pageSize: number | string;
-            /** Format: int32 */
-            totalCount: number | string;
         };
         Pagination: {
             /** Format: int32 */
@@ -1986,7 +1978,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DataResponseOfPagedResult`1"];
+                    "application/json": components["schemas"]["PagedResponseOfQueryPurchaseRequestsResponse"];
                 };
             };
             /** @description Bad Request */

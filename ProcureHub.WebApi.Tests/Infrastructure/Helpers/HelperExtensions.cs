@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,6 +9,12 @@ namespace ProcureHub.WebApi.Tests.Infrastructure.Helpers;
 
 public static class HelperExtensions
 {
+    // Note: ReadFromJsonAsyn uses JsonSerializerDefaults.Web by default. Extending it here for JSON string enum support.
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
+    {
+        Converters = { new JsonStringEnumConverter() }
+    };
+
     public static void AssertHasError(this HttpValidationProblemDetails problemDetails, string field, string? messageContains = null)
     {
         Assert.Contains(field, problemDetails.Errors.Keys);
@@ -32,7 +40,7 @@ public static class HelperExtensions
         public Task<T> ReadJsonAsync<T>(CancellationToken ct = default)
         {
             response.EnsureSuccessStatusCode();
-            return response.Content.ReadFromJsonAsync<T>(ct)!;
+            return response.Content.ReadFromJsonAsync<T>(JsonOptions, ct)!;
         }
 
         public async Task<ProblemDetails> AssertProblemDetailsAsync(
