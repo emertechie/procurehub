@@ -60,3 +60,16 @@ export function useLogoutMutation() {
     },
   });
 }
+
+export function useDemoUsers() {
+  return api.useQuery("get", "/demo-users");
+}
+
+export function useDemoLoginMutation() {
+  const queryClient = useQueryClient();
+  return api.useMutation("post", "/demo-login", {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: userQueryKey });
+    },
+  });
+}

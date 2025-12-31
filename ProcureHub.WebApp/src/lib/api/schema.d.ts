@@ -86,6 +86,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/demo-users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["GetDemoUsers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/demo-login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["DemoLogin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/register": {
         parameters: {
             query?: never;
@@ -851,6 +883,15 @@ export interface components {
         DataResponseOfQueryRolesRoleArray: {
             data: components["schemas"]["QueryRolesRole"][];
         };
+        DemoEndpointsDemoLoginRequest: {
+            email: string;
+        };
+        DemoEndpointsDemoUser: {
+            role: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+        };
         EntityCreatedResponseOfString: {
             id: null | string;
         };
@@ -955,6 +996,7 @@ export interface components {
         };
         IReadOnlyListOfQueryPurchaseRequestsResponse: components["schemas"]["QueryPurchaseRequestsResponse"][];
         IReadOnlyListOfQueryUsersResponse: components["schemas"]["QueryUsersResponse"][];
+        ListOfDemoEndpointsDemoUser: components["schemas"]["DemoEndpointsDemoUser"][];
         LoginRequest: {
             email: string;
             password: string;
@@ -1167,6 +1209,66 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["User"];
+                };
+            };
+        };
+    };
+    GetDemoUsers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListOfDemoEndpointsDemoUser"];
+                };
+            };
+        };
+    };
+    DemoLogin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DemoEndpointsDemoLoginRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
         };

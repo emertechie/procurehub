@@ -15,6 +15,7 @@ public static class ApiEndpoints
         app.MapGet("/test", async () => Results.Ok(new { DateTime = DateTime.UtcNow }));
 
         app.ConfigureAuthEndpoints();
+        app.ConfigureDemoEndpoints();
         app.ConfigureUsersEndpoints();
         app.ConfigureDepartmentEndpoints();
         app.ConfigureCategoryEndpoints();

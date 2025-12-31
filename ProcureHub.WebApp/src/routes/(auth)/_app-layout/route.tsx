@@ -12,12 +12,15 @@ import {
   Package,
   Users,
   CheckCircle,
+  Sparkles,
 } from "lucide-react";
 
 import {
   ensureAuthenticated,
   useAuth,
   useLogoutMutation,
+  useDemoUsers,
+  useDemoLoginMutation,
 } from "@/features/auth/hooks";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -105,6 +108,8 @@ const navigation = {
 function AuthenticatedLayout() {
   const { user, loading } = useAuth();
   const logoutMutation = useLogoutMutation();
+  const { data: demoUsers } = useDemoUsers();
+  const demoLoginMutation = useDemoLoginMutation();
 
   if (loading) {
     return (
@@ -127,6 +132,20 @@ function AuthenticatedLayout() {
           // stay on this route but (eventually) be in a logged-out state.
           // So using hard redirect instead.
           window.location.href = "/login";
+        },
+      },
+    );
+  };
+
+  const handleDemoLogin = (email: string) => {
+    demoLoginMutation.mutate(
+      {
+        body: { email },
+      },
+      {
+        onSuccess: () => {
+          // Full page reload to refresh auth context
+          window.location.href = "/dashboard";
         },
       },
     );
@@ -287,6 +306,38 @@ function AuthenticatedLayout() {
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
+                  {demoUsers && Array.isArray(demoUsers) && (
+                    <>
+                      <DropdownMenuLabel className="flex items-center gap-2 bg-amber-50 px-2 py-1.5 text-amber-900">
+                        <Sparkles className="h-4 w-4 text-amber-600" />
+                        <span className="font-semibold">Demo Users</span>
+                        <span className="ml-auto text-xs font-normal text-amber-700">
+                          (Demo Only)
+                        </span>
+                      </DropdownMenuLabel>
+                      {demoUsers.map((demoUser) => (
+                        <DropdownMenuItem
+                          key={demoUser.email}
+                          onClick={() => handleDemoLogin(demoUser.email)}
+                          disabled={
+                            demoLoginMutation.isPending ||
+                            user?.email === demoUser.email
+                          }
+                          className="bg-amber-50/50"
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-medium">
+                              {demoUser.firstName} {demoUser.lastName}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {demoUser.role} • {demoUser.email}
+                            </span>
+                          </div>
+                        </DropdownMenuItem>
+                      ))}
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Log out
