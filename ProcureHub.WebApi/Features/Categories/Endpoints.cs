@@ -5,7 +5,6 @@ using ProcureHub.Infrastructure;
 using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Helpers;
 using ProcureHub.WebApi.Responses;
-using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 namespace ProcureHub.WebApi.Features.Categories;
 
@@ -16,7 +15,6 @@ public static class Endpoints
         var group = app.MapGroup("")
             .RequireAuthorization(AuthorizationPolicyNames.Authenticated)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
-            .AddFluentValidationAutoValidation()
             .WithTags("Categories");
 
         group.MapPost("/categories", async (
@@ -30,7 +28,7 @@ public static class Endpoints
                     newId => Results.Created($"/categories/{newId}", new EntityCreatedResponse<string>(newId.ToString())),
                     error => error.ToProblemDetails());
             })
-            .RequireAuthorization(RolePolicyNames.AdminOnly)
+            .RequireAuthorization(RolePolicyNames.Admin)
             .WithName(nameof(CreateCategory))
             .Produces<EntityCreatedResponse<string>>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
@@ -80,7 +78,7 @@ public static class Endpoints
                     error => error.ToProblemDetails()
                 );
             })
-            .RequireAuthorization(RolePolicyNames.AdminOnly)
+            .RequireAuthorization(RolePolicyNames.Admin)
             .WithName(nameof(UpdateCategory))
             .Produces(StatusCodes.Status204NoContent)
             .ProducesValidationProblem()
@@ -98,7 +96,7 @@ public static class Endpoints
                     error => error.ToProblemDetails()
                 );
             })
-            .RequireAuthorization(RolePolicyNames.AdminOnly)
+            .RequireAuthorization(RolePolicyNames.Admin)
             .WithName(nameof(DeleteCategory))
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);

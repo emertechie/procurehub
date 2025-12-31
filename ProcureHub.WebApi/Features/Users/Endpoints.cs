@@ -6,7 +6,6 @@ using ProcureHub.Infrastructure;
 using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Helpers;
 using ProcureHub.WebApi.Responses;
-using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 namespace ProcureHub.WebApi.Features.Users;
 
@@ -15,9 +14,8 @@ public static class Endpoints
     public static void ConfigureUsersEndpoints(this WebApplication app)
     {
         var group = app.MapGroup("")
-            .RequireAuthorization(AuthorizationPolicyNames.Authenticated, RolePolicyNames.AdminOnly)
+            .RequireAuthorization(AuthorizationPolicyNames.Authenticated, RolePolicyNames.Admin)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
-            .AddFluentValidationAutoValidation()
             .WithTags("Users");
 
         group.MapPost("/users", async (

@@ -7,7 +7,7 @@ public interface IRequestHandler<TRequest>
 }
 
 // ReSharper disable once TypeParameterCanBeVariant
-public interface IRequestHandler<TRequest, TReturn>
+public interface IRequestHandler<TRequest, TResponse>
 {
-    Task<TReturn> HandleAsync(TRequest request, CancellationToken token);
+    Task<TResponse> HandleAsync(TRequest request, CancellationToken token);
 }

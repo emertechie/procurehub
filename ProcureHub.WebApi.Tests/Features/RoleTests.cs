@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using ProcureHub.Constants;
 using ProcureHub.Features.Roles;
 using ProcureHub.Features.Users;
 using ProcureHub.WebApi.Responses;
@@ -16,12 +17,18 @@ public class RoleTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
         IClassFixture<UserSetupFixture>,
         IAsyncLifetime
 {
-    private const string ValidUserEmail = "user1@example.com";
-    private const string ValidUserPassword = "Test1234!";
+    private const string RequesterUserEmail = "user1@example.com";
+    private const string RequesterUserPassword = "Test1234!";
 
     public async ValueTask InitializeAsync()
     {
-        await userSetupFixture.EnsureUserCreated(this, AdminEmail, AdminPassword, ValidUserEmail, ValidUserPassword);
+        await userSetupFixture.EnsureUserCreated(this,
+            AdminEmail,
+            AdminPassword,
+            RequesterUserEmail,
+            RequesterUserPassword,
+            RoleNames.Requester
+        );
     }
 
     public ValueTask DisposeAsync()
@@ -63,7 +70,7 @@ public class RoleTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
     public async Task All_role_endpoints_require_admin_authorization(EndpointInfo endpoint)
     {
         // Log in as a regular user, not an admin
-        await LoginAsync(ValidUserEmail, ValidUserPassword);
+        await LoginAsync(RequesterUserEmail, RequesterUserPassword);
 
         const string testId = "test-id";
 
@@ -94,11 +101,14 @@ public class RoleTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
     {
         await LoginAsAdminAsync();
 
-        // No user ID
+        // Empty UserId -> route mismatch (since route has "user-1")
         var reqNoUserId = new AssignRole.Request("", "role-1");
         var respNoUserId = await HttpClient.PostAsync("/users/user-1/roles", JsonContent.Create(reqNoUserId));
-        await respNoUserId.AssertValidationProblemAsync(
-            errors: new Dictionary<string, string[]> { ["UserId"] = ["'User Id' must not be empty."] });
+        await respNoUserId.AssertProblemDetailsAsync(
+            HttpStatusCode.BadRequest,
+            "Route ID mismatch",
+            "Route ID does not match request ID",
+            "POST /users/user-1/roles");
 
         // No role ID
         var reqNoRoleId = new AssignRole.Request("user-1", "");

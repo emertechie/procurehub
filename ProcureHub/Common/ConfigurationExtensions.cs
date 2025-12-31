@@ -1,4 +1,6 @@
-namespace ProcureHub.WebApi.Helpers;
+using Microsoft.Extensions.Configuration;
+
+namespace ProcureHub.Common;
 
 public static class ConfigurationExtensions
 {

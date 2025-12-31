@@ -28,7 +28,7 @@ public class AuthenticationTests(ApiTestHostFixture hostFixture, ITestOutputHelp
     public async Task Can_login_as_admin_and_use_API_with_token()
     {
         // Login as the test admin (using credentials defined in WebApiTestFactory)
-        var loginRequest = JsonContent.Create(new { email = "test-admin@procurehub.local", password = "TestAdmin123!" });
+        var loginRequest = JsonContent.Create(new { email = AdminEmail, password = AdminPassword });
         var loginResp = await HttpClient.PostAsync("/login", loginRequest);
         Assert.Equal(HttpStatusCode.OK, loginResp.StatusCode);
 
@@ -44,7 +44,7 @@ public class AuthenticationTests(ApiTestHostFixture hostFixture, ITestOutputHelp
         Assert.Equal(HttpStatusCode.OK, meResp.StatusCode);
         var meResult = await meResp.Content.ReadFromJsonAsync<MeResponse>();
         Assert.NotEmpty(meResult!.Id);
-        Assert.Equal("test-admin@procurehub.local", meResult!.Email);
+        Assert.Equal(AdminEmail, meResult!.Email);
 
         // Make sure can call the /users endpoint
         var usersResp = await HttpClient.GetAsync("/users");
@@ -55,7 +55,7 @@ public class AuthenticationTests(ApiTestHostFixture hostFixture, ITestOutputHelp
     public async Task Can_login_as_admin_and_use_API_with_cookie()
     {
         // Login as the test admin using cookie authentication
-        var loginRequest = JsonContent.Create(new { email = "test-admin@procurehub.local", password = "TestAdmin123!" });
+        var loginRequest = JsonContent.Create(new { email = AdminEmail, password = AdminPassword });
         var loginResp = await HttpClient.PostAsync("/login?useCookies=true", loginRequest);
         Assert.Equal(HttpStatusCode.OK, loginResp.StatusCode);
 
@@ -66,7 +66,7 @@ public class AuthenticationTests(ApiTestHostFixture hostFixture, ITestOutputHelp
         var meResult = await meResp.Content.ReadFromJsonAsync<MeResponse>();
         Assert.NotNull(meResult);
         Assert.NotEmpty(meResult.Id);
-        Assert.Equal("test-admin@procurehub.local", meResult.Email);
+        Assert.Equal(AdminEmail, meResult.Email);
 
         // Make sure can call the /users endpoint with cookie
         var usersResp = await HttpClient.GetAsync("/users");
@@ -85,7 +85,7 @@ public class AuthenticationTests(ApiTestHostFixture hostFixture, ITestOutputHelp
         Assert.Equal(HttpStatusCode.Unauthorized, unauthLogoutResp.StatusCode);
 
         // Login with cookie
-        var loginRequest = JsonContent.Create(new { email = "test-admin@procurehub.local", password = "TestAdmin123!" });
+        var loginRequest = JsonContent.Create(new { email = AdminEmail, password = AdminPassword });
         var loginResp = await HttpClient.PostAsync("/login?useCookies=true", loginRequest);
         Assert.Equal(HttpStatusCode.OK, loginResp.StatusCode);
 

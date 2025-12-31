@@ -25,6 +25,12 @@
 - For guidance on core domain types like Models, Migrations, and VSA request handlers, see: `ProcureHub/AGENTS.md`
 - For guidance on how to map endpoints, see: `ProcureHub.WebApi/Features/AGENTS.md`
 
+## C# Code Style
+
+- Use "Allman" style braces
+- Always insert braces after an `if` statement
+- In a multi-line conditional statement, put the `||` or `&&` operators at the start of subsequent line(s)
+
 # Architecture
 
 - On both backend and frontend, implement features using a Vertical Slice Architecture (VSA). Use `/Features/{FeatureName}` folders to group all code for a feature together.

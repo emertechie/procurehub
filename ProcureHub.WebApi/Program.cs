@@ -10,6 +10,7 @@ using ProcureHub.Data;
 using ProcureHub.Features.Users;
 using ProcureHub.Features.Users.Validation;
 using ProcureHub.Infrastructure;
+using ProcureHub.Infrastructure.Authentication;
 using ProcureHub.Models;
 using ProcureHub.WebApi;
 using ProcureHub.WebApi.Authentication;
@@ -46,6 +47,8 @@ void RegisterServices(WebApplicationBuilder appBuilder)
             context.ProblemDetails.Extensions.TryAdd("requestId", context.HttpContext.TraceIdentifier);
         };
     });
+
+    builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
 
     // Add services to the container.
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -98,16 +101,18 @@ void RegisterServices(WebApplicationBuilder appBuilder)
         });
 
         // Role-based policies
-        options.AddPolicy(RolePolicyNames.AdminOnly, policy => { policy.RequireRole(RoleNames.Admin); });
+        options.AddPolicy(RolePolicyNames.Admin, policy => { policy.RequireRole(RoleNames.Admin); });
+        options.AddPolicy(RolePolicyNames.Requester, policy => { policy.RequireRole(RoleNames.Requester); });
+        options.AddPolicy(RolePolicyNames.Approver, policy => { policy.RequireRole(RoleNames.Approver); });
     });
 
-    appBuilder.Services.AddRequestHandlers();
+    appBuilder.Services.AddDomainServices();
+
+    builder.Services.AddHttpContextAccessor();
+    builder.Services.AddScoped<ICurrentUser, CurrentUserFromHttpContext>();
 
     // Register all FluentValidation validators 
     appBuilder.Services.AddValidatorsFromAssemblyContaining<CreateUser.Request>();
-
-    // Automatically run FluentValidation validators on ASP.Net Minimal APIs:
-    builder.Services.AddFluentValidationAutoValidation();
 }
 
 async Task ConfigureApplication(WebApplication app)
@@ -131,14 +136,14 @@ async Task ConfigureApplication(WebApplication app)
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         await dbContext.Database.MigrateAsync();
 
-        // Seed database with roles and initial admin user
-        await DataSeeder.SeedAsync(
+        // Seed database with roles, users, and initial data
+        var seeder = new DataSeeder(
             dbContext,
             scope.ServiceProvider.GetRequiredService<UserManager<User>>(),
             scope.ServiceProvider.GetRequiredService<RoleManager<Role>>(),
-            scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>(),
-            app.Configuration.GetRequiredString("DevAdminUser:Email"),
-            app.Configuration.GetRequiredString("DevAdminUser:Password"));
+            app.Configuration,
+            scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>());
+        await seeder.SeedAsync();
     }
 
     app.UseHttpsRedirection();

@@ -21,19 +21,17 @@ public static class DeleteCategory
                 return Result.Failure(Error.NotFound("Category not found"));
             }
 
-            // TODO: Check if category has purchase requests before deleting
-            // Uncomment once PurchaseRequest model is implemented:
-            // var requestsForCategory = await dbContext.PurchaseRequests
-            //     .CountAsync(pr => pr.CategoryId == request.Id, token);
-            //
-            // if (requestsForCategory > 0)
-            // {
-            //     return Result.Failure(Error.Validation(
-            //         $"Cannot delete category. It has {requestsForCategory} purchase request(s). Please reassign requests before deleting."));
-            // }
-
             dbContext.Categories.Remove(category);
-            await dbContext.SaveChangesAsync(token);
+
+            try
+            {
+                await dbContext.SaveChangesAsync(token);
+            }
+            catch (DbUpdateException ex) when (ex.IsForeignKeyRestrictViolation("FK_PurchaseRequests_Categories_CategoryId"))
+            {
+                return Result.Failure(Error.Validation(
+                    $"Cannot delete category. It has one or more purchase requests. Please reassign requests before deleting."));
+            }
 
             return Result.Success();
         }

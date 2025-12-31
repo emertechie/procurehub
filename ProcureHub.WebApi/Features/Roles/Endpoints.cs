@@ -5,7 +5,6 @@ using ProcureHub.Infrastructure;
 using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Helpers;
 using ProcureHub.WebApi.Responses;
-using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
 
 namespace ProcureHub.WebApi.Features.Roles;
 
@@ -14,9 +13,8 @@ public static class Endpoints
     public static void ConfigureRolesEndpoints(this WebApplication app)
     {
         var group = app.MapGroup("")
-            .RequireAuthorization(AuthorizationPolicyNames.Authenticated, RolePolicyNames.AdminOnly)
+            .RequireAuthorization(AuthorizationPolicyNames.Authenticated, RolePolicyNames.Admin)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
-            .AddFluentValidationAutoValidation()
             .WithTags("Roles");
 
         group.MapGet("/roles", async (

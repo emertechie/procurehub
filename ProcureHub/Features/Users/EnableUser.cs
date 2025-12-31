@@ -41,8 +41,9 @@ public static class EnableUser
                 return Result.Success();
             }
 
-            user.EnabledAt = DateTime.UtcNow;
-            user.UpdatedAt = DateTime.UtcNow;
+            var now = DateTime.UtcNow;
+            user.EnabledAt = now;
+            user.UpdatedAt = now;
 
             await dbContext.SaveChangesAsync(token);
 

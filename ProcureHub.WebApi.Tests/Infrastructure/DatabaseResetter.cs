@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -28,18 +29,17 @@ public static class DatabaseResetter
         await _respawner.ResetAsync(connection);
     }
 
-    public static async Task SeedDataAsync(
-        IServiceProvider factoryServices,
-        string adminEmail,
-        string adminPassword)
+    public static async Task SeedDataAsync(IServiceProvider factoryServices)
     {
         using var scope = factoryServices.CreateScope();
 
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>();
+        var seeder = new DataSeeder(
+            scope.ServiceProvider.GetRequiredService<ApplicationDbContext>(),
+            scope.ServiceProvider.GetRequiredService<UserManager<User>>(),
+            scope.ServiceProvider.GetRequiredService<RoleManager<Role>>(),
+            scope.ServiceProvider.GetRequiredService<IConfiguration>(),
+            scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>());
 
-        await DataSeeder.SeedAsync(dbContext, userManager, roleManager, logger, adminEmail, adminPassword);
+        await seeder.SeedAsync(onlySeedRolesAndAdminUser: true);
     }
 }

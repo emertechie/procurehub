@@ -1,6 +1,10 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using ProcureHub.Features.Roles;
+using ProcureHub.Models;
+using ProcureHub.WebApi.Responses;
+using ProcureHub.WebApi.Tests.Infrastructure.Helpers;
 using ProcureHub.WebApi.Tests.Infrastructure.Xunit;
 
 namespace ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
@@ -11,8 +15,11 @@ namespace ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
 /// </summary>
 public abstract class HttpClientBase : IHttpClientAuthHelper
 {
+    // Note: Admin user gets seeded in ResetDatabaseFixture
     public const string AdminEmail = "test-admin@procurehub.local";
-    public const string AdminPassword = "TestAdmin123!";
+    public const string AdminPassword = ValidPassword;
+
+    public const string ValidPassword = "Password1!";
 
     protected readonly ApiTestHost ApiTestHost;
 
@@ -24,6 +31,21 @@ public abstract class HttpClientBase : IHttpClientAuthHelper
     }
 
     public HttpClient HttpClient { get; init; }
+
+    public async Task<string> CreateUserAsync(
+        string email,
+        string password,
+        string[]? roleNames = null,
+        Guid? departmentId = null
+    )
+    {
+        return await UserHelper.CreateUserAsync(HttpClient, email, password, roleNames, departmentId);
+    }
+
+    public async Task AssignRoleToUserAsync(string userId, string roleName)
+    {
+        await UserHelper.AssignRoleToUserAsync(HttpClient, userId, roleName);
+    }
 
     public async Task LoginAsync(string email, string password)
     {
