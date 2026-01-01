@@ -18,7 +18,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UserAvatar } from "@/components/user-avatar";
 import { MoreHorizontal, Eye } from "lucide-react";
 
 interface PurchaseRequestTableProps {
@@ -91,11 +90,7 @@ export function PurchaseRequestTable({
               </TableCell>
               <TableCell className="font-medium">{request.title}</TableCell>
               <TableCell>
-                <UserAvatar
-                  firstName={request.requester.firstName}
-                  lastName={request.requester.lastName}
-                  email={request.requester.email}
-                />
+                {request.requester.firstName} {request.requester.lastName}
               </TableCell>
               <TableCell>{request.department.name}</TableCell>
               <TableCell>{request.category.name}</TableCell>
