@@ -7,10 +7,12 @@ import { PurchaseRequestStatus, type PurchaseRequest } from "./types";
 
 interface PurchaseRequestDetailsProps {
   purchaseRequest: PurchaseRequest;
+  children?: React.ReactNode;
 }
 
 export function PurchaseRequestDetails({
   purchaseRequest,
+  children,
 }: PurchaseRequestDetailsProps) {
   const isPending = purchaseRequest.status === PurchaseRequestStatus.Pending;
 
@@ -100,6 +102,7 @@ export function PurchaseRequestDetails({
             )}
           </CardContent>
         </Card>
+        {children}
       </div>
     </div>
   );

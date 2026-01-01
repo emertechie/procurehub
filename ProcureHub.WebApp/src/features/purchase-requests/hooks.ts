@@ -94,6 +94,86 @@ export function useDeletePurchaseRequest() {
   });
 }
 
+export function useApprovePurchaseRequest() {
+  const queryClient = useQueryClient();
+
+  return api.useMutation("post", "/purchase-requests/{id}/approve", {
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["get", "/purchase-requests"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [
+          "get",
+          "/purchase-requests/{id}",
+          { id: variables.params.path.id },
+        ],
+      });
+    },
+  });
+}
+
+export function useRejectPurchaseRequest() {
+  const queryClient = useQueryClient();
+
+  return api.useMutation("post", "/purchase-requests/{id}/reject", {
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["get", "/purchase-requests"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [
+          "get",
+          "/purchase-requests/{id}",
+          { id: variables.params.path.id },
+        ],
+      });
+    },
+  });
+}
+
+/**
+ * Composite hook for reviewing (approving/rejecting) a purchase request.
+ * Encapsulates approve and reject mutations with navigation and toast feedback.
+ */
+export function useReviewPurchaseRequest(id: string) {
+  const navigate = useNavigate();
+  const approveMutation = useApprovePurchaseRequest();
+  const rejectMutation = useRejectPurchaseRequest();
+
+  const handleApprove = async () => {
+    try {
+      await approveMutation.mutateAsync({
+        params: { path: { id } },
+      });
+      toast.success("Purchase request approved");
+      navigate({ to: "/requests" });
+    } catch {
+      toast.error("Failed to approve purchase request");
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      await rejectMutation.mutateAsync({
+        params: { path: { id } },
+      });
+      toast.success("Purchase request rejected");
+      navigate({ to: "/requests" });
+    } catch {
+      toast.error("Failed to reject purchase request");
+    }
+  };
+
+  return {
+    handleApprove,
+    handleReject,
+    isApproving: approveMutation.isPending,
+    isRejecting: rejectMutation.isPending,
+    isPending: approveMutation.isPending || rejectMutation.isPending,
+  };
+}
+
 /**
  * Composite hook for editing a purchase request.
  * Encapsulates update, submit, and delete mutations with navigation and toast feedback.

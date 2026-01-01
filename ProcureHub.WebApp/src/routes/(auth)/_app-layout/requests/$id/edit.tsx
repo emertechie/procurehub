@@ -19,13 +19,16 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   PurchaseRequestForm,
   PurchaseRequestDetails,
+  ApproverActions,
   usePurchaseRequest,
   useEditPurchaseRequest,
+  useReviewPurchaseRequest,
   PurchaseRequestStatus,
   type PurchaseRequest,
 } from "@/features/purchase-requests";
 import { useCategories } from "@/features/categories";
 import { useDepartments } from "@/features/departments";
+import { useAuth } from "@/features/auth/hooks";
 
 export const Route = createFileRoute("/(auth)/_app-layout/requests/$id/edit")({
   component: EditRequestPage,
@@ -33,10 +36,20 @@ export const Route = createFileRoute("/(auth)/_app-layout/requests/$id/edit")({
 
 interface PurchaseRequestReadOnlyViewProps {
   purchaseRequest: PurchaseRequest;
+  showApproverActions: boolean;
+  onApprove: () => void;
+  onReject: () => void;
+  isApproving: boolean;
+  isRejecting: boolean;
 }
 
 function PurchaseRequestReadOnlyView({
   purchaseRequest,
+  showApproverActions,
+  onApprove,
+  onReject,
+  isApproving,
+  isRejecting,
 }: PurchaseRequestReadOnlyViewProps) {
   return (
     <div className="space-y-6">
@@ -49,13 +62,23 @@ function PurchaseRequestReadOnlyView({
         </p>
       </div>
 
-      <PurchaseRequestDetails purchaseRequest={purchaseRequest} />
+      <PurchaseRequestDetails purchaseRequest={purchaseRequest}>
+        {showApproverActions && (
+          <ApproverActions
+            onApprove={onApprove}
+            onReject={onReject}
+            isApproving={isApproving}
+            isRejecting={isRejecting}
+          />
+        )}
+      </PurchaseRequestDetails>
     </div>
   );
 }
 
 function EditRequestPage() {
   const { id } = Route.useParams();
+  const { hasRole } = useAuth();
 
   const {
     data: requestData,
@@ -78,11 +101,17 @@ function EditRequestPage() {
     submitError,
   } = useEditPurchaseRequest(id);
 
+  const { handleApprove, handleReject, isApproving, isRejecting } =
+    useReviewPurchaseRequest(id);
+
   const purchaseRequest = requestData?.data;
   const categories = categoriesData?.data ?? [];
   const departments = departmentsData?.data ?? [];
 
   const isDraft = purchaseRequest?.status === PurchaseRequestStatus.Draft;
+  const isPending = purchaseRequest?.status === PurchaseRequestStatus.Pending;
+  const isApprover = hasRole("Approver");
+  const showApproverActions = isPending && isApprover;
 
   if (isRequestLoading) {
     return (
@@ -114,7 +143,16 @@ function EditRequestPage() {
 
   // Show read-only view for non-draft requests
   if (!isDraft) {
-    return <PurchaseRequestReadOnlyView purchaseRequest={purchaseRequest} />;
+    return (
+      <PurchaseRequestReadOnlyView
+        purchaseRequest={purchaseRequest}
+        showApproverActions={showApproverActions}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        isApproving={isApproving}
+        isRejecting={isRejecting}
+      />
+    );
   }
 
   return (
