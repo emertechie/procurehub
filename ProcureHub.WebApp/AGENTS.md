@@ -1,6 +1,5 @@
 # General
 
-- In all interactions, plans, and commit messages, be extremely concise and sacrifice grammar for the sake of concision.
 - Prefer to use TanStack Query instead of raw fetch calls
 - After changes, run `npm run typecheck` to ensure no new type errors introduced
 - Always run prettier to format new or updated files
@@ -8,6 +7,8 @@
 # React
 
 - When using JSX, always add a `import * as React from "react";` line at top of file
+- Favor small, single-responsibility components (one clear purpose, ideally <150 lines); break down large UIs into multiple nested components instead of one monolithic file.
+- When a component grows beyond a clear responsibility, extract subcomponents and compose them rather than extending the file.
 
 # API calls
 

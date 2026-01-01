@@ -21,9 +21,12 @@ src/
 │  │  ├─ provider.tsx
 │  │  └─ types.ts
 │  │
-│  └─ posts/              # Example feature
-│     ├─ api.ts
-│     └─ types.ts
+│  └─ departments/        # Example feature
+│     ├─ hooks.ts         # TanStack Query hooks (useDepartments, etc.)
+│     ├─ types.ts         # Form data types, DTOs
+│     ├─ department-table.tsx
+│     ├─ department-dialog.tsx
+│     └─ index.ts         # Barrel export
 │
 ├─ components/            # Reusable UI components
 │  └─ ui/                 # shadcn/ui components
@@ -53,7 +56,7 @@ src/
 
 1. **Routes are for navigation only** — no business logic, no API calls.
 
-2. **Every business capability lives in `features/`** (auth, posts, etc.).
+2. **Every business capability lives in `features/`** (auth, departments, users, etc.).
 
 3. **Deleting a feature folder should remove a real app capability.**
 
@@ -70,6 +73,10 @@ src/
 9. **Cross-cutting helpers go in `lib/`** (API client, utils).
 
 10. **Group by domain, not by file type.**
+
+11. **Feature folders use `index.ts` barrel exports** — routes import from feature index, not internal files.
+
+12. **Feature components are co-located** — dialogs, tables, and other UI specific to a feature live in that feature folder, not `components/`.
 
 ---
 
