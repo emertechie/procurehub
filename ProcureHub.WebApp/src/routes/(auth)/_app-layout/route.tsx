@@ -128,7 +128,7 @@ function AuthenticatedLayout() {
 
   const navigation = React.useMemo(() => getNavigation(hasRole), [hasRole]);
 
-  const getCurrentPageTitle = () => {
+  const getBreadcrumbs = () => {
     const currentPath = location.pathname;
 
     // Check all navigation groups for matching URL
@@ -140,10 +140,28 @@ function AuthenticatedLayout() {
     ];
 
     const matchingItem = allNavItems.find((item) => item.url === currentPath);
-    return matchingItem?.title || "Current Page";
+
+    // Handle exact matches (simple pages)
+    if (matchingItem) {
+      return [{ title: matchingItem.title, url: currentPath }];
+    }
+
+    // Handle nested routes
+    // Check for nested request routes: /requests/{id}/edit
+    const requestEditMatch = currentPath.match(/^\/requests\/[^/]+\/edit$/);
+    if (requestEditMatch) {
+      const requestsItem = allNavItems.find((item) => item.url === "/requests");
+      return [
+        { title: requestsItem?.title || "Requests", url: "/requests" },
+        { title: "Purchase Request", url: currentPath },
+      ];
+    }
+
+    return [];
   };
 
   const isOnDashboard = location.pathname === "/dashboard";
+  const breadcrumbs = getBreadcrumbs();
 
   if (loading) {
     return (
@@ -299,14 +317,28 @@ function AuthenticatedLayout() {
                   <Link to="/dashboard">Home</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              {!isOnDashboard && (
+              {!isOnDashboard && breadcrumbs.length === 0 && (
                 <>
                   <BreadcrumbSeparator className="hidden md:block" />
                   <BreadcrumbItem>
-                    <BreadcrumbPage>{getCurrentPageTitle()}</BreadcrumbPage>
+                    <BreadcrumbPage>Current Page</BreadcrumbPage>
                   </BreadcrumbItem>
                 </>
               )}
+              {breadcrumbs.map((crumb, index) => (
+                <React.Fragment key={crumb.url}>
+                  <BreadcrumbSeparator className="hidden md:block" />
+                  <BreadcrumbItem>
+                    {index === breadcrumbs.length - 1 ? (
+                      <BreadcrumbPage>{crumb.title}</BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink asChild>
+                        <Link to={crumb.url}>{crumb.title}</Link>
+                      </BreadcrumbLink>
+                    )}
+                  </BreadcrumbItem>
+                </React.Fragment>
+              ))}
             </BreadcrumbList>
           </Breadcrumb>
           <div className="ml-auto flex items-center gap-2">
