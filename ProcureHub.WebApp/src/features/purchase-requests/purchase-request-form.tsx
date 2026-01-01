@@ -162,15 +162,6 @@ export function PurchaseRequestForm({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" asChild>
-          <Link to="/requests">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Requests
-          </Link>
-        </Button>
-      </div>
-
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Card>

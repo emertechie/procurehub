@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import type { components } from "@/lib/api/schema";
 import {
   Card,
@@ -22,6 +22,11 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 type User = components["schemas"]["QueryUsersResponse"];
 
 export const Route = createFileRoute("/(auth)/_app-layout/admin/users/")({
+  beforeLoad: ({ context }) => {
+    if (!context.auth.hasRole("Admin")) {
+      throw redirect({ to: "/dashboard" });
+    }
+  },
   component: AdminUsersPage,
 });
 
