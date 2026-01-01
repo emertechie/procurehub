@@ -11,15 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { FormErrorAlert } from "@/components/form-error-alert";
 import {
@@ -27,12 +19,8 @@ import {
   setFormFieldErrors,
 } from "@/hooks/use-problem-details";
 import { useCreateUser, useUpdateUser } from "./hooks";
-import {
-  createUserSchema,
-  updateUserSchema,
-  type CreateUserFormData,
-  type UpdateUserFormData,
-} from "./types";
+import { UserFormFields } from "./user-form-fields";
+import { userFormSchema, type UserFormData } from "./types";
 
 type User = components["schemas"]["QueryUsersResponse"];
 
@@ -47,62 +35,54 @@ export function UserDialog({ open, onOpenChange, user }: UserDialogProps) {
   const updateUser = useUpdateUser();
   const isEditing = !!user;
 
-  const createForm = useForm<CreateUserFormData>({
-    resolver: zodResolver(createUserSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      firstName: "",
-      lastName: "",
-    },
+  const form = useForm<UserFormData>({
+    resolver: zodResolver(userFormSchema),
+    defaultValues: isEditing
+      ? {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        }
+      : {
+          email: "",
+          password: "",
+          firstName: "",
+          lastName: "",
+        },
   });
 
-  const editForm = useForm<UpdateUserFormData>({
-    resolver: zodResolver(updateUserSchema),
-    defaultValues: {
-      id: user?.id || "",
-      email: user?.email || "",
-      firstName: user?.firstName || "",
-      lastName: user?.lastName || "",
-    },
-  });
-
+  // Reset form when user data changes
   React.useEffect(() => {
     if (user && isEditing) {
-      editForm.reset({
+      form.reset({
         id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
       });
     } else {
-      createForm.reset({
+      form.reset({
         email: "",
         password: "",
         firstName: "",
         lastName: "",
       });
     }
-  }, [user, isEditing, createForm, editForm]);
+  }, [user, isEditing, form]);
 
   // Extract ProblemDetails from mutation errors
-  const createProblem = useProblemDetails(createUser.error);
-  const updateProblem = useProblemDetails(updateUser.error);
+  const activeMutation = isEditing ? updateUser : createUser;
+  const problem = useProblemDetails(activeMutation.error);
 
-  // Sync field errors to forms
+  // Sync field errors to form
   React.useEffect(() => {
-    if (createProblem.hasFieldErrors) {
-      setFormFieldErrors(createForm, createProblem.fieldErrors);
+    if (problem.hasFieldErrors) {
+      setFormFieldErrors(form, problem.fieldErrors);
     }
-  }, [createProblem.fieldErrors, createProblem.hasFieldErrors, createForm]);
+  }, [problem.fieldErrors, problem.hasFieldErrors, form]);
 
-  React.useEffect(() => {
-    if (updateProblem.hasFieldErrors) {
-      setFormFieldErrors(editForm, updateProblem.fieldErrors);
-    }
-  }, [updateProblem.fieldErrors, updateProblem.hasFieldErrors, editForm]);
-
-  // Reset mutation state only when dialog opens (not on every mutation state change)
+  // Reset mutation state only when dialog opens
   const prevOpenRef = React.useRef(false);
   React.useEffect(() => {
     if (open && !prevOpenRef.current) {
@@ -112,26 +92,31 @@ export function UserDialog({ open, onOpenChange, user }: UserDialogProps) {
     prevOpenRef.current = open;
   }, [open, createUser, updateUser]);
 
-  const onCreateSubmit = async (data: CreateUserFormData) => {
+  const onSubmit = async (data: UserFormData) => {
     try {
-      await createUser.mutateAsync({
-        body: data,
-      });
-      toast.success("User created successfully");
-      onOpenChange(false);
-      createForm.reset();
-    } catch {
-      // Error handled via useProblemDetails
-    }
-  };
-
-  const onUpdateSubmit = async (data: UpdateUserFormData) => {
-    try {
-      await updateUser.mutateAsync({
-        params: { path: { id: data.id } },
-        body: data,
-      });
-      toast.success("User updated successfully");
+      if (isEditing && data.id) {
+        await updateUser.mutateAsync({
+          params: { path: { id: data.id } },
+          body: {
+            id: data.id,
+            email: data.email,
+            firstName: data.firstName,
+            lastName: data.lastName,
+          },
+        });
+        toast.success("User updated successfully");
+      } else if (data.password) {
+        await createUser.mutateAsync({
+          body: {
+            email: data.email,
+            password: data.password,
+            firstName: data.firstName,
+            lastName: data.lastName,
+          },
+        });
+        toast.success("User created successfully");
+        form.reset();
+      }
       onOpenChange(false);
     } catch {
       // Error handled via useProblemDetails
@@ -150,149 +135,32 @@ export function UserDialog({ open, onOpenChange, user }: UserDialogProps) {
           </DialogDescription>
         </DialogHeader>
 
-        {isEditing ? (
-          <Form {...editForm}>
-            <form
-              onSubmit={editForm.handleSubmit(onUpdateSubmit)}
-              className="space-y-4"
-            >
-              <FormErrorAlert message={updateProblem.summary} />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormErrorAlert message={problem.summary} />
 
-              <FormField
-                control={editForm.control}
-                name="firstName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>First Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <UserFormFields form={form} isEditing={isEditing} />
 
-              <FormField
-                control={editForm.control}
-                name="lastName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Last Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={editForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={updateUser.isPending}>
-                  {updateUser.isPending ? "Saving..." : "Save Changes"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        ) : (
-          <Form {...createForm}>
-            <form
-              onSubmit={createForm.handleSubmit(onCreateSubmit)}
-              className="space-y-4"
-            >
-              <FormErrorAlert message={createProblem.summary} />
-
-              <FormField
-                control={createForm.control}
-                name="firstName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>First Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={createForm.control}
-                name="lastName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Last Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={createForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={createForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={createUser.isPending}>
-                  {createUser.isPending ? "Creating..." : "Create User"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        )}
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={activeMutation.isPending}>
+                {activeMutation.isPending
+                  ? isEditing
+                    ? "Saving..."
+                    : "Creating..."
+                  : isEditing
+                    ? "Save Changes"
+                    : "Create User"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

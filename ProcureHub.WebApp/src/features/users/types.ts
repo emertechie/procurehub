@@ -14,5 +14,18 @@ export const updateUserSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
 });
 
+// Combined schema for unified form handling - includes all fields with appropriate optionality
+export const userFormSchema = z.object({
+  id: z.string().optional(),
+  email: z.string().email("Invalid email address"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .optional(),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+});
+
 export type CreateUserFormData = z.infer<typeof createUserSchema>;
 export type UpdateUserFormData = z.infer<typeof updateUserSchema>;
+export type UserFormData = z.infer<typeof userFormSchema>;
