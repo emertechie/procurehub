@@ -131,6 +131,11 @@ function AuthenticatedLayout() {
   const getBreadcrumbs = () => {
     const currentPath = location.pathname;
 
+    // Dashboard is always just "Home", no additional breadcrumbs
+    if (currentPath === "/dashboard") {
+      return [];
+    }
+
     // Check all navigation groups for matching URL
     const allNavItems = [
       ...navigation.main,
