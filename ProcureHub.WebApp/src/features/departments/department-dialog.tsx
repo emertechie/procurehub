@@ -27,12 +27,7 @@ import {
   setFormFieldErrors,
 } from "@/hooks/use-problem-details";
 import { useCreateDepartment, useUpdateDepartment } from "./hooks";
-import {
-  createDepartmentSchema,
-  updateDepartmentSchema,
-  type CreateDepartmentFormData,
-  type UpdateDepartmentFormData,
-} from "./types";
+import { departmentFormSchema, type DepartmentFormData } from "./types";
 
 type Department = components["schemas"]["QueryDepartmentsResponse"];
 
@@ -51,52 +46,34 @@ export function DepartmentDialog({
   const updateDepartment = useUpdateDepartment();
   const isEditing = !!department;
 
-  const createForm = useForm<CreateDepartmentFormData>({
-    resolver: zodResolver(createDepartmentSchema),
-    defaultValues: {
-      name: "",
-    },
+  const form = useForm<DepartmentFormData>({
+    resolver: zodResolver(departmentFormSchema),
+    defaultValues: isEditing
+      ? { id: department.id, name: department.name }
+      : { name: "" },
   });
 
-  const editForm = useForm<UpdateDepartmentFormData>({
-    resolver: zodResolver(updateDepartmentSchema),
-    defaultValues: {
-      id: department?.id || "",
-      name: department?.name || "",
-    },
-  });
-
+  // Reset form when department data changes
   React.useEffect(() => {
     if (department && isEditing) {
-      editForm.reset({
-        id: department.id,
-        name: department.name,
-      });
+      form.reset({ id: department.id, name: department.name });
     } else {
-      createForm.reset({
-        name: "",
-      });
+      form.reset({ name: "" });
     }
-  }, [department, isEditing, createForm, editForm]);
+  }, [department, isEditing, form]);
 
   // Extract ProblemDetails from mutation errors
-  const createProblem = useProblemDetails(createDepartment.error);
-  const updateProblem = useProblemDetails(updateDepartment.error);
+  const activeMutation = isEditing ? updateDepartment : createDepartment;
+  const problem = useProblemDetails(activeMutation.error);
 
-  // Sync field errors to forms
+  // Sync field errors to form
   React.useEffect(() => {
-    if (createProblem.hasFieldErrors) {
-      setFormFieldErrors(createForm, createProblem.fieldErrors);
+    if (problem.hasFieldErrors) {
+      setFormFieldErrors(form, problem.fieldErrors);
     }
-  }, [createProblem.fieldErrors, createProblem.hasFieldErrors, createForm]);
+  }, [problem.fieldErrors, problem.hasFieldErrors, form]);
 
-  React.useEffect(() => {
-    if (updateProblem.hasFieldErrors) {
-      setFormFieldErrors(editForm, updateProblem.fieldErrors);
-    }
-  }, [updateProblem.fieldErrors, updateProblem.hasFieldErrors, editForm]);
-
-  // Reset mutation state only when dialog opens (not on every mutation state change)
+  // Reset mutation state only when dialog opens
   const prevOpenRef = React.useRef(false);
   React.useEffect(() => {
     if (open && !prevOpenRef.current) {
@@ -106,26 +83,21 @@ export function DepartmentDialog({
     prevOpenRef.current = open;
   }, [open, createDepartment, updateDepartment]);
 
-  const onCreateSubmit = async (data: CreateDepartmentFormData) => {
+  const onSubmit = async (data: DepartmentFormData) => {
     try {
-      await createDepartment.mutateAsync({
-        body: data,
-      });
-      toast.success("Department created successfully");
-      onOpenChange(false);
-      createForm.reset();
-    } catch {
-      // Error handled via useProblemDetails
-    }
-  };
-
-  const onUpdateSubmit = async (data: UpdateDepartmentFormData) => {
-    try {
-      await updateDepartment.mutateAsync({
-        params: { path: { id: data.id } },
-        body: { id: data.id, name: data.name },
-      });
-      toast.success("Department updated successfully");
+      if (isEditing && data.id) {
+        await updateDepartment.mutateAsync({
+          params: { path: { id: data.id } },
+          body: { id: data.id, name: data.name },
+        });
+        toast.success("Department updated successfully");
+      } else {
+        await createDepartment.mutateAsync({
+          body: { name: data.name },
+        });
+        toast.success("Department created successfully");
+        form.reset();
+      }
       onOpenChange(false);
     } catch {
       // Error handled via useProblemDetails
@@ -146,79 +118,44 @@ export function DepartmentDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {isEditing ? (
-          <Form {...editForm}>
-            <form
-              onSubmit={editForm.handleSubmit(onUpdateSubmit)}
-              className="space-y-4"
-            >
-              <FormErrorAlert message={updateProblem.summary} />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormErrorAlert message={problem.summary} />
 
-              <FormField
-                control={editForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Department" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Department" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={updateDepartment.isPending}>
-                  {updateDepartment.isPending ? "Updating..." : "Update"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        ) : (
-          <Form {...createForm}>
-            <form
-              onSubmit={createForm.handleSubmit(onCreateSubmit)}
-              className="space-y-4"
-            >
-              <FormErrorAlert message={createProblem.summary} />
-
-              <FormField
-                control={createForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Department" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={createDepartment.isPending}>
-                  {createDepartment.isPending ? "Creating..." : "Create"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        )}
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={activeMutation.isPending}>
+                {activeMutation.isPending
+                  ? isEditing
+                    ? "Updating..."
+                    : "Creating..."
+                  : isEditing
+                    ? "Update"
+                    : "Create"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
