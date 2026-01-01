@@ -50,9 +50,7 @@ export function UserMenu({ user, onLogout }: UserMenuProps) {
             </AvatarFallback>
           </Avatar>
           <div className="hidden md:grid text-left text-sm leading-tight">
-            <span className="truncate font-semibold">
-              {user?.email?.split("@")[0] || "User"}
-            </span>
+            <span className="truncate font-semibold">{user?.firstName}</span>
           </div>
           <ChevronsUpDown className="h-4 w-4" />
         </button>
@@ -68,7 +66,7 @@ export function UserMenu({ user, onLogout }: UserMenuProps) {
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-semibold">
-                {user?.email?.split("@")[0] || "User"}
+                {user?.firstName} {user?.lastName}
               </span>
               <span className="truncate text-xs">{user?.email}</span>
             </div>
