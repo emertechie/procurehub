@@ -149,8 +149,8 @@ function AuthenticatedLayout() {
       },
       {
         onSuccess: () => {
-          // Full page reload to refresh auth context
-          window.location.href = "/dashboard";
+          // Full page reload to refresh auth context and stay on current page
+          window.location.reload();
         },
       },
     );
