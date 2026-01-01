@@ -1,8 +1,6 @@
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Send, Save } from "lucide-react";
-import { Link } from "@tanstack/react-router";
 
 import {
   Card,
@@ -11,30 +9,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Form } from "@/components/ui/form";
 import { FormErrorAlert } from "@/components/form-error-alert";
 import {
   useProblemDetails,
   setFormFieldErrors,
 } from "@/hooks/use-problem-details";
 
+import { PurchaseRequestFormFields } from "./purchase-request-form-fields";
+import { PurchaseRequestActions } from "./purchase-request-actions";
 import {
   createPurchaseRequestSchema,
   updatePurchaseRequestSchema,
@@ -158,8 +141,6 @@ export function PurchaseRequestForm({
     }
   };
 
-  const isPending = isSaving || isSubmitting;
-
   return (
     <div className="space-y-6">
       <div className="grid gap-6 lg:grid-cols-3">
@@ -178,149 +159,12 @@ export function PurchaseRequestForm({
                     message={saveProblem.summary || submitProblem.summary}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Title *</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., MacBook Pro for Development Team"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Describe what you need to purchase and why..."
-                            className="min-h-[100px] resize-y"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <FormField
-                      control={form.control}
-                      name="categoryId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Category *</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                            disabled={isCategoriesLoading}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select category" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {categories.map((category) => (
-                                <SelectItem
-                                  key={category.id}
-                                  value={category.id}
-                                >
-                                  {category.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="departmentId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Department *</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                            disabled={isDepartmentsLoading}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select department" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {departments.map((department) => (
-                                <SelectItem
-                                  key={department.id}
-                                  value={department.id}
-                                >
-                                  {department.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="estimatedAmount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Estimated Amount (EUR) *</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                              €
-                            </span>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              placeholder="0.00"
-                              className="pl-7"
-                              {...field}
-                            />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="businessJustification"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Business Justification</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Explain why this purchase is necessary and how it benefits the organization..."
-                            className="min-h-[100px] resize-y"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                  <PurchaseRequestFormFields
+                    form={form}
+                    categories={categories}
+                    departments={departments}
+                    isCategoriesLoading={isCategoriesLoading}
+                    isDepartmentsLoading={isDepartmentsLoading}
                   />
                 </form>
               </Form>
@@ -329,39 +173,13 @@ export function PurchaseRequestForm({
         </div>
 
         <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Actions</CardTitle>
-              <CardDescription>
-                {isEditing
-                  ? "Update your draft request or submit for approval"
-                  : "Save as draft or submit for approval"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button
-                className="w-full"
-                onClick={handleSubmitForApproval}
-                disabled={isPending}
-              >
-                <Send className="mr-2 h-4 w-4" />
-                {isSubmitting ? "Submitting..." : "Submit for Approval"}
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={handleSaveAsDraft}
-                disabled={isPending}
-              >
-                <Save className="mr-2 h-4 w-4" />
-                {isSaving
-                  ? "Saving..."
-                  : isEditing
-                    ? "Save Draft"
-                    : "Save as Draft"}
-              </Button>
-            </CardContent>
-          </Card>
+          <PurchaseRequestActions
+            isEditing={isEditing}
+            isSaving={isSaving}
+            isSubmitting={isSubmitting}
+            onSaveAsDraft={handleSaveAsDraft}
+            onSubmitForApproval={handleSubmitForApproval}
+          />
         </div>
       </div>
     </div>
