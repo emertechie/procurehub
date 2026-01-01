@@ -325,38 +325,6 @@ function AuthenticatedLayout() {
                     </Tooltip>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  {demoUsers && Array.isArray(demoUsers) && (
-                    <>
-                      <DropdownMenuLabel className="flex items-center gap-2 bg-amber-50 px-2 py-1.5 text-amber-900">
-                        <Sparkles className="h-4 w-4 text-amber-600" />
-                        <span className="font-semibold">Demo Users</span>
-                        <span className="ml-auto text-xs font-normal text-amber-700">
-                          (Demo Only)
-                        </span>
-                      </DropdownMenuLabel>
-                      {demoUsers.map((demoUser) => (
-                        <DropdownMenuItem
-                          key={demoUser.email}
-                          onClick={() => handleDemoLogin(demoUser.email)}
-                          disabled={
-                            demoLoginMutation.isPending ||
-                            user?.email === demoUser.email
-                          }
-                          className="bg-amber-50/50"
-                        >
-                          <div className="flex flex-col">
-                            <span className="font-medium">
-                              {demoUser.firstName} {demoUser.lastName}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {demoUser.role} • {demoUser.email}
-                            </span>
-                          </div>
-                        </DropdownMenuItem>
-                      ))}
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Log out
@@ -386,6 +354,45 @@ function AuthenticatedLayout() {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
+          {demoUsers && Array.isArray(demoUsers) && (
+            <div className="ml-auto">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 rounded-md border-2 border-amber-400 bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-900 shadow-sm hover:bg-amber-100 hover:border-amber-500 transition-colors">
+                    <Sparkles className="h-4 w-4 text-amber-600" />
+                    <span>Switch Demo User</span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64">
+                  <DropdownMenuLabel className="flex items-center gap-2 text-amber-900">
+                    <Sparkles className="h-4 w-4 text-amber-600" />
+                    <span>Demo Users</span>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {demoUsers.map((demoUser) => (
+                    <DropdownMenuItem
+                      key={demoUser.email}
+                      onClick={() => handleDemoLogin(demoUser.email)}
+                      disabled={
+                        demoLoginMutation.isPending ||
+                        user?.email === demoUser.email
+                      }
+                      className="cursor-pointer"
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-medium">
+                          {demoUser.firstName} {demoUser.lastName}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {demoUser.role} • {demoUser.email}
+                        </span>
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
         </header>
         <div className="flex flex-1 flex-col gap-4 py-4 px-6">
           <Outlet />
