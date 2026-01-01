@@ -69,11 +69,11 @@ export function PurchaseRequestDetails({
       </div>
 
       <div className="space-y-4">
-        <Card>
+        <Card className="gap-1">
           <CardHeader>
             <CardTitle>Status</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent>
             <Badge
               variant="outline"
               className={
@@ -91,7 +91,7 @@ export function PurchaseRequestDetails({
             </Badge>
 
             {isPending && (
-              <Alert>
+              <Alert className="mt-4">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
                   This request is pending approval and cannot be edited.
