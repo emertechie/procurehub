@@ -49,7 +49,6 @@ import { Separator } from "@/components/ui/separator";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupLabel,
   SidebarHeader,
@@ -69,45 +68,53 @@ export const Route = createFileRoute("/(auth)/_app-layout")({
   component: AuthenticatedLayout,
 });
 
-const navigation = {
-  main: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: Home,
-    },
-  ],
-  requests: [
-    {
-      title: "My Requests",
-      url: "/requests",
-      icon: FileText,
-    },
-    {
-      title: "New Request",
-      url: "/requests/new",
-      icon: FilePlus,
-    },
-  ],
-  approvals: [
-    {
-      title: "Pending Approvals",
-      url: "/approvals",
-      icon: CheckCircle,
-    },
-  ],
-  admin: [
-    {
-      title: "Users",
-      url: "/admin/users",
-      icon: Users,
-    },
-    {
-      title: "Departments",
-      url: "/admin/departments",
-      icon: Building2,
-    },
-  ],
+const getNavigation = (hasRole: (role: string) => boolean) => {
+  const requestsTitle = hasRole("Admin")
+    ? "All Requests"
+    : hasRole("Approver")
+      ? "Department Requests"
+      : "My Requests";
+
+  return {
+    main: [
+      {
+        title: "Dashboard",
+        url: "/dashboard",
+        icon: Home,
+      },
+    ],
+    requests: [
+      {
+        title: requestsTitle,
+        url: "/requests",
+        icon: FileText,
+      },
+      {
+        title: "New Request",
+        url: "/requests/new",
+        icon: FilePlus,
+      },
+    ],
+    approvals: [
+      {
+        title: "Pending Approvals",
+        url: "/approvals",
+        icon: CheckCircle,
+      },
+    ],
+    admin: [
+      {
+        title: "Users",
+        url: "/admin/users",
+        icon: Users,
+      },
+      {
+        title: "Departments",
+        url: "/admin/departments",
+        icon: Building2,
+      },
+    ],
+  };
 };
 
 function AuthenticatedLayout() {
@@ -115,6 +122,8 @@ function AuthenticatedLayout() {
   const logoutMutation = useLogoutMutation();
   const { data: demoUsers } = useDemoUsers();
   const demoLoginMutation = useDemoLoginMutation();
+
+  const navigation = React.useMemo(() => getNavigation(hasRole), [hasRole]);
 
   if (loading) {
     return (

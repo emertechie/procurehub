@@ -17,12 +17,14 @@ import {
   type PurchaseRequestStatusValue,
 } from "@/features/purchase-requests";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { useAuth } from "@/features/auth/hooks";
 
 export const Route = createFileRoute("/(auth)/_app-layout/requests/")({
   component: MyRequestsPage,
 });
 
 function MyRequestsPage() {
+  const { hasRole } = useAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = React.useState("");
   const debouncedSearch = useDebouncedValue(searchQuery);
@@ -59,11 +61,17 @@ function MyRequestsPage() {
 
   const totalPages = Math.ceil(totalCount / currentPageSize);
 
+  const pageTitle = hasRole("Admin")
+    ? "All Requests"
+    : hasRole("Approver")
+      ? "Department Requests"
+      : "My Requests";
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">My Requests</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{pageTitle}</h1>
           <p className="text-muted-foreground text-sm">
             View and manage your purchase requests
           </p>
