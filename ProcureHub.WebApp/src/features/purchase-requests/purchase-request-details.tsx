@@ -8,11 +8,13 @@ import { PurchaseRequestStatus, type PurchaseRequest } from "./types";
 interface PurchaseRequestDetailsProps {
   purchaseRequest: PurchaseRequest;
   children?: React.ReactNode;
+  showPendingWarning?: boolean;
 }
 
 export function PurchaseRequestDetails({
   purchaseRequest,
   children,
+  showPendingWarning = true,
 }: PurchaseRequestDetailsProps) {
   const isPending = purchaseRequest.status === PurchaseRequestStatus.Pending;
 
@@ -92,7 +94,7 @@ export function PurchaseRequestDetails({
               {purchaseRequest.status}
             </Badge>
 
-            {isPending && (
+            {isPending && showPendingWarning && (
               <Alert className="mt-4">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>

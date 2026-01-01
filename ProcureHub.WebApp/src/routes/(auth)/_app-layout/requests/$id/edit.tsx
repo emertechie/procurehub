@@ -37,6 +37,7 @@ export const Route = createFileRoute("/(auth)/_app-layout/requests/$id/edit")({
 interface PurchaseRequestReadOnlyViewProps {
   purchaseRequest: PurchaseRequest;
   showApproverActions: boolean;
+  isApprover: boolean;
   onApprove: () => void;
   onReject: () => void;
   isApproving: boolean;
@@ -46,6 +47,7 @@ interface PurchaseRequestReadOnlyViewProps {
 function PurchaseRequestReadOnlyView({
   purchaseRequest,
   showApproverActions,
+  isApprover,
   onApprove,
   onReject,
   isApproving,
@@ -62,7 +64,10 @@ function PurchaseRequestReadOnlyView({
         </p>
       </div>
 
-      <PurchaseRequestDetails purchaseRequest={purchaseRequest}>
+      <PurchaseRequestDetails
+        purchaseRequest={purchaseRequest}
+        showPendingWarning={!isApprover}
+      >
         {showApproverActions && (
           <ApproverActions
             onApprove={onApprove}
@@ -147,6 +152,7 @@ function EditRequestPage() {
       <PurchaseRequestReadOnlyView
         purchaseRequest={purchaseRequest}
         showApproverActions={showApproverActions}
+        isApprover={isApprover}
         onApprove={handleApprove}
         onReject={handleReject}
         isApproving={isApproving}
