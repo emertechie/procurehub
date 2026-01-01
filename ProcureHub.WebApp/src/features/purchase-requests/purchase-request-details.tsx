@@ -22,14 +22,6 @@ export function PurchaseRequestDetails({
             <CardTitle>Request Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <h4 className="text-sm font-medium text-muted-foreground">
-                Description
-              </h4>
-              <p className="mt-1">
-                {purchaseRequest.description || "No description provided"}
-              </p>
-            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground">
@@ -43,6 +35,14 @@ export function PurchaseRequestDetails({
                 </h4>
                 <p className="mt-1">{purchaseRequest.department.name}</p>
               </div>
+            </div>
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground">
+                Description
+              </h4>
+              <p className="mt-1">
+                {purchaseRequest.description || "No description provided"}
+              </p>
             </div>
             <div>
               <h4 className="text-sm font-medium text-muted-foreground">
