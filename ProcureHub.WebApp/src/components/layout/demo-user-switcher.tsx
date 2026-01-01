@@ -1,3 +1,4 @@
+import * as React from "react";
 import { ChevronsUpDown, Sparkles } from "lucide-react";
 
 import {
