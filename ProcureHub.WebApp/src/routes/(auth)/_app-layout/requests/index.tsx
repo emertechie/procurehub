@@ -76,12 +76,14 @@ function MyRequestsPage() {
             View and manage your purchase requests
           </p>
         </div>
-        <Button asChild>
-          <Link to="/requests/new">
-            <Plus className="mr-2 h-4 w-4" />
-            New Request
-          </Link>
-        </Button>
+        {hasRole("Requester") && (
+          <Button asChild>
+            <Link to="/requests/new">
+              <Plus className="mr-2 h-4 w-4" />
+              New Request
+            </Link>
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

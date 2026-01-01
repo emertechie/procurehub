@@ -77,6 +77,23 @@ export const Route = createFileRoute("/(auth)/_app-layout")({
 const getNavigation = (hasRole: (role: string) => boolean) => {
   const requestsTitle = getRequestsAreaTitle(hasRole);
 
+  const requestsNav = [
+    {
+      title: requestsTitle,
+      url: "/requests",
+      icon: FileText,
+    },
+  ];
+
+  // Only show "New Request" link to users with Requester role
+  if (hasRole("Requester")) {
+    requestsNav.push({
+      title: "New Request",
+      url: "/requests/new",
+      icon: FilePlus,
+    });
+  }
+
   return {
     main: [
       {
@@ -85,18 +102,7 @@ const getNavigation = (hasRole: (role: string) => boolean) => {
         icon: Home,
       },
     ],
-    requests: [
-      {
-        title: requestsTitle,
-        url: "/requests",
-        icon: FileText,
-      },
-      {
-        title: "New Request",
-        url: "/requests/new",
-        icon: FilePlus,
-      },
-    ],
+    requests: requestsNav,
     approvals: [
       {
         title: "Pending Approvals",
