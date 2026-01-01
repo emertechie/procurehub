@@ -45,15 +45,6 @@ function PurchaseRequestReadOnlyView({
 }: PurchaseRequestReadOnlyViewProps) {
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" asChild>
-          <Link to="/requests">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Requests
-          </Link>
-        </Button>
-      </div>
-
       <div>
         <h1 className="text-2xl font-bold tracking-tight">
           {purchaseRequest.title}
