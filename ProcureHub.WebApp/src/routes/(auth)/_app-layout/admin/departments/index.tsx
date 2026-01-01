@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import type { components } from "@/lib/api/schema";
 import {
   Card,
@@ -19,6 +19,11 @@ import {
 type Department = components["schemas"]["QueryDepartmentsResponse"];
 
 export const Route = createFileRoute("/(auth)/_app-layout/admin/departments/")({
+  beforeLoad: ({ context }) => {
+    if (!context.auth.hasRole("Admin")) {
+      throw redirect({ to: "/dashboard" });
+    }
+  },
   component: AdminDepartmentsPage,
 });
 
