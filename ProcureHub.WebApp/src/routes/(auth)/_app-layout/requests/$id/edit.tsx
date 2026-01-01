@@ -130,7 +130,7 @@ function EditRequestPage() {
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm">
+            <Button variant="outline" size="sm">
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
             </Button>
