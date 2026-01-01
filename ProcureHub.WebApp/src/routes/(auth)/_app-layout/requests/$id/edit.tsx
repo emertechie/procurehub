@@ -1,7 +1,6 @@
 import * as React from "react";
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { toast } from "sonner";
-import { ArrowLeft, Trash2, AlertCircle } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Trash2, AlertCircle, ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,12 +20,8 @@ import {
   PurchaseRequestForm,
   PurchaseRequestDetails,
   usePurchaseRequest,
-  useUpdatePurchaseRequest,
-  useSubmitPurchaseRequest,
-  useDeletePurchaseRequest,
+  useEditPurchaseRequest,
   PurchaseRequestStatus,
-  type CreatePurchaseRequestFormData,
-  type UpdatePurchaseRequestFormData,
   type PurchaseRequest,
 } from "@/features/purchase-requests";
 import { useCategories } from "@/features/categories";
@@ -61,7 +56,6 @@ function PurchaseRequestReadOnlyView({
 
 function EditRequestPage() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
 
   const {
     data: requestData,
@@ -73,71 +67,22 @@ function EditRequestPage() {
   const { data: departmentsData, isPending: isDepartmentsLoading } =
     useDepartments();
 
-  const updateMutation = useUpdatePurchaseRequest();
-  const submitMutation = useSubmitPurchaseRequest();
-  const deleteMutation = useDeletePurchaseRequest();
+  const {
+    handleSaveAsDraft,
+    handleSubmitForApproval,
+    handleDelete,
+    isSaving,
+    isSubmitting,
+    isDeleting,
+    saveError,
+    submitError,
+  } = useEditPurchaseRequest(id);
 
   const purchaseRequest = requestData?.data;
   const categories = categoriesData?.data ?? [];
   const departments = departmentsData?.data ?? [];
 
   const isDraft = purchaseRequest?.status === PurchaseRequestStatus.Draft;
-
-  const updateRequest = async (
-    data: CreatePurchaseRequestFormData | UpdatePurchaseRequestFormData,
-  ) => {
-    return updateMutation.mutateAsync({
-      params: { path: { id } },
-      body: {
-        id,
-        title: data.title,
-        description: data.description || null,
-        estimatedAmount: data.estimatedAmount,
-        businessJustification: data.businessJustification || null,
-        categoryId: data.categoryId,
-        departmentId: data.departmentId,
-      },
-    });
-  };
-
-  const handleSaveAsDraft = async (
-    data: CreatePurchaseRequestFormData | UpdatePurchaseRequestFormData,
-  ) => {
-    try {
-      await updateRequest(data);
-      toast.success("Purchase request updated");
-      navigate({ to: "/requests" });
-    } catch {
-      // Error handled via form
-    }
-  };
-
-  const handleSubmitForApproval = async (
-    data: CreatePurchaseRequestFormData | UpdatePurchaseRequestFormData,
-  ) => {
-    try {
-      await updateRequest(data);
-      await submitMutation.mutateAsync({
-        params: { path: { id } },
-      });
-      toast.success("Purchase request submitted for approval");
-      navigate({ to: "/requests" });
-    } catch {
-      // Error handled via form
-    }
-  };
-
-  const handleDelete = async () => {
-    try {
-      await deleteMutation.mutateAsync({
-        params: { path: { id } },
-      });
-      toast.success("Purchase request deleted");
-      navigate({ to: "/requests" });
-    } catch {
-      toast.error("Failed to delete purchase request");
-    }
-  };
 
   if (isRequestLoading) {
     return (
@@ -204,7 +149,7 @@ function EditRequestPage() {
                 onClick={handleDelete}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                {isDeleting ? "Deleting..." : "Delete"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -219,10 +164,10 @@ function EditRequestPage() {
         isDepartmentsLoading={isDepartmentsLoading}
         onSaveAsDraft={handleSaveAsDraft}
         onSubmitForApproval={handleSubmitForApproval}
-        isSaving={updateMutation.isPending && !submitMutation.isPending}
-        isSubmitting={submitMutation.isPending}
-        saveError={updateMutation.error}
-        submitError={submitMutation.error || updateMutation.error}
+        isSaving={isSaving}
+        isSubmitting={isSubmitting}
+        saveError={saveError}
+        submitError={submitError}
       />
     </div>
   );

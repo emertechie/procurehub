@@ -1,6 +1,12 @@
 import { api } from "@/lib/api/client";
 import { useQueryClient } from "@tanstack/react-query";
-import type { PurchaseRequestStatusValue } from "./types";
+import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
+import type {
+  PurchaseRequestStatusValue,
+  CreatePurchaseRequestFormData,
+  UpdatePurchaseRequestFormData,
+} from "./types";
 
 export function usePurchaseRequests(
   status?: PurchaseRequestStatusValue,
@@ -86,4 +92,82 @@ export function useDeletePurchaseRequest() {
       });
     },
   });
+}
+
+/**
+ * Composite hook for editing a purchase request.
+ * Encapsulates update, submit, and delete mutations with navigation and toast feedback.
+ */
+export function useEditPurchaseRequest(id: string) {
+  const navigate = useNavigate();
+  const updateMutation = useUpdatePurchaseRequest();
+  const submitMutation = useSubmitPurchaseRequest();
+  const deleteMutation = useDeletePurchaseRequest();
+
+  const updateRequest = async (
+    data: CreatePurchaseRequestFormData | UpdatePurchaseRequestFormData,
+  ) => {
+    return updateMutation.mutateAsync({
+      params: { path: { id } },
+      body: {
+        id,
+        title: data.title,
+        description: data.description || null,
+        estimatedAmount: data.estimatedAmount,
+        businessJustification: data.businessJustification || null,
+        categoryId: data.categoryId,
+        departmentId: data.departmentId,
+      },
+    });
+  };
+
+  const handleSaveAsDraft = async (
+    data: CreatePurchaseRequestFormData | UpdatePurchaseRequestFormData,
+  ) => {
+    try {
+      await updateRequest(data);
+      toast.success("Purchase request updated");
+      navigate({ to: "/requests" });
+    } catch {
+      // Error handled via form
+    }
+  };
+
+  const handleSubmitForApproval = async (
+    data: CreatePurchaseRequestFormData | UpdatePurchaseRequestFormData,
+  ) => {
+    try {
+      await updateRequest(data);
+      await submitMutation.mutateAsync({
+        params: { path: { id } },
+      });
+      toast.success("Purchase request submitted for approval");
+      navigate({ to: "/requests" });
+    } catch {
+      // Error handled via form
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteMutation.mutateAsync({
+        params: { path: { id } },
+      });
+      toast.success("Purchase request deleted");
+      navigate({ to: "/requests" });
+    } catch {
+      toast.error("Failed to delete purchase request");
+    }
+  };
+
+  return {
+    handleSaveAsDraft,
+    handleSubmitForApproval,
+    handleDelete,
+    isSaving: updateMutation.isPending && !submitMutation.isPending,
+    isSubmitting: submitMutation.isPending,
+    isDeleting: deleteMutation.isPending,
+    saveError: updateMutation.error,
+    submitError: submitMutation.error || updateMutation.error,
+  };
 }
