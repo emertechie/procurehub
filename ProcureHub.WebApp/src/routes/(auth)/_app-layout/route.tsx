@@ -1,5 +1,10 @@
 import React from "react";
-import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
+import {
+  Link,
+  Outlet,
+  createFileRoute,
+  useLocation,
+} from "@tanstack/react-router";
 import {
   BadgeCheck,
   Bell,
@@ -22,6 +27,7 @@ import {
   useDemoUsers,
   useDemoLoginMutation,
 } from "@/features/auth/hooks";
+import { getRequestsAreaTitle } from "@/features/purchase-requests/utils/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Breadcrumb,
@@ -69,16 +75,12 @@ export const Route = createFileRoute("/(auth)/_app-layout")({
 });
 
 const getNavigation = (hasRole: (role: string) => boolean) => {
-  const requestsTitle = hasRole("Admin")
-    ? "All Requests"
-    : hasRole("Approver")
-      ? "Department Requests"
-      : "My Requests";
+  const requestsTitle = getRequestsAreaTitle(hasRole);
 
   return {
     main: [
       {
-        title: "Dashboard",
+        title: "Home",
         url: "/dashboard",
         icon: Home,
       },
@@ -122,8 +124,26 @@ function AuthenticatedLayout() {
   const logoutMutation = useLogoutMutation();
   const { data: demoUsers } = useDemoUsers();
   const demoLoginMutation = useDemoLoginMutation();
+  const location = useLocation();
 
   const navigation = React.useMemo(() => getNavigation(hasRole), [hasRole]);
+
+  const getCurrentPageTitle = () => {
+    const currentPath = location.pathname;
+
+    // Check all navigation groups for matching URL
+    const allNavItems = [
+      ...navigation.main,
+      ...navigation.requests,
+      ...(hasRole("Approver") ? navigation.approvals : []),
+      ...(hasRole("Admin") ? navigation.admin : []),
+    ];
+
+    const matchingItem = allNavItems.find((item) => item.url === currentPath);
+    return matchingItem?.title || "Current Page";
+  };
+
+  const isOnDashboard = location.pathname === "/dashboard";
 
   if (loading) {
     return (
@@ -276,13 +296,17 @@ function AuthenticatedLayout() {
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
                 <BreadcrumbLink asChild>
-                  <Link to="/dashboard">Dashboard</Link>
+                  <Link to="/dashboard">Home</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Current Page</BreadcrumbPage>
-              </BreadcrumbItem>
+              {!isOnDashboard && (
+                <>
+                  <BreadcrumbSeparator className="hidden md:block" />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>{getCurrentPageTitle()}</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </>
+              )}
             </BreadcrumbList>
           </Breadcrumb>
           <div className="ml-auto flex items-center gap-2">
