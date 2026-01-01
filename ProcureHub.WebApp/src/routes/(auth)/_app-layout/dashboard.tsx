@@ -1,5 +1,6 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { Info } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks";
 import {
   Card,
@@ -8,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const Route = createFileRoute("/(auth)/_app-layout/dashboard")({
   component: DashboardPage,
@@ -22,6 +24,13 @@ function DashboardPage() {
 
   return (
     <div className="space-y-4">
+      <Alert className="border-blue-200 bg-blue-50 text-blue-900">
+        <Info className="h-4 w-4 text-blue-600" />
+        <AlertDescription>
+          Dashboard not implemented yet. Demo data shown below.
+        </AlertDescription>
+      </Alert>
+
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">Welcome back {user.firstName}</p>

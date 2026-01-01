@@ -5,7 +5,7 @@ import {
   Bell,
   Building2,
   ChevronsUpDown,
-  ClipboardList,
+  FilePlus,
   FileText,
   Home,
   LogOut,
@@ -40,6 +40,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import {
   Sidebar,
@@ -81,7 +86,7 @@ const navigation = {
     {
       title: "New Request",
       url: "/requests/new",
-      icon: ClipboardList,
+      icon: FilePlus,
     },
   ],
   approvals: [
@@ -296,14 +301,28 @@ function AuthenticatedLayout() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                      <BadgeCheck className="mr-2 h-4 w-4" />
-                      Profile
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Bell className="mr-2 h-4 w-4" />
-                      Notifications
-                    </DropdownMenuItem>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                          <BadgeCheck className="mr-2 h-4 w-4" />
+                          Profile
+                        </DropdownMenuItem>
+                      </TooltipTrigger>
+                      <TooltipContent side="right">
+                        <p className="text-xs">Not implemented</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                          <Bell className="mr-2 h-4 w-4" />
+                          Notifications
+                        </DropdownMenuItem>
+                      </TooltipTrigger>
+                      <TooltipContent side="right">
+                        <p className="text-xs">Not implemented</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   {demoUsers && Array.isArray(demoUsers) && (
