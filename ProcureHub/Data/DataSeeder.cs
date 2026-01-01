@@ -96,28 +96,25 @@ public sealed class DataSeeder
 
     private async Task SeedAdminUserAsync()
     {
-        await SeedUserAsync("SeedUsers:Admin", RoleNames.Admin, null);
+        await SeedUserAsync("SeedUsers:Admin", null, RoleNames.Admin, RoleNames.Approver, RoleNames.Requester);
     }
 
     private async Task SeedUsersAsync()
     {
-        await SeedUserAsync(
-            "SeedUsers:Admin",
-            RoleNames.Admin,
-            null);
+        await SeedAdminUserAsync();
 
         await SeedUserAsync(
             "SeedUsers:Requester",
-            RoleNames.Requester,
-            "SeedUsers:Requester:Department");
+            "SeedUsers:Requester:Department",
+            RoleNames.Requester);
 
         await SeedUserAsync(
             "SeedUsers:Approver",
-            RoleNames.Approver,
-            "SeedUsers:Approver:Department");
+            "SeedUsers:Approver:Department",
+            RoleNames.Approver);
     }
 
-    private async Task SeedUserAsync(string configKey, string roleName, string? departmentConfigKey)
+    private async Task SeedUserAsync(string configKey, string? departmentConfigKey, params string[] roleNames)
     {
         var email = _configuration.GetRequiredString($"{configKey}:Email");
         var existingUser = await _userManager.FindByEmailAsync(email);
@@ -151,7 +148,7 @@ public sealed class DataSeeder
         }
 
         var password = _configuration.GetRequiredString($"{configKey}:Password");
-        _logger.LogWarning("Creating user with email '{Email}' and role '{Role}'", email, roleName);
+        _logger.LogWarning("Creating user with email '{Email}' and roles '{Roles}'", email, string.Join(", ", roleNames));
 
         var result = await _userManager.CreateAsync(user, password);
         if (!result.Succeeded)
@@ -160,7 +157,10 @@ public sealed class DataSeeder
                 $"Failed to create user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
         }
 
-        await _userManager.AddToRoleAsync(user, roleName);
+        foreach (var roleName in roleNames)
+        {
+            await _userManager.AddToRoleAsync(user, roleName);
+        }
     }
 
     private async Task SeedCategoriesAsync()
