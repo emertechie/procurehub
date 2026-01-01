@@ -70,6 +70,12 @@
 
 # Commons Commands
 
+- To start the web app (e.g. for Chrome MCP tool):
+  - *You must be in the `ProcureHub.WebApp` directory first*
+  - Run the dev server **non-interactively**: `API_URL=http://localhost:5140 npm run dev -- --port 3003 < /dev/null`
+  - Do NOT send keyboard input to the process
+  - The process will not exit on its own
+  - *Log in with the user credentials in the `ProcureHub.WebApi/appsettings.json` file*
 - Update EF Core migrations: `dotnet ef migrations add ExampleMigration -p ../ProcureHub`
   - NOTE: Run all migration commands in the `ProcureHub.WebApi` dir, and add the `-p` flag for project reference as shown above
 - Update the strongly typed `openapi-react-query` client after a change to OpenAPI spec: In the `/ProcureHub.WebApp` folder, run `npm run generate:api-schema`
