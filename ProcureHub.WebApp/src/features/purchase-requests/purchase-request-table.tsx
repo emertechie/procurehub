@@ -18,6 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { UserAvatar } from "@/components/user-avatar";
 import { MoreHorizontal, Eye } from "lucide-react";
 
 interface PurchaseRequestTableProps {
@@ -48,14 +49,6 @@ function formatCurrency(amount: number | string): string {
   }).format(numAmount);
 }
 
-function formatDate(dateString: string): string {
-  return new Intl.DateTimeFormat("en-IE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(new Date(dateString));
-}
-
 export function PurchaseRequestTable({
   requests,
   onViewRequest,
@@ -66,10 +59,11 @@ export function PurchaseRequestTable({
         <TableRow>
           <TableHead>ID</TableHead>
           <TableHead>Title</TableHead>
+          <TableHead>Requester</TableHead>
+          <TableHead>Department</TableHead>
           <TableHead>Category</TableHead>
           <TableHead className="text-right">Amount</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead>Updated</TableHead>
           <TableHead className="w-12"></TableHead>
         </TableRow>
       </TableHeader>
@@ -77,7 +71,7 @@ export function PurchaseRequestTable({
         {requests.length === 0 ? (
           <TableRow>
             <TableCell
-              colSpan={7}
+              colSpan={8}
               className="text-center text-muted-foreground"
             >
               No purchase requests found
@@ -96,6 +90,14 @@ export function PurchaseRequestTable({
                 </Link>
               </TableCell>
               <TableCell className="font-medium">{request.title}</TableCell>
+              <TableCell>
+                <UserAvatar
+                  firstName={request.requester.firstName}
+                  lastName={request.requester.lastName}
+                  email={request.requester.email}
+                />
+              </TableCell>
+              <TableCell>{request.department.name}</TableCell>
               <TableCell>{request.category.name}</TableCell>
               <TableCell className="text-right font-medium">
                 {formatCurrency(request.estimatedAmount)}
@@ -108,9 +110,6 @@ export function PurchaseRequestTable({
                   <span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current" />
                   {request.status}
                 </Badge>
-              </TableCell>
-              <TableCell className="text-muted-foreground">
-                {formatDate(request.updatedAt)}
               </TableCell>
               <TableCell>
                 <DropdownMenu>
