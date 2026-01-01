@@ -86,35 +86,31 @@ function MyRequestsPage() {
         )}
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex gap-2">
-          <Input
-            placeholder="Search by title or ID..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            className="w-64 bg-white"
-          />
-          {searchQuery && (
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSearchQuery("");
-                setPage(1);
-              }}
-            >
-              Clear
-            </Button>
-          )}
-        </div>
-      </div>
-
       <StatusFilter
         selectedStatus={selectedStatus}
         onStatusChange={handleStatusChange}
       />
+
+      <div className="flex gap-2">
+        <Input
+          placeholder="Search by title or ID..."
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setPage(1);
+          }}
+          className="bg-white"
+        />
+        <Button
+          variant="outline"
+          onClick={() => {
+            setSearchQuery("");
+            setPage(1);
+          }}
+        >
+          Clear
+        </Button>
+      </div>
 
       <Card>
         <CardHeader>
