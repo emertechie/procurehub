@@ -352,10 +352,10 @@ function AuthenticatedLayout() {
               ))}
             </BreadcrumbList>
           </Breadcrumb>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 rounded-lg border border-input bg-background px-2 py-1.5 hover:bg-accent hover:text-accent-foreground">
+                <button className="flex items-center gap-2 rounded-lg border border-input bg-background px-2 py-1 hover:bg-accent hover:text-accent-foreground">
                   <Avatar className="h-7 w-7 rounded-lg">
                     <AvatarImage src="" alt={user?.email} />
                     <AvatarFallback className="rounded-lg text-xs">

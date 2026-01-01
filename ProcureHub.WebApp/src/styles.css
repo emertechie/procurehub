@@ -44,6 +44,9 @@
   --success-foreground: oklch(0.985 0 0);
   --warning: oklch(0.75 0.15 80);
   --warning-foreground: oklch(0.2 0 0);
+
+  /* Overrides */
+  --sidebar: #edeff3;
 }
 
 .dark {

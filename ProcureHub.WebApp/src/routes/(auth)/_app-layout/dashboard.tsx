@@ -24,17 +24,17 @@ function DashboardPage() {
 
   return (
     <div className="space-y-4">
-      <Alert className="border-blue-200 bg-blue-50 text-blue-900">
-        <Info className="h-4 w-4 text-blue-600" />
-        <AlertDescription>
-          Dashboard not implemented yet. Demo data shown below.
-        </AlertDescription>
-      </Alert>
-
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">Welcome back {user.firstName}</p>
       </div>
+
+      <Alert className="border-amber-200 bg-amber-50">
+        <Info className="h-4 w-4 !text-amber-800" />
+        <AlertDescription className="text-amber-800">
+          Dashboard not implemented yet. Demo data shown below.
+        </AlertDescription>
+      </Alert>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
