@@ -5,7 +5,6 @@ namespace ProcureHub.WebApi.Features.Auth;
 
 public static class DemoEndpoints
 {
-    private static readonly string[] demoUserRoles = new[] { "Admin", "Requester", "Approver" };
 
     public static void ConfigureDemoEndpoints(this WebApplication app)
     {
@@ -17,14 +16,26 @@ public static class DemoEndpoints
 
         app.MapGet("/demo-users", (IConfiguration configuration) =>
             {
-                var demoUsers = demoUserRoles
-                    .Select(role => new DemoUser
+                var demoUserEmails = configuration.GetSection("DemoUsers").Get<string[]>() ?? Array.Empty<string>();
+                var seedUsersSection = configuration.GetSection("SeedUsers");
+
+                var demoUsers = demoUserEmails
+                    .Select(email =>
                     {
-                        Role = role,
-                        Email = configuration[$"SeedUsers:{role}:Email"]!,
-                        FirstName = configuration[$"SeedUsers:{role}:FirstName"]!,
-                        LastName = configuration[$"SeedUsers:{role}:LastName"]!
+                        var userSection = seedUsersSection.GetSection(email);
+                        if (!userSection.Exists())
+                        {
+                            return null;
+                        }
+                        return new DemoUser
+                        {
+                            Email = email,
+                            FirstName = userSection["FirstName"] ?? "",
+                            LastName = userSection["LastName"] ?? "",
+                            Roles = userSection.GetSection("Roles").GetChildren().Select(c => c.Value).OfType<string>().ToArray()
+                        };
                     })
+                    .OfType<DemoUser>()
                     .ToList();
 
                 return Results.Ok(demoUsers);
@@ -39,22 +50,10 @@ public static class DemoEndpoints
                 [FromServices] SignInManager<Models.User> signInManager,
                 [FromServices] IConfiguration configuration) =>
             {
-                // Validate that the email belongs to a known demo user
-                var isDemoUser = false;
-                string? password = null;
+                var demoUserEmails = configuration.GetSection("DemoUsers").Get<string[]>() ?? Array.Empty<string>();
 
-                foreach (var role in demoUserRoles)
-                {
-                    var configEmail = configuration[$"SeedUsers:{role}:Email"];
-                    if (configEmail?.Equals(request.Email, StringComparison.OrdinalIgnoreCase) == true)
-                    {
-                        isDemoUser = true;
-                        password = configuration[$"SeedUsers:{role}:Password"];
-                        break;
-                    }
-                }
-
-                if (!isDemoUser || password == null)
+                // Validate that the email belongs to a demo user
+                if (!demoUserEmails.Contains(request.Email, StringComparer.OrdinalIgnoreCase))
                 {
                     return Results.Problem(
                         title: "Invalid demo user",
@@ -84,12 +83,20 @@ public static class DemoEndpoints
             .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
-    public sealed record DemoUser
+    public sealed record SeedUserConfig
     {
-        public required string Role { get; init; }
         public required string Email { get; init; }
         public required string FirstName { get; init; }
         public required string LastName { get; init; }
+        public string[]? Roles { get; init; }
+    }
+
+    public sealed record DemoUser
+    {
+        public required string Email { get; init; }
+        public required string FirstName { get; init; }
+        public required string LastName { get; init; }
+        public required string[] Roles { get; init; }
     }
 
     public sealed record DemoLoginRequest

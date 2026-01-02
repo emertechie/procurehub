@@ -16,7 +16,7 @@ namespace ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
 public abstract class HttpClientBase : IHttpClientAuthHelper
 {
     // Note: Admin user gets seeded in ResetDatabaseFixture
-    public const string AdminEmail = "test-admin@procurehub.local";
+    public const string AdminEmail = "test-admin@example.com";
     public const string AdminPassword = ValidPassword;
 
     public const string ValidPassword = "Password1!";

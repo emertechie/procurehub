@@ -96,27 +96,31 @@ public sealed class DataSeeder
 
     private async Task SeedAdminUserAsync()
     {
-        await SeedUserAsync("SeedUsers:Admin", null, RoleNames.Admin, RoleNames.Approver, RoleNames.Requester);
+        var adminEmail = _configuration.GetRequiredString("AdminUserEmail");
+        await SeedUserAsync(adminEmail);
     }
 
     private async Task SeedUsersAsync()
     {
-        await SeedAdminUserAsync();
-
-        await SeedUserAsync(
-            "SeedUsers:Requester",
-            "SeedUsers:Requester:Department",
-            RoleNames.Requester);
-
-        await SeedUserAsync(
-            "SeedUsers:Approver",
-            "SeedUsers:Approver:Department",
-            RoleNames.Approver);
+        var seedUsersSection = _configuration.GetSection("SeedUsers");
+        foreach (var userSection in seedUsersSection.GetChildren())
+        {
+            await SeedUserAsync(userSection.Key);
+        }
     }
 
-    private async Task SeedUserAsync(string configKey, string? departmentConfigKey, params string[] roleNames)
+    private async Task SeedUserAsync(string email)
     {
-        var email = _configuration.GetRequiredString($"{configKey}:Email");
+        var configKey = $"SeedUsers:{email}";
+
+        // Check if user config exists
+        var userSection = _configuration.GetSection(configKey);
+        if (!userSection.Exists())
+        {
+            _logger.LogWarning("Skipping user '{Email}' - no config found", email);
+            return;
+        }
+
         var existingUser = await _userManager.FindByEmailAsync(email);
         if (existingUser != null)
         {
@@ -137,9 +141,9 @@ public sealed class DataSeeder
         };
 
         // Assign department if specified
-        if (departmentConfigKey != null)
+        var departmentName = _configuration[$"{configKey}:Department"];
+        if (departmentName != null)
         {
-            var departmentName = _configuration.GetRequiredString(departmentConfigKey);
             var department = _dbContext.Departments.FirstOrDefault(d => d.Name == departmentName);
             if (department != null)
             {
@@ -148,7 +152,10 @@ public sealed class DataSeeder
         }
 
         var password = _configuration.GetRequiredString($"{configKey}:Password");
-        _logger.LogWarning("Creating user with email '{Email}' and roles '{Roles}'", email, string.Join(", ", roleNames));
+        var rolesSection = _configuration.GetSection($"{configKey}:Roles");
+        var roles = rolesSection.GetChildren().Select(c => c.Value).OfType<string>().ToArray();
+
+        _logger.LogWarning("Creating user with email '{Email}' and roles '{Roles}'", email, string.Join(", ", roles));
 
         var result = await _userManager.CreateAsync(user, password);
         if (!result.Succeeded)
@@ -157,7 +164,7 @@ public sealed class DataSeeder
                 $"Failed to create user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
         }
 
-        foreach (var roleName in roleNames)
+        foreach (var roleName in roles)
         {
             await _userManager.AddToRoleAsync(user, roleName);
         }
@@ -207,8 +214,9 @@ public sealed class DataSeeder
             return;
         }
 
-        var requester = await _userManager.FindByEmailAsync(_configuration.GetRequiredString("SeedUsers:Requester:Email"));
-        var approver = await _userManager.FindByEmailAsync(_configuration.GetRequiredString("SeedUsers:Approver:Email"));
+        // Hardcoded demo users for purchase request seeding
+        var requester = await _userManager.FindByEmailAsync("requester@example.com");
+        var approver = await _userManager.FindByEmailAsync("approver@example.com");
 
         if (requester == null || approver == null)
         {
