@@ -884,10 +884,10 @@ export interface components {
             email: string;
         };
         DemoEndpointsDemoUser: {
-            role: string;
             email: string;
             firstName: string;
             lastName: string;
+            roles: string[];
         };
         EntityCreatedResponseOfString: {
             id: null | string;

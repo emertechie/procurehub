@@ -9,13 +9,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 import type { AuthUser } from "@/features/auth/types";
+import { getRoleBadgeClasses } from "@/features/users/role-badge-utils";
 
 interface DemoUser {
   email: string;
   firstName: string;
   lastName: string;
-  role: string;
+  roles: string[];
 }
 
 interface DemoUserSwitcherProps {
@@ -53,13 +61,29 @@ export function DemoUserSwitcher({
             disabled={isDemoLoginPending || user?.email === demoUser.email}
             className="cursor-pointer"
           >
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-1.5 w-full">
               <span className="font-medium">
                 {demoUser.firstName} {demoUser.lastName}
               </span>
               <span className="text-xs text-muted-foreground">
-                {demoUser.role} • {demoUser.email}
+                {demoUser.email}
               </span>
+              <TooltipProvider>
+                <div className="flex gap-1 flex-wrap">
+                  {demoUser.roles.map((role) => (
+                    <Tooltip key={role} delayDuration={300}>
+                      <TooltipTrigger asChild>
+                        <span className="text-xs px-1.5 py-0.5 rounded border border-gray-200 bg-gray-50 text-gray-600">
+                          {role}
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{role} role</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  ))}
+                </div>
+              </TooltipProvider>
             </div>
           </DropdownMenuItem>
         ))}
