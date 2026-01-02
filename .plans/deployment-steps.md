@@ -4,20 +4,20 @@
 
 ### 1. Azure & Terraform Bootstrap
 
-- [ ] **1.1** Create Azure subscription (or confirm existing one)
-- [ ] **1.2** Install Terraform CLI locally
-- [ ] **1.3** Log in with `az login`
-- [ ] **1.4** Create resource group for Terraform state: `rg-procurehub-tfstate`
-- [ ] **1.5** Create storage account + container for remote state
-- [ ] **1.6** Create `infra/` folder structure:
+- [x] **1.1** Create Azure subscription (or confirm existing one)
+- [x] **1.2** Install Terraform CLI locally
+- [x] **1.3** Log in with `az login`
+- [x] **1.4** Create resource group for Terraform state: `rg-procurehub-tfstate`
+- [x] **1.5** Create storage account + container for remote state
+- [x] **1.6** Create `infra/` folder structure:
   ```
   infra/
     modules/
     envs/
       staging/
   ```
-- [ ] **1.7** Configure `backend.tf` for staging (Azure Storage backend)
-- [ ] **1.8** Run `terraform init` in `infra/envs/staging/`
+- [x] **1.7** Configure `backend.tf` for staging (Azure Storage backend)
+- [x] **1.8** Run `terraform init` in `infra/envs/staging/`
 
 Commands ran:
 
