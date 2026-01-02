@@ -14,4 +14,10 @@ todos.md
 .context/
 .bruno/
 Prototype/
-infra/
+
+# Terraform
+**/.terraform/
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/.terraformrc
+**/terraform.rc

@@ -19,6 +19,32 @@
 - [ ] **1.7** Configure `backend.tf` for staging (Azure Storage backend)
 - [ ] **1.8** Run `terraform init` in `infra/envs/staging/`
 
+Commands ran:
+
+```
+# Create resource group for Terraform state
+az group create \
+  --name rg-procurehub-tfstate \
+  --location northeurope
+
+# Create storage account (name must be globally unique, lowercase, no hyphens)
+az storage account create \
+  --name procurehubstgtfstate \
+  --resource-group rg-procurehub-tfstate \
+  --location northeurope \
+  --sku Standard_LRS \
+  --encryption-services blob \
+  --allow-blob-public-access false
+
+# Create container for state files
+az storage container create \
+  --name tfstate \
+  --account-name procurehubstgtfstate
+
+cd infra/envs/staging
+terraform init
+```
+
 ### 2. Resource Group + Observability (Staging)
 
 - [ ] **2.1** Create `modules/rg/` module (resource group + tags)
