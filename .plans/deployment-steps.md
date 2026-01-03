@@ -162,49 +162,49 @@ az role assignment create \
   --scope "/subscriptions/98a83e0e-404f-4773-9bce-c22c1e888481/resourceGroups/rg-procurehub-staging/providers/Microsoft.KeyVault/vaults/kv-procurehub-staging"
 ```
 
-### 6. Static Web App (Staging)
+### 6. GitHub OIDC + RBAC Setup
 
-- [ ] **6.1** Create `modules/static_web_app/` module
-- [ ] **6.2** Add to staging `main.tf`
-- [ ] **6.3** Apply and note default hostname
-- [ ] **6.4** Verify SWA is accessible (empty for now)
-
-### 7. GitHub OIDC + RBAC Setup
-
-- [ ] **7.1** Create Azure AD app registration for GitHub Actions
-- [ ] **7.2** Configure federated identity credentials:
+- [ ] **6.1** Create Azure AD app registration for GitHub Actions
+- [ ] **6.2** Configure federated identity credentials:
   - Subject: `repo:YOUR_ORG/ProcureHub:ref:refs/heads/staging`
   - Subject: `repo:YOUR_ORG/ProcureHub:environment:staging` (if using GH environments)
-- [ ] **7.3** Assign Contributor role on `rg-procurehub-staging`
-- [ ] **7.4** Store in GitHub secrets:
+- [ ] **6.3** Assign Contributor role on `rg-procurehub-staging`
+- [ ] **6.4** Store in GitHub secrets:
   - `AZURE_CLIENT_ID`
   - `AZURE_TENANT_ID`
   - `AZURE_SUBSCRIPTION_ID`
-- [ ] **7.5** Test OIDC login in a minimal workflow
+- [ ] **6.5** Test OIDC login in a minimal workflow
 
-### 8. Dockerize the API
+### 7. Dockerize the API
 
-- [ ] **8.1** Review/update `ProcureHub.WebApi/Dockerfile`
-- [ ] **8.2** Build and test locally: `docker build -t procurehub-api .`
-- [ ] **8.3** Run locally with test DB to verify
+- [x] **7.1** Review/update `ProcureHub.WebApi/Dockerfile`
+- [x] **7.2** Build and test locally: `docker build -t procurehub-api .`
+- [x] **7.3** Run locally with staging DB to verify
 
-### 9. CI/CD - API Build + Push
+### 8. CI/CD - API Build + Push
 
-- [ ] **9.1** Create `.github/workflows/api-ci.yml`
+- [ ] **8.1** Create `.github/workflows/api-ci.yml`
   - Trigger: push to `staging`, PR to `main`
   - Steps: checkout, build, test, build Docker image
-- [ ] **9.2** Push image to GHCR with commit SHA tag
-- [ ] **9.3** Verify image appears in GitHub Packages
+- [ ] **8.2** Push image to GHCR with commit SHA tag
+- [ ] **8.3** Verify image appears in GitHub Packages
 
-### 10. CI/CD - API Deploy to Staging
+### 9. CI/CD - API Deploy to Staging
 
-- [ ] **10.1** Extend workflow (or create `api-deploy-staging.yml`)
+- [ ] **9.1** Extend workflow (or create `api-deploy-staging.yml`)
   - Authenticate via OIDC
   - Deploy image to staging Container App
   - Run EF Core migrations bundle against staging DB
-- [ ] **10.2** Create EF Core migrations bundle in CI
-- [ ] **10.3** Add smoke test step (health endpoint)
-- [ ] **10.4** Test full flow: push to staging → deployed + migrated
+- [ ] **9.2** Create EF Core migrations bundle in CI
+- [ ] **9.3** Add smoke test step (health endpoint)
+- [ ] **9.4** Test full flow: push to staging → deployed + migrated
+
+### 10. Static Web App (Staging)
+
+- [ ] **10.1** Create `modules/static_web_app/` module
+- [ ] **10.2** Add to staging `main.tf`
+- [ ] **10.3** Apply and note default hostname
+- [ ] **10.4** Verify SWA is accessible (empty for now)
 
 ### 11. CI/CD - Frontend Build + Deploy
 
