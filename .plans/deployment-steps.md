@@ -17,6 +17,23 @@ ARM_SUBSCRIPTION_ID=xxxx
 ARM_TENANT_ID=xxxx
 ```
 
+Grant this role so that Terraform can perform role assignments (search for `azurerm_role_assignment`).
+Otherwise, a lot of manual commands needed.
+
+```bash
+# Grant your Terraform SP Owner role on the RG
+az role assignment create \
+  --assignee $ARM_CLIENT_ID \
+  --role "Owner" \
+  --scope "/subscriptions/98a83e0e-404f-4773-9bce-c22c1e888481/resourceGroups/rg-procurehub-staging"
+```
+
+Need to pass in repo when running plan:
+
+```bash
+terraform plan -var="github_repo=YOUR_GITHUB_USERNAME/ProcureHub"
+```
+
 ## Phase 1: Staging Environment + CI/CD
 
 ### 1. Azure & Terraform Bootstrap

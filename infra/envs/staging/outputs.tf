@@ -33,6 +33,11 @@ output "container_app_identity_principal_id" {
   value       = module.container_app.container_app_identity_principal_id
 }
 
+output "github_actions_client_id" {
+  description = "GitHub Actions OIDC Client ID (AZURE_CLIENT_ID)"
+  value       = module.github_oidc.client_id
+}
+
 # Observability outputs commented for now
 # output "log_analytics_workspace_id" {
 #   description = "Log Analytics workspace ID"

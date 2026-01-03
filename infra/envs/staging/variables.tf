@@ -16,6 +16,11 @@ variable "name_prefix" {
   default     = "procurehub"
 }
 
+variable "github_repo" {
+  description = "GitHub repository in format 'owner/repo'"
+  type        = string
+}
+
 variable "tags" {
   description = "Common tags for all resources"
   type        = map(string)

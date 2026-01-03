@@ -45,6 +45,13 @@ module "container_app" {
   tags                   = var.tags
 }
 
+module "github_oidc" {
+  source            = "../../modules/github_oidc"
+  app_name          = "${var.name_prefix}-${var.env}"
+  github_repo       = var.github_repo
+  resource_group_id = module.rg.id
+}
+
 # Observability module commented out for now
 # module "observability" {
 #   source              = "../../modules/log_analytics_appinsights"
