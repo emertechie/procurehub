@@ -3,6 +3,16 @@ output "resource_group_name" {
   value       = module.rg.name
 }
 
+output "key_vault_name" {
+  description = "Key Vault name"
+  value       = module.key_vault.name
+}
+
+output "key_vault_uri" {
+  description = "Key Vault URI"
+  value       = module.key_vault.vault_uri
+}
+
 # Observability outputs commented for now
 # output "log_analytics_workspace_id" {
 #   description = "Log Analytics workspace ID"
