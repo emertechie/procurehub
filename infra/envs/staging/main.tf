@@ -32,6 +32,19 @@ module "postgres" {
   tags                   = var.tags
 }
 
+module "container_app" {
+  source                 = "../../modules/container_apps_api"
+  name_prefix            = var.name_prefix
+  env                    = var.env
+  resource_group_name    = module.rg.name
+  location               = var.location
+  key_vault_id           = module.key_vault.id
+  key_vault_uri          = module.key_vault.vault_uri
+  postgres_server_fqdn   = module.postgres.server_fqdn
+  postgres_database_name = module.postgres.database_name
+  tags                   = var.tags
+}
+
 # Observability module commented out for now
 # module "observability" {
 #   source              = "../../modules/log_analytics_appinsights"

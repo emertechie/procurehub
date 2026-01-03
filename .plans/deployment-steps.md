@@ -149,6 +149,19 @@ az role assignment create \
 - [ ] **5.4** Apply (deploys with placeholder/hello-world image)
 - [ ] **5.5** Verify API URL responds
 
+Manually assign role so container app can read secrets:
+
+```bash
+# Get the Container App's managed identity principal ID
+CA_PRINCIPAL_ID=$(terraform output -raw container_app_identity_principal_id)
+
+# Grant Key Vault Secrets User role
+az role assignment create \
+  --assignee $CA_PRINCIPAL_ID \
+  --role "Key Vault Secrets User" \
+  --scope "/subscriptions/98a83e0e-404f-4773-9bce-c22c1e888481/resourceGroups/rg-procurehub-staging/providers/Microsoft.KeyVault/vaults/kv-procurehub-staging"
+```
+
 ### 6. Static Web App (Staging)
 
 - [ ] **6.1** Create `modules/static_web_app/` module

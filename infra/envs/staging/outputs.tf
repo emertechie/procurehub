@@ -23,6 +23,16 @@ output "postgres_database_name" {
   value       = module.postgres.database_name
 }
 
+output "container_app_url" {
+  description = "Container App URL"
+  value       = module.container_app.container_app_url
+}
+
+output "container_app_identity_principal_id" {
+  description = "Container App managed identity principal ID"
+  value       = module.container_app.container_app_identity_principal_id
+}
+
 # Observability outputs commented for now
 # output "log_analytics_workspace_id" {
 #   description = "Log Analytics workspace ID"
