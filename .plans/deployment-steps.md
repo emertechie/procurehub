@@ -21,7 +21,7 @@
 
 Commands ran:
 
-```
+```bash
 # Create resource group for Terraform state
 az group create \
   --name rg-procurehub-tfstate \
@@ -47,11 +47,24 @@ terraform init
 
 ### 2. Resource Group + Observability (Staging)
 
-- [ ] **2.1** Create `modules/rg/` module (resource group + tags)
-- [ ] **2.2** Create `modules/log_analytics_appinsights/` module
-- [ ] **2.3** Wire up both modules in `infra/envs/staging/main.tf`
-- [ ] **2.4** Run `terraform plan` → `terraform apply`
-- [ ] **2.5** Verify resources in Azure Portal
+- [x] **2.1** Create `modules/rg/` module (resource group + tags)
+- [x] **2.2** Create `modules/log_analytics_appinsights/` module
+- [x] **2.3** Wire up both modules in `infra/envs/staging/main.tf`
+- [x] **2.4** Run `terraform plan` → `terraform apply`
+- [x] **2.5** Verify resources in Azure Portal
+
+Commnds ran:
+
+```bash
+# Validate the configuration
+terraform validate
+
+# Preview what will be created
+terraform plan
+
+# Apply (creates: resource group, log analytics workspace, application insights)
+terraform apply
+```
 
 ### 3. Key Vault (Staging)
 
