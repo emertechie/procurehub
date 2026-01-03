@@ -137,17 +137,17 @@ az role assignment create \
 
 ### 5. Container Apps Environment + API (Staging)
 
-- [ ] **5.1** Create `modules/container_apps_api/` module
+- [x] **5.1** Create `modules/container_apps_api/` module
   - Container Apps Environment
   - Container App (placeholder image initially)
   - System-assigned managed identity
   - Key Vault access for secrets
   - Ingress + health probes
   - App Insights integration
-- [ ] **5.2** Add module to staging `main.tf`
-- [ ] **5.3** Configure DB connection string as env var/Key Vault reference
-- [ ] **5.4** Apply (deploys with placeholder/hello-world image)
-- [ ] **5.5** Verify API URL responds
+- [x] **5.2** Add module to staging `main.tf`
+- [x] **5.3** Configure DB connection string as env var/Key Vault reference
+- [x] **5.4** Apply (deploys with placeholder/hello-world image)
+- [x] **5.5** Verify API URL responds
 
 Manually assign role so container app can read secrets:
 

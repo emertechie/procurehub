@@ -37,7 +37,7 @@ variable "container_image" {
 variable "container_port" {
   description = "Container port for ingress"
   type        = number
-  default     = 80
+  default     = 8080
 }
 
 variable "min_replicas" {
