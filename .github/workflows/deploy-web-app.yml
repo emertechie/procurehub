@@ -1,16 +1,18 @@
 name: Deploy Web App to Azure Static Web Apps
 
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'ProcureHub.WebApp/**'
-      - '.github/workflows/deploy-web-app.yml'
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
+# Manual trigger temporarily
+on: workflow_dispatch
+# on:
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - 'ProcureHub.WebApp/**'
+#       - '.github/workflows/deploy-web-app.yml'
+#   pull_request:
+#     types: [opened, synchronize, reopened, closed]
+#     branches:
+#       - main
 
 jobs:
   build_and_deploy_job:
