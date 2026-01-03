@@ -13,6 +13,16 @@ output "key_vault_uri" {
   value       = module.key_vault.vault_uri
 }
 
+output "postgres_server_fqdn" {
+  description = "PostgreSQL server FQDN"
+  value       = module.postgres.server_fqdn
+}
+
+output "postgres_database_name" {
+  description = "PostgreSQL database name"
+  value       = module.postgres.database_name
+}
+
 # Observability outputs commented for now
 # output "log_analytics_workspace_id" {
 #   description = "Log Analytics workspace ID"

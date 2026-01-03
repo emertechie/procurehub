@@ -1,5 +1,22 @@
 # ProcureHub Deployment - Step-by-Step Plan
 
+## Pre-requisites
+
+Create a service principal. See: https://developer.hashicorp.com/terraform/tutorials/azure-get-started/azure-build#create-a-service-principal
+
+```bash
+az ad sp create-for-rbac --role="Contributor" --scopes="/subscriptions/<SUBSCRIPTION_ID>"
+```
+
+Then set the following environment variables:
+
+```bash
+ARM_CLIENT_ID=xxxx
+ARM_CLIENT_SECRET=xxxx
+ARM_SUBSCRIPTION_ID=xxxx
+ARM_TENANT_ID=xxxx
+```
+
 ## Phase 1: Staging Environment + CI/CD
 
 ### 1. Azure & Terraform Bootstrap
@@ -68,20 +85,55 @@ terraform apply
 
 ### 3. Key Vault (Staging)
 
-- [ ] **3.1** Create `modules/key_vault/` module (RBAC mode enabled)
-- [ ] **3.2** Add to staging `main.tf`
-- [ ] **3.3** Apply and verify
+- [x] **3.1** Create `modules/key_vault/` module (RBAC mode enabled)
+- [x] **3.2** Add to staging `main.tf`
+- [x] **3.3** Apply and verify
+
+Commands ran:
+
+```bash
+# Get your own user object ID
+az ad signed-in-user show --query id -o tsv
+
+# Assign Key Vault Administrator to yourself
+az role assignment create \
+  --assignee YOUR_USER_OBJECT_ID \
+  --role "Key Vault Administrator" \
+  --scope "/subscriptions/98a83e0e-404f-4773-9bce-c22c1e888481/resourceGroups/rg-procurehub-staging/providers/Microsoft.KeyVault/vaults/kv-procurehub-staging"
+```
 
 ### 4. PostgreSQL Flexible Server (Staging)
 
-- [ ] **4.1** Create `modules/postgres_flexible/` module
+Generate secure password in vault first, and grant SP access to secrets:
+
+```bash
+# Generate a secure password
+openssl rand -base64 32
+
+# Store it in Key Vault (replace PASSWORD with generated value)
+az keyvault secret set \
+  --vault-name kv-procurehub-staging \
+  --name postgres-admin-password \
+  --value "YOUR_GENERATED_PASSWORD"
+
+# Get service principal object ID from client ID
+SP_OBJECT_ID=$(az ad sp show --id $ARM_CLIENT_ID --query id -o tsv)
+
+# Grant Key Vault Secrets User role
+az role assignment create \
+  --assignee $SP_OBJECT_ID \
+  --role "Key Vault Secrets User" \
+  --scope "/subscriptions/98a83e0e-404f-4773-9bce-c22c1e888481/resourceGroups/rg-procurehub-staging/providers/Microsoft.KeyVault/vaults/kv-procurehub-staging"
+
+```
+
+- [x] **4.1** Create `modules/postgres_flexible/` module
   - Server, database, SSL enforcement
   - Firewall rule: allow Azure services
   - No `prevent_destroy` for staging
-- [ ] **4.2** Add DB admin password to Key Vault (manual or via Terraform)
-- [ ] **4.3** Add module to staging `main.tf`
-- [ ] **4.4** Apply and verify connection (e.g., via psql with temp firewall rule)
-- [ ] **4.5** Update API connection string config for staging
+- [x] **4.2** Add DB admin password to Key Vault (manual or via Terraform)
+- [x] **4.3** Add module to staging `main.tf`
+- [x] **4.4** Apply and verify
 
 ### 5. Container Apps Environment + API (Staging)
 
@@ -93,8 +145,9 @@ terraform apply
   - Ingress + health probes
   - App Insights integration
 - [ ] **5.2** Add module to staging `main.tf`
-- [ ] **5.3** Apply (deploys with placeholder/hello-world image)
-- [ ] **5.4** Verify API URL responds
+- [ ] **5.3** Configure DB connection string as env var/Key Vault reference
+- [ ] **5.4** Apply (deploys with placeholder/hello-world image)
+- [ ] **5.5** Verify API URL responds
 
 ### 6. Static Web App (Staging)
 
