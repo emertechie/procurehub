@@ -140,6 +140,10 @@ void RegisterServices(WebApplicationBuilder appBuilder)
 
     // Register all FluentValidation validators 
     appBuilder.Services.AddValidatorsFromAssemblyContaining<CreateUser.Request>();
+
+    // Add health checks
+    appBuilder.Services.AddHealthChecks()
+        .AddDbContextCheck<ApplicationDbContext>("database");
 }
 
 async Task ConfigureApplication(WebApplication app)
@@ -180,6 +184,19 @@ async Task ConfigureApplication(WebApplication app)
     app.UseAuthorization();
 
     ConfigureIdentityApiEndpoints(app);
+    ConfigureHealthEndpoints(app);
+}
+
+void ConfigureHealthEndpoints(WebApplication app)
+{
+    // Basic liveness check - just confirms app is running
+    app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+    {
+        Predicate = _ => false // Don't run any checks, just return healthy if app is running
+    }).ExcludeFromDescription();
+
+    // Readiness check - includes database connectivity
+    app.MapHealthChecks("/health/ready").ExcludeFromDescription();
 }
 
 void ConfigureIdentityApiEndpoints(WebApplication app)
