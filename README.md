@@ -152,7 +152,7 @@ The standard ASP.Net `MapIdentityApi` required two fixes:
 See: [ConfigureIdentityApiEndpoints](ProcureHub.WebApi/Program.cs#L202)
 
 
-## AI Agents
+### AI Agents
 
 This project is structured for effective collaboration with AI coding agents:
 
