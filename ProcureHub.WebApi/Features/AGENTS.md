@@ -1,5 +1,5 @@
 - Follow this guide when implementing endpoint configuration types in this folder
-- Use `MapGroup` at top to apply common concerns like auth, FluentValidation, and defining OpenAPI tags. Example:
+- Use `MapGroup` at top to apply common concerns like auth and OpenAPI tags. Example:
 ```cs
     public static void ConfigureUsersEndpoints(this WebApplication app)
     {

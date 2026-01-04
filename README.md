@@ -15,11 +15,46 @@ A full-stack example procurement and purchase approvals system. Demonstrates rea
 ## Highlights
 
 - **End-to-End Type Safety**: OpenAPI spec auto-generates a TypeScript client. Types flow from C# API to React components
-- **Vertical Slice Architecture**: Features grouped cohesively on both [backend](ProcureHub/Features) and [frontend](ProcureHub.WebApp/src/features)
+- **Vertical Slice Architecture**: Features grouped cohesively on both backend and frontend
 - **Role-Based Access Control**: UI adapts per role. API enforces authorization at every endpoint
-- **Comprehensive Testing**: Integration tests ensure all endpoints are authenticated, authorized, and validated. [Example](ProcureHub.WebApi.Tests/Features/UserTests.cs)
+- **Comprehensive Testing**: Quick integration tests for cross-cutting concerns, and detailed tests for domain logic
 - **Infrastructure as Code**: Terraform modules for Azure deployment (Container Apps, Postgres, Key Vault)
-- **AI-Assisted Development**: `AGENTS.md` files throughout enable effective collaboration with coding agents
+- **AI-Assisted Development**: `AGENTS.md` files built up during development and pointing to best practice examples.
+
+----
+
+## Quick Links
+
+### Purchase Request Application Slice
+
+Domain
+
+* EF Core Entity model & mapping: [PurchaseRequest](ProcureHub/Models/PurchaseRequest.cs)
+* Domain handlers: [ProcureHub/Features/PurchaseRequests](ProcureHub/Features/PurchaseRequests)
+  * Command handler: [CreatePurchaseRequest.cs](ProcureHub/Features/PurchaseRequests/CreatePurchaseRequest.cs)
+  * Query handler: [QueryPurchaseRequests.cs](ProcureHub/Features/PurchaseRequests/QueryPurchaseRequests.cs)
+
+API
+
+* Endpoint mapping: [PurchaseRequests/Endpoints.cs](ProcureHub.WebApi/Features/PurchaseRequests/Endpoints.cs)
+  * Domain `IRequestHandler` injected into endpoints
+  * Full OpenAPI configuration to enable typesafe client generation
+
+Frontend
+
+* Features folder: [src/features/purchase-requests](ProcureHub.WebApp/src/features/purchase-requests)
+* Routes: [src/routes/(auth)/_app-layout/requests](ProcureHub.WebApp/src/routes/(auth)/_app-layout/requests)
+
+Tests
+
+* Integration tests: [PurchaseRequestTests.cs](ProcureHub.WebApi.Tests/Features/PurchaseRequestTests.cs)
+  * Note there are 2 test classes in file - one for mostly stateless, cross-cutting concerns (database only reset per class instance), and one for detailed domain testing using Arrange-Act-Assert approach (DB reset per test).
+
+### Agents.md
+
+- [AGENTS.md](AGENTS.md)
+- [ProcureHub.WebApp/AGENTS.md](ProcureHub.WebApp/AGENTS.md)
+- [ProcureHub.WebApi/Features/AGENTS.md](ProcureHub.WebApi/Features/AGENTS.md)
 
 ---
 
@@ -50,31 +85,22 @@ A full-stack example procurement and purchase approvals system. Demonstrates rea
 ### Backend (.NET 10)
 - **ASP.NET Core Minimal APIs** with OpenAPI 3.1 documentation
 - **EF Core** with PostgreSQL, code-first migrations, clean entity configuration
-- **ASP.NET Identity** with [custom User](ProcureHub/Models/User.cs) and [Role](ProcureHub/Models/Role.cs) entities
+- **ASP.NET Identity** with custom application User entity
 - **FluentValidation** with automatic decorator-based validation ([ValidationRequestHandlerDecorator](ProcureHub/Infrastructure/ValidationRequestHandlerDecorator.cs))
-- **Problem Details** for consistent error responses ([ToProblemDetails](ProcureHub.WebApi/Helpers/ResultExtensions.cs))
+- **Problem Details** for consistent error responses
 
 ### Frontend (React + TypeScript)
 - **TanStack Router** for type-safe routing
-- **TanStack Query** via [openapi-react-query](https://openapi-ts.dev/openapi-react-query/) for data fetching
+- **Typesafe API client** based on TanStack Query, via [openapi-react-query](https://openapi-ts.dev/openapi-react-query/)
 - **shadcn/ui** component library with Tailwind CSS
 - **Feature-based structure** mirroring backend organization
-
----
-
-## Key Files to Explore
-
-- **Request Handler Pattern (Command)**: [CreatePurchaseRequest.cs](ProcureHub/Features/PurchaseRequests/CreatePurchaseRequest.cs)
-- **Request Handler Pattern (Query)**: [QueryPurchaseRequests.cs](ProcureHub/Features/PurchaseRequests/QueryPurchaseRequests.cs)
-- **API Endpoint Pattern**: Domain `IRequestHandler<,>` injected into endpoints - [PurchaseRequests/Endpoints.cs](ProcureHub.WebApi/Features/PurchaseRequests/Endpoints.cs)
-- **Integration Tests**: [PurchaseRequestTests.cs](ProcureHub.WebApi.Tests/Features/PurchaseRequestTests.cs). Simpler CRUD tests: [UserTests.cs](ProcureHub.WebApi.Tests/Features/UserTests.cs)
-- **Frontend Feature Module**: [purchase-requests/](ProcureHub.WebApp/src/features/purchase-requests)
 
 ---
 
 ## Notable Patterns & Techniques
 
 ### Type-Safe API Client Generation
+
 The API exposes an OpenAPI spec that generates a fully typed TypeScript client, using the [openapi-react-query](https://openapi-ts.dev/openapi-react-query/) library. The generated client wraps [TanStack Query](https://tanstack.com/query/latest).
 
 
@@ -83,7 +109,8 @@ npm run generate:api-schema  # Regenerates client from OpenAPI spec
 ```
 
 ### Transport-Agnostic Domain Logic
-Request handlers return a [Result&lt;T&gt;](ProcureHub/Common/Result.cs) type, keeping domain logic decoupled from HTTP concerns:
+
+Domain request handlers return a [Result&lt;T&gt;](ProcureHub/Common/Result.cs) type, keeping domain logic decoupled from HTTP concerns. API maps to HTTP error using [ToProblemDetails](ProcureHub.WebApi/Helpers/ResultExtensions.cs) extension method.
 
 ```csharp
 // Handler returns domain result
@@ -101,6 +128,14 @@ result.Match(
 );
 ```
 
+### Request handlers and decorators
+
+Simple [AddRequestHandlers](ProcureHub/Infrastructure/RequestHandlerExtensions.cs) extension method in the domain project:
+- Registers all `IRequestHandler` implementations
+- Adds a `ValidationRequestHandlerDecorator` which runs any FluentValidation validators before invoking the handlers
+
+(For more complex needs, I would consider using MediatR)
+
 
 ### OpenAPI Schema Customization
 Custom logic was needed to ensure nested response types generate unique schema names. See: [CreateOpenApiSchemaReferenceId](ProcureHub.WebApi/Program.cs#L258).
@@ -110,13 +145,13 @@ Example: Transforms `DataResponse<GetUserById.Response>` to `"DataResponseOfGetU
 
 ### Identity API Fixes
 The standard ASP.Net `MapIdentityApi` required two fixes:
-- Added missing 401 response documentation for `/login` endpoint (to ensure generated client had correct types).
+- Added missing 401 response documentation for `/login` endpoint (to ensure generated client had correct types). I also added that to the [Github issue](https://github.com/dotnet/aspnetcore/issues/52424#issuecomment-3677914753)
 - Added `/logout` endpoint (not included by default)
 
 See: [ConfigureIdentityApiEndpoints](ProcureHub.WebApi/Program.cs#L202)
 
 
-## AI-Assisted Development
+## AI Agents
 
 This project is structured for effective collaboration with AI coding agents:
 
