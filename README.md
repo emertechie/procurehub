@@ -53,6 +53,7 @@ Tests
 ### Agents.md
 
 - [AGENTS.md](AGENTS.md)
+- [ProcureHub/AGENTS.md](ProcureHub/AGENTS.md)
 - [ProcureHub.WebApp/AGENTS.md](ProcureHub.WebApp/AGENTS.md)
 - [ProcureHub.WebApi/Features/AGENTS.md](ProcureHub.WebApi/Features/AGENTS.md)
 
