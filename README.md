@@ -64,11 +64,11 @@ A full-stack example procurement and purchase approvals system. Demonstrates rea
 
 ## Key Files to Explore
 
-- **API Endpoint Pattern**: [Users/Endpoints.cs](ProcureHub.WebApi/Features/Users/Endpoints.cs)
-- **Request Handler Pattern**: [CreateUser.cs](ProcureHub/Features/Users/CreateUser.cs)
-- **Integration Tests**: [UserTests.cs](ProcureHub.WebApi.Tests/Features/UserTests.cs)
+- **Request Handler Pattern (Command)**: [CreatePurchaseRequest.cs](ProcureHub/Features/PurchaseRequests/CreatePurchaseRequest.cs)
+- **Request Handler Pattern (Query)**: [QueryPurchaseRequests.cs](ProcureHub/Features/PurchaseRequests/QueryPurchaseRequests.cs)
+- **API Endpoint Pattern**: Domain `IRequestHandler<,>` injected into endpoints - [PurchaseRequests/Endpoints.cs](ProcureHub.WebApi/Features/PurchaseRequests/Endpoints.cs)
+- **Integration Tests**: [PurchaseRequestTests.cs](ProcureHub.WebApi.Tests/Features/PurchaseRequestTests.cs). Simpler CRUD tests: [UserTests.cs](ProcureHub.WebApi.Tests/Features/UserTests.cs)
 - **Frontend Feature Module**: [purchase-requests/](ProcureHub.WebApp/src/features/purchase-requests)
-- **Generated API Client**: [client.ts](ProcureHub.WebApp/src/lib/api/client.ts)
 
 ---
 
