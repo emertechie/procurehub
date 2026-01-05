@@ -6,9 +6,11 @@ A full-stack example procurement and purchase approvals system. Demonstrates rea
 * React frontend
 * Postgres DB
 
-## Screenshot
+## Screenshots
 
 ![Screenshot of ProcureHub Requests area](images/screenshot1.jpg)
+
+![Screenshot of New Request page](images/screenshot2.jpg)
 
 ---
 
