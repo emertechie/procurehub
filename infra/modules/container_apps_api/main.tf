@@ -31,6 +31,16 @@ resource "azurerm_container_app" "this" {
         value = "Production"
       }
 
+      env {
+        name  = "ConnectionStrings__DefaultConnection"
+        value = "Server=${var.postgres_server_fqdn};Database=${var.postgres_database_name};Port=5432;User Id=${var.postgres_admin_login};Ssl Mode=Require;"
+      }
+
+      env {
+        name        = "ConnectionStrings__Password"
+        secret_name = "postgres-password"
+      }
+
       liveness_probe {
         transport               = "HTTP"
         path                    = "/health"
@@ -49,26 +59,15 @@ resource "azurerm_container_app" "this" {
         timeout                 = 5
         failure_count_threshold = 3
       }
-
-      # Database connection env vars commented out until deploying actual API
-      # env {
-      #   name  = "ConnectionStrings__DefaultConnection"
-      #   value = "Server=${var.postgres_server_fqdn};Database=${var.postgres_database_name};Port=5432;User Id=${var.postgres_admin_login};Ssl Mode=Require;"
-      # }
-
-      # env {
-      #   name        = "ConnectionStrings__Password"
-      #   secret_name = "postgres-password"
-      # }
     }
   }
 
   # Secret reference commented out until deploying actual API
-  # secret {
-  #   name                = "postgres-password"
-  #   key_vault_secret_id = "${var.key_vault_uri}secrets/postgres-admin-password"
-  #   identity            = "System"
-  # }
+  secret {
+    name                = "postgres-password"
+    key_vault_secret_id = "${var.key_vault_uri}secrets/postgres-admin-password"
+    identity            = "System"
+  }
 
   ingress {
     external_enabled = true
