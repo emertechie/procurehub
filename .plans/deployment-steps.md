@@ -200,11 +200,11 @@ az role assignment create \
 
 ### 8. CI/CD - API Build + Push
 
-- [ ] **8.1** Create `.github/workflows/api-ci.yml`
+- [x] **8.1** Create `.github/workflows/api-ci.yml`
   - Trigger: push to `staging`, PR to `main`
   - Steps: checkout, build, test, build Docker image
-- [ ] **8.2** Push image to GHCR with commit SHA tag
-- [ ] **8.3** Verify image appears in GitHub Packages
+- [x] **8.2** Push image to GHCR with commit SHA tag
+- [x] **8.3** Verify image appears in GitHub Packages
 
 ### 9. CI/CD - API Deploy to Staging
 

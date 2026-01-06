@@ -1,0 +1,41 @@
+name: API - Deploy to Staging
+
+on:
+  workflow_run:
+    workflows: ["API - Build & Push"]
+    types: [completed]
+    branches: [staging]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/api
+  CONTAINER_APP_NAME: ca-procurehub-api-staging
+  RESOURCE_GROUP: rg-procurehub-staging
+
+permissions:
+  id-token: write
+  contents: read
+  packages: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Container App
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          containerAppName: ${{ env.CONTAINER_APP_NAME }}
+          resourceGroup: ${{ env.RESOURCE_GROUP }}
+          imageToDeploy: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:staging
