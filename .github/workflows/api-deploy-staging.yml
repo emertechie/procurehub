@@ -61,6 +61,9 @@ jobs:
       - name: Output image tags
         run: echo "Images pushed - ${{ steps.meta.outputs.tags }}"
 
+    outputs:
+      image: ${{ fromJSON(steps.meta.outputs.json).tags[1] }}
+
   deploy:
     needs: push-image
     runs-on: ubuntu-latest
@@ -81,4 +84,4 @@ jobs:
         with:
           containerAppName: ${{ env.CONTAINER_APP_NAME }}
           resourceGroup: ${{ env.RESOURCE_GROUP }}
-          imageToDeploy: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:staging
+          imageToDeploy: ${{ needs.push-image.outputs.image }}
