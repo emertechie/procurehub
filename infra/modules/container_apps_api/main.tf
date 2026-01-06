@@ -33,11 +33,11 @@ resource "azurerm_container_app" "this" {
 
       env {
         name  = "ConnectionStrings__DefaultConnection"
-        value = "Server=${var.postgres_server_fqdn};Database=${var.postgres_database_name};Port=5432;User Id=${var.postgres_admin_login};Ssl Mode=Require;"
+        value = "Host=${var.postgres_server_fqdn};Database=${var.postgres_database_name};Port=5432;Username=${var.postgres_admin_login};Ssl Mode=Require"
       }
 
       env {
-        name        = "ConnectionStrings__Password"
+        name        = "DatabasePassword"
         secret_name = "postgres-password"
       }
 
