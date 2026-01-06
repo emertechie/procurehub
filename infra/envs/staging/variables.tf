@@ -19,6 +19,7 @@ variable "name_prefix" {
 variable "github_repo" {
   description = "GitHub repository in format 'owner/repo'"
   type        = string
+  default     = "emertechie/procurehub"
 }
 
 variable "tags" {
