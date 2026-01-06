@@ -31,6 +31,25 @@ resource "azurerm_container_app" "this" {
         value = "Production"
       }
 
+      liveness_probe {
+        transport               = "HTTP"
+        path                    = "/health"
+        port                    = var.container_port
+        initial_delay           = 10
+        interval_seconds        = 30
+        timeout                 = 5
+        failure_count_threshold = 3
+      }
+
+      readiness_probe {
+        transport               = "HTTP"
+        path                    = "/health/ready"
+        port                    = var.container_port
+        interval_seconds        = 10
+        timeout                 = 5
+        failure_count_threshold = 3
+      }
+
       # Database connection env vars commented out until deploying actual API
       # env {
       #   name  = "ConnectionStrings__DefaultConnection"
