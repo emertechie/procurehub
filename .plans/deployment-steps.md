@@ -181,16 +181,16 @@ az role assignment create \
 
 ### 6. GitHub OIDC + RBAC Setup
 
-- [ ] **6.1** Create Azure AD app registration for GitHub Actions
-- [ ] **6.2** Configure federated identity credentials:
+- [x] **6.1** Create Azure AD app registration for GitHub Actions
+- [x] **6.2** Configure federated identity credentials:
   - Subject: `repo:YOUR_ORG/ProcureHub:ref:refs/heads/staging`
   - Subject: `repo:YOUR_ORG/ProcureHub:environment:staging` (if using GH environments)
-- [ ] **6.3** Assign Contributor role on `rg-procurehub-staging`
-- [ ] **6.4** Store in GitHub secrets:
+- [x] **6.3** Assign Contributor role on `rg-procurehub-staging`
+- [x] **6.4** Store in GitHub secrets:
   - `AZURE_CLIENT_ID`
   - `AZURE_TENANT_ID`
   - `AZURE_SUBSCRIPTION_ID`
-- [ ] **6.5** Test OIDC login in a minimal workflow
+- [x] **6.5** Test OIDC login in a minimal workflow
 
 ### 7. Dockerize the API
 
