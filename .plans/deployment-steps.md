@@ -218,20 +218,35 @@ az role assignment create \
 
 ### 10. Static Web App (Staging)
 
-- [ ] **10.1** Create `modules/static_web_app/` module
-- [ ] **10.2** Add to staging `main.tf`
-- [ ] **10.3** Apply and note default hostname
+- [x] **10.1** Create `modules/static_web_app/` module
+- [x] **10.2** Add to staging `main.tf`
+- [x] **10.3** Apply and note default hostname
 - [ ] **10.4** Verify SWA is accessible (empty for now)
 
 ### 11. CI/CD - Frontend Build + Deploy
 
-- [ ] **11.1** Create `staging` branch in GitHub
-- [ ] **11.2** Create `.github/workflows/frontend-staging.yml`
+- [x] **11.1** Create `staging` branch in GitHub
+- [x] **11.2** Create `.github/workflows/frontend-staging.yml`
   - Build React app with `VITE_API_BASE_URL` pointing to staging API
   - Deploy to staging Static Web App
-- [ ] **11.3** Configure SWA deployment token in GitHub secrets
+- [x] **11.3** Configure SWA deployment token in GitHub secrets
 - [ ] **11.4** Test: push to staging → frontend deployed
 - [ ] **11.5** Verify staging SWA calls staging API correctly
+
+**Required GitHub Secrets:**
+
+```bash
+# Get the SWA deployment token
+cd infra/envs/staging
+terraform output -raw static_web_app_api_key
+
+# Get the Container App URL
+terraform output -raw container_app_url
+
+# Then add these to GitHub repository secrets:
+# - AZURE_STATIC_WEB_APPS_API_TOKEN_STAGING (from static_web_app_api_key)
+# - STAGING_API_URL (from container_app_url)
+```
 
 ### 12. PR Preview Environments (Optional for Phase 1)
 

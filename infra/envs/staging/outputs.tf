@@ -38,6 +38,17 @@ output "github_actions_client_id" {
   value       = module.github_oidc.client_id
 }
 
+output "static_web_app_url" {
+  description = "Static Web App default hostname"
+  value       = module.static_web_app.default_host_name
+}
+
+output "static_web_app_api_key" {
+  description = "Static Web App deployment token"
+  value       = module.static_web_app.api_key
+  sensitive   = true
+}
+
 # Observability outputs commented for now
 # output "log_analytics_workspace_id" {
 #   description = "Log Analytics workspace ID"
