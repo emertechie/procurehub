@@ -49,7 +49,7 @@ variable "min_replicas" {
 variable "max_replicas" {
   description = "Maximum number of replicas"
   type        = number
-  default     = 3
+  default     = 1
 }
 
 variable "cpu" {

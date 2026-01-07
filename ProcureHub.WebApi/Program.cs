@@ -87,6 +87,14 @@ void RegisterServices(WebApplicationBuilder appBuilder)
 
     var connectionString = appBuilder.Configuration.GetConnectionString("DefaultConnection") ??
                            throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+    // Append password from separate env var (for Key Vault secret injection in production)
+    var databasePassword = appBuilder.Configuration["DatabasePassword"];
+    if (!string.IsNullOrWhiteSpace(databasePassword))
+    {
+        connectionString += $";Password={databasePassword}";
+    }
+
     appBuilder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseNpgsql(connectionString, dbOptions => dbOptions.MigrationsAssembly("ProcureHub")));
 
