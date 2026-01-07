@@ -85,3 +85,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "migrate_db_on_startup" {
+  description = "Run EF Core migrations on container startup (true for staging, false for prod)"
+  type        = bool
+  default     = false
+}

@@ -162,6 +162,20 @@ async Task ConfigureApplication(WebApplication app)
     // Turn unhandled exceptions into ProblemDetails response:
     app.UseExceptionHandler();
 
+    var shouldMigrate = app.Environment.IsDevelopment()
+        || app.Configuration.GetValue<bool>("MIGRATE_DB_ON_STARTUP");
+
+    if (shouldMigrate)
+    {
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+        logger.LogInformation("Applying database migrations...");
+        await dbContext.Database.MigrateAsync();
+        logger.LogInformation("Database migrations complete");
+    }
+
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
     {
@@ -170,10 +184,7 @@ async Task ConfigureApplication(WebApplication app)
         app.UseSwaggerUI(options => { options.SwaggerEndpoint("/openapi/v1.json", "v1"); });
 
         using var scope = app.Services.CreateScope();
-
-        // Ensure DB created
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await dbContext.Database.MigrateAsync();
 
         // Seed database with roles, users, and initial data
         var seeder = new DataSeeder(
