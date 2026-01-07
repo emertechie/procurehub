@@ -212,9 +212,9 @@ az role assignment create \
   - Authenticate via OIDC
   - Deploy image to staging Container App
   - Run EF Core migrations bundle against staging DB
-- [ ] **9.2** Create EF Core migrations bundle in CI
+- [x] **9.2** Create EF Core migrations bundle in CI
 - [x] **9.3** Add smoke test step (health endpoint)
-- [ ] **9.4** Test full flow: push to staging → deployed + migrated
+- [x] **9.4** Test full flow: push to staging → deployed + migrated
 
 ### 10. Static Web App (Staging)
 
