@@ -85,6 +85,12 @@ resource "azurerm_container_app" "this" {
   }
 
   tags = var.tags
+
+  lifecycle {
+    ignore_changes = [
+      template[0].container[0].image # Managed by CI/CD pipeline
+    ]
+  }
 }
 
 resource "azurerm_role_assignment" "container_app_kv_secrets_user" {
