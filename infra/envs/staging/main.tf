@@ -58,7 +58,7 @@ module "static_web_app" {
   name_prefix         = var.name_prefix
   env                 = var.env
   resource_group_name = module.rg.name
-  location            = var.location
+  location            = var.location2
   tags                = var.tags
 }
 
