@@ -32,6 +32,11 @@ resource "azurerm_container_app" "this" {
       }
 
       env {
+        name  = "MIGRATE_DB_ON_STARTUP"
+        value = tostring(var.migrate_db_on_startup)
+      }
+
+      env {
         name  = "ConnectionStrings__DefaultConnection"
         value = "Host=${var.postgres_server_fqdn};Database=${var.postgres_database_name};Port=5432;Username=${var.postgres_admin_login};Ssl Mode=Require"
       }
