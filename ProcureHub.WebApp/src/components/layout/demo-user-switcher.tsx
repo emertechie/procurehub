@@ -15,9 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
 import type { AuthUser } from "@/features/auth/types";
-import { getRoleBadgeClasses } from "@/features/users/role-badge-utils";
 
 interface DemoUser {
   email: string;
