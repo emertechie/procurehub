@@ -43,7 +43,7 @@ variable "container_port" {
 variable "min_replicas" {
   description = "Minimum number of replicas"
   type        = number
-  default     = 0
+  default     = 1
 }
 
 variable "max_replicas" {
