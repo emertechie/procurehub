@@ -10,6 +10,12 @@ variable "location" {
   default     = "northeurope"
 }
 
+variable "location2" {
+  description = "Azure region for services not available in primary location (e.g. Static Web Apps)"
+  type        = string
+  default     = "westeurope"
+}
+
 variable "name_prefix" {
   description = "Prefix for resource names"
   type        = string
