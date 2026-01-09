@@ -55,6 +55,10 @@
 
 - `/ProcureHub.WebApp`: Project structure and feature layout rules are defined in `ProcureHub.WebApp/docs/project-structure.md`
 
+## Blazor App
+
+- See guidance here: `ProcureHub.BlazorApp/AGENTS.md`
+
 # Testing
 
 - Use Arrange-Act-Assert approach
