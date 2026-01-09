@@ -1,13 +1,15 @@
 ﻿@page "/auth"
+@attribute [Authorize]
 
 @using Microsoft.AspNetCore.Authorization
 
-@attribute [Authorize]
-
 <PageTitle>Auth</PageTitle>
 
-<h1>You are authenticated</h1>
-
-<AuthorizeView>
-    Hello @context.User.Identity?.Name!
-</AuthorizeView>
+<RadzenStack Gap="1.5rem">
+    <RadzenText TextStyle="TextStyle.H4">You are authenticated</RadzenText>
+    <RadzenCard>
+        <AuthorizeView>
+            <RadzenText TextStyle="TextStyle.Body1">Hello @context.User.Identity?.Name!</RadzenText>
+        </AuthorizeView>
+    </RadzenCard>
+</RadzenStack>

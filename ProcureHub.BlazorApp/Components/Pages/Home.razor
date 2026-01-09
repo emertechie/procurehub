@@ -1,7 +1,13 @@
 ﻿@page "/"
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Authorization
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
+<RadzenStack Gap="1.5rem">
+    <RadzenText TextStyle="TextStyle.H4">Dashboard</RadzenText>
+    <RadzenCard>
+        <RadzenText TextStyle="TextStyle.Body1">Welcome to ProcureHub - Your Procurement Management System</RadzenText>
+    </RadzenCard>
+</RadzenStack>

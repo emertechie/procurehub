@@ -1,41 +1,36 @@
 ﻿@page "/weather"
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Authorization
 
 <PageTitle>Weather</PageTitle>
 
-<h1>Weather</h1>
-
-<p>This component demonstrates showing data.</p>
-
-@if (forecasts == null)
-{
-    <p>
-        <em>Loading...</em>
-    </p>
-}
-else
-{
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Date</th>
-            <th aria-label="Temperature in Celsius">Temp. (C)</th>
-            <th aria-label="Temperature in Fahrenheit">Temp. (F)</th>
-            <th>Summary</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var forecast in forecasts)
+<RadzenStack Gap="1.5rem">
+    <RadzenText TextStyle="TextStyle.H4">Weather Forecast</RadzenText>
+    <RadzenCard>
+        @if (forecasts == null)
         {
-            <tr>
-                <td>@forecast.Date.ToShortDateString()</td>
-                <td>@forecast.TemperatureC</td>
-                <td>@forecast.TemperatureF</td>
-                <td>@forecast.Summary</td>
-            </tr>
+            <RadzenText TextStyle="TextStyle.Body1">
+                <em>Loading...</em>
+            </RadzenText>
         }
-        </tbody>
-    </table>
-}
+        else
+        {
+            <RadzenDataGrid Data="@forecasts" TItem="WeatherForecast" AllowPaging="false">
+                <Columns>
+                    <RadzenDataGridColumn TItem="WeatherForecast" Property="Date" Title="Date">
+                        <Template Context="forecast">
+                            @forecast.Date.ToShortDateString()
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="WeatherForecast" Property="TemperatureC" Title="Temp. (C)"/>
+                    <RadzenDataGridColumn TItem="WeatherForecast" Property="TemperatureF" Title="Temp. (F)"/>
+                    <RadzenDataGridColumn TItem="WeatherForecast" Property="Summary" Title="Summary"/>
+                </Columns>
+            </RadzenDataGrid>
+        }
+    </RadzenCard>
+</RadzenStack>
 
 @code {
     private WeatherForecast[]? forecasts;
