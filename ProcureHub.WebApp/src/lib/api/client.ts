@@ -21,7 +21,7 @@ const problemDetailsMiddleware: Middleware = {
 };
 
 const fetchClient = createFetchClient<paths>({
-  baseUrl: "/api",
+  baseUrl: import.meta.env.VITE_API_BASE_URL || "/api",
 });
 
 fetchClient.use(problemDetailsMiddleware);
