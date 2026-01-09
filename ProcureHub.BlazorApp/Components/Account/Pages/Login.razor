@@ -1,4 +1,5 @@
 ﻿@page "/Account/Login"
+@layout UnauthenticatedLayout
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Authentication
@@ -13,63 +14,74 @@
 
 <PageTitle>Log in</PageTitle>
 
-<h1>Log in</h1>
-<div class="row">
-    <div class="col-lg-6">
-        <section>
-            <StatusMessage Message="@errorMessage"/>
-            <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login">
-                <DataAnnotationsValidator/>
-                <h2>Use a local account to log in.</h2>
-                <hr/>
-                <ValidationSummary class="text-danger" role="alert"/>
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username webauthn" aria-required="true" placeholder="name@example.com"/>
-                    <label for="Input.Email" class="form-label">Email</label>
-                    <ValidationMessage For="() => Input.Email" class="text-danger"/>
-                </div>
-                <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password"/>
-                    <label for="Input.Password" class="form-label">Password</label>
-                    <ValidationMessage For="() => Input.Password" class="text-danger"/>
-                </div>
-                <div class="checkbox mb-3">
-                    <label class="form-label">
-                        <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input"/>
-                        Remember me
-                    </label>
-                </div>
-                <div>
-                    <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-                </div>
-                <hr/>
-                <div class="d-flex flex-column">
-                    <span class="text-secondary mx-auto mt-2">OR</span>
-                    <PasskeySubmit Operation="PasskeyOperation.Request" Name="Input.Passkey" EmailName="Input.Email" class="btn btn-link mx-auto">Log in with a passkey</PasskeySubmit>
-                </div>
-                <hr/>
-                <div>
-                    <p>
-                        <a href="Account/ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
-                    </p>
-                    <p>
-                        <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
-                    </p>
-                </div>
-            </EditForm>
-        </section>
-    </div>
-    <div class="col-lg-4 col-lg-offset-2">
-        <section>
-            <h3>Use another service to log in.</h3>
-            <hr/>
-            <ExternalLoginPicker/>
-        </section>
-    </div>
-</div>
+<RadzenStack Gap="1.5rem">
+    <RadzenText TextStyle="TextStyle.H5" Style="margin: 0; text-align: center;">Log in</RadzenText>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" Variant="Variant.Flat" Shade="Shade.Lighter">
+            @errorMessage
+        </RadzenAlert>
+    }
+
+    <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login">
+        <DataAnnotationsValidator />
+        <RadzenStack Gap="1rem">
+            <RadzenFormField Text="Email" Variant="Variant.Outlined">
+                <ChildContent>
+                    <RadzenTextBox @bind-Value="Input.Email" Name="Input.Email" Style="width: 100%;"
+                        Placeholder="name@example.com" autocomplete="username webauthn" />
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="() => Input.Email" />
+                </Helper>
+            </RadzenFormField>
+
+            <RadzenFormField Text="Password" Variant="Variant.Outlined">
+                <ChildContent>
+                    <RadzenPassword @bind-Value="Input.Password" Name="Input.Password" Style="width: 100%;"
+                        Placeholder="password" autocomplete="current-password" />
+                </ChildContent>
+                <Helper>
+                    <ValidationMessage For="() => Input.Password" />
+                </Helper>
+            </RadzenFormField>
+
+            <RadzenCheckBox @bind-Value="Input.RememberMe" Name="Input.RememberMe" />
+            <RadzenLabel Text="Remember me" Component="Input.RememberMe" Style="margin-left: 0.5rem;" />
+
+            <RadzenButton ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Style="width: 100%;"
+                Size="ButtonSize.Large" Text="Log in" />
+
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem"
+                Style="margin-top: 0.5rem;">
+                <RadzenText TextStyle="TextStyle.Body2" Style="color: var(--rz-text-secondary-color);">OR</RadzenText>
+            </RadzenStack>
+
+            <PasskeySubmit Operation="PasskeyOperation.Request" Name="Input.Passkey" EmailName="Input.Email"
+                class="rz-button rz-button-md rz-variant-text rz-secondary rz-button-text-only" style="width: 100%;">Log
+                in with a passkey</PasskeySubmit>
+
+            <RadzenStack Gap="0.5rem" Style="margin-top: 1rem;">
+                <RadzenLink Path="Account/ForgotPassword" Text="Forgot your password?" Style="text-align: center;" />
+                <RadzenLink
+                    Path="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))"
+                    Text="Register as a new user" Style="text-align: center;" />
+                <RadzenLink Path="Account/ResendEmailConfirmation" Text="Resend email confirmation"
+                    Style="text-align: center;" />
+            </RadzenStack>
+        </RadzenStack>
+    </EditForm>
+
+    @if (false)
+    {
+        <RadzenStack Gap="0.5rem" Style="margin-top: 1rem;">
+            <RadzenText TextStyle="TextStyle.Subtitle2" Style="text-align: center;">Use another service to log in
+            </RadzenText>
+            <ExternalLoginPicker />
+        </RadzenStack>
+    }
+</RadzenStack>
 
 @code {
     private string? errorMessage;
@@ -121,7 +133,8 @@
 
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-            result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+            result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure:
+            false);
         }
 
         if (result.Succeeded)
@@ -132,8 +145,8 @@
         else if (result.RequiresTwoFactor)
         {
             RedirectManager.RedirectTo(
-                "Account/LoginWith2fa",
-                new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
+            "Account/LoginWith2fa",
+            new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
         }
         else if (result.IsLockedOut)
         {

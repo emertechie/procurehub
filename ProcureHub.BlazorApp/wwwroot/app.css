@@ -1,15 +1,34 @@
+:root {
+    /* Custom app colors (for non-Radzen elements) */
+    --primary-color: #0d9488;
+    --primary-hover: #0f766e;
+    --primary-light: #14b8a6;
+
+    /* Radzen theme color overrides */
+    --rz-primary: #0d9488;
+    --rz-primary-light: #2dd4bf;
+    --rz-primary-lighter: rgba(13, 148, 136, 0.16);
+    --rz-primary-dark: #0f766e;
+    --rz-primary-darker: #115e59;
+}
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 a, .btn-link {
-    color: #006bb7;
+    color: var(--primary-color);
 }
 
 .btn-primary {
     color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    background-color: var(--primary-color);
+    border-color: var(--primary-hover);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {

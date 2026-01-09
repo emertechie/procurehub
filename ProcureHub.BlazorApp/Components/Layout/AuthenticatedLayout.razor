@@ -29,7 +29,9 @@
     <RadzenSidebar @bind-Expanded="@sidebarExpanded" style="width: 250px">
         <RadzenStack Gap="1rem" Class="rz-p-4">
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-                <RadzenIcon Icon="shopping_cart" Style="font-size: 2rem;" />
+                <div style="display: flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; background-color: var(--primary-color, #0d9488); border-radius: 0.5rem;">
+                    <RadzenIcon Icon="inventory_2" Style="font-size: 1.5rem; color: white;" />
+                </div>
                 <RadzenStack Gap="0">
                     <RadzenText TextStyle="TextStyle.Subtitle1" Style="margin: 0; font-weight: 600;">ProcureHub
                     </RadzenText>
