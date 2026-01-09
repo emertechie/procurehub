@@ -42,8 +42,10 @@ module "container_app" {
   key_vault_uri          = module.key_vault.vault_uri
   postgres_server_fqdn   = module.postgres.server_fqdn
   postgres_database_name = module.postgres.database_name
-  migrate_db_on_startup  = true
   allowed_origins        = ["https://${module.static_web_app.default_host_name}"]
+  migrate_db_on_startup  = true
+  seed_data              = true
+  enable_demo_mode       = true
   tags                   = var.tags
 }
 

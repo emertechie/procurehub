@@ -97,3 +97,15 @@ variable "allowed_origins" {
   type        = list(string)
   default     = []
 }
+
+variable "seed_data" {
+  description = "Seed data on startup (true for staging, false for prod)"
+  type        = bool
+  default     = false
+}
+
+variable "enable_demo_mode" {
+  description = "Enable demo mode features (true for staging, false for prod)"
+  type        = bool
+  default     = false
+}

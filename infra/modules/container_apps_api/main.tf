@@ -51,6 +51,16 @@ resource "azurerm_container_app" "this" {
         secret_name = "postgres-password"
       }
 
+      env {
+        name  = "SEED_DATA"
+        value = tostring(var.seed_data)
+      }
+
+      env {
+        name  = "ENABLE_DEMO_MODE"
+        value = tostring(var.enable_demo_mode)
+      }
+
       liveness_probe {
         transport               = "HTTP"
         path                    = "/health"

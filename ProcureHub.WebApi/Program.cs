@@ -192,13 +192,17 @@ async Task ConfigureApplication(WebApplication app)
         logger.LogInformation("Database migrations complete");
     }
 
-    // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
     {
         app.MapOpenApi();
 
         app.UseSwaggerUI(options => { options.SwaggerEndpoint("/openapi/v1.json", "v1"); });
+    }
 
+    var shouldSeed = app.Environment.IsDevelopment()
+        || app.Configuration.GetValue<bool>("SEED_DATA");
+    if (shouldSeed)
+    {
         using var scope = app.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
