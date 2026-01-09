@@ -47,20 +47,13 @@
                 </Helper>
             </RadzenFormField>
 
-            <RadzenCheckBox @bind-Value="Input.RememberMe" Name="Input.RememberMe" />
-            <RadzenLabel Text="Remember me" Component="Input.RememberMe" Style="margin-left: 0.5rem;" />
+            <div class="rz-mb-2">
+                <RadzenCheckBox @bind-Value="Input.RememberMe" Name="Input.RememberMe" />
+                <RadzenLabel Text="Remember me" Component="Input.RememberMe" Style="margin-left: 0.5rem;" />
+            </div>
 
             <RadzenButton ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Style="width: 100%;"
                 Size="ButtonSize.Large" Text="Log in" />
-
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem"
-                Style="margin-top: 0.5rem;">
-                <RadzenText TextStyle="TextStyle.Body2" Style="color: var(--rz-text-secondary-color);">OR</RadzenText>
-            </RadzenStack>
-
-            <PasskeySubmit Operation="PasskeyOperation.Request" Name="Input.Passkey" EmailName="Input.Email"
-                class="rz-button rz-button-md rz-variant-text rz-secondary rz-button-text-only" style="width: 100%;">Log
-                in with a passkey</PasskeySubmit>
 
             <RadzenStack Gap="0.5rem" Style="margin-top: 1rem;">
                 <RadzenLink Path="Account/ForgotPassword" Text="Forgot your password?" Style="text-align: center;" />
