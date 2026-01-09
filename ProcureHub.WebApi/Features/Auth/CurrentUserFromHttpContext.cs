@@ -3,32 +3,12 @@ using ProcureHub.Infrastructure.Authentication;
 
 namespace ProcureHub.WebApi.Features.Auth;
 
-public sealed class CurrentUserFromHttpContext : ICurrentUser
+public sealed class HttpContextCurrentUserProvider(IHttpContextAccessor httpContextAccessor)
+    : ICurrentUserProvider
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public CurrentUserFromHttpContext(IHttpContextAccessor httpContextAccessor)
+    public Task<ICurrentUser> GetCurrentUserAsync()
     {
-        _httpContextAccessor = httpContextAccessor;
+        var principal = httpContextAccessor.HttpContext?.User ?? new ClaimsPrincipal(new ClaimsIdentity());
+        return Task.FromResult<ICurrentUser>(new ClaimsPrincipalCurrentUser(principal));
     }
-
-    private ClaimsPrincipal Principal =>
-        _httpContextAccessor.HttpContext?.User
-        ?? new ClaimsPrincipal(new ClaimsIdentity());
-
-    public Guid? UserId
-    {
-        get
-        {
-            var id = Principal.FindFirstValue(ClaimTypes.NameIdentifier);
-            return Guid.TryParse(id, out var guid)
-                ? guid
-                : null;
-        }
-    }
-
-    public IReadOnlyCollection<string> Roles =>
-        Principal.FindAll(ClaimTypes.Role)
-            .Select(r => r.Value)
-            .ToArray();
 }

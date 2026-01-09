@@ -1,0 +1,25 @@
+@inherits LayoutComponentBase
+
+<RadzenLayout
+    Style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background-color: var(--rz-base-200);">
+    <RadzenBody Style="width: 100%">
+        <RadzenCard Style="margin: 2rem auto; max-width: 400px">
+            <RadzenStack Gap="2rem">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                    JustifyContent="JustifyContent.Center" Gap="0.5rem">
+                    <div style="display: flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; background-color: var(--rz-primary); border-radius: 0.5rem;">
+                        <RadzenIcon Icon="inventory_2" Style="font-size: 1.25rem; color: white;" />
+                    </div>
+                    <RadzenStack Gap="0">
+                        <RadzenText TextStyle="TextStyle.H4" Style="margin: 0; font-weight: 600;">ProcureHub
+                        </RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body2"
+                            Style="margin: 0; color: var(--rz-text-secondary-color);">Procurement System</RadzenText>
+                    </RadzenStack>
+                </RadzenStack>
+
+                @Body
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenBody>
+</RadzenLayout>
