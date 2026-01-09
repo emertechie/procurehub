@@ -1,0 +1,77 @@
+@inherits LayoutComponentBase
+
+<RadzenLayout>
+    <RadzenHeader>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" Class="rz-p-4">
+            <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)" />
+            <RadzenBreadCrumb>
+                <RadzenBreadCrumbItem Path="/dashboard" Text="Home" />
+            </RadzenBreadCrumb>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem"
+                Style="margin-left: auto;">
+                <AuthorizeView>
+                    <Authorized>
+                        <RadzenProfileMenu>
+                            <Template>
+                                <RadzenGravatar Email="@context.User.Identity?.Name" />
+                            </Template>
+                            <ChildContent>
+                                <RadzenProfileMenuItem Text="Profile" Path="/Account/Manage" />
+                                <RadzenProfileMenuItem Text="Logout" Path="/Account/Logout" />
+                            </ChildContent>
+                        </RadzenProfileMenu>
+                    </Authorized>
+                </AuthorizeView>
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenHeader>
+
+    <RadzenSidebar @bind-Expanded="@sidebarExpanded" style="width: 250px">
+        <RadzenStack Gap="1rem" Class="rz-p-4">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenIcon Icon="shopping_cart" Style="font-size: 2rem;" />
+                <RadzenStack Gap="0">
+                    <RadzenText TextStyle="TextStyle.Subtitle1" Style="margin: 0; font-weight: 600;">ProcureHub
+                    </RadzenText>
+                    <RadzenText TextStyle="TextStyle.Caption" Style="margin: 0;">Procurement System</RadzenText>
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenStack>
+
+        <RadzenPanelMenu>
+            <RadzenPanelMenuItem Text="Overview" Icon="dashboard">
+                <RadzenPanelMenuItem Text="Home" Path="/dashboard" Icon="home" />
+            </RadzenPanelMenuItem>
+
+            <RadzenPanelMenuItem Text="Request Management" Icon="description">
+                <RadzenPanelMenuItem Text="Requests" Path="/requests" Icon="list_alt" />
+                <AuthorizeView Roles="Requester">
+                    <RadzenPanelMenuItem Text="New Request" Path="/requests/new" Icon="add_circle" />
+                </AuthorizeView>
+            </RadzenPanelMenuItem>
+
+            <AuthorizeView Roles="Approver">
+                <RadzenPanelMenuItem Text="Approvals" Icon="check_circle">
+                    <RadzenPanelMenuItem Text="Pending Approvals" Path="/approvals" Icon="pending_actions" />
+                </RadzenPanelMenuItem>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Admin">
+                <RadzenPanelMenuItem Text="Administration" Icon="settings">
+                    <RadzenPanelMenuItem Text="Users" Path="/admin/users" Icon="people" />
+                    <RadzenPanelMenuItem Text="Departments" Path="/admin/departments" Icon="business" />
+                </RadzenPanelMenuItem>
+            </AuthorizeView>
+        </RadzenPanelMenu>
+    </RadzenSidebar>
+
+    <RadzenBody>
+        <div class="rz-p-4">
+            @Body
+        </div>
+    </RadzenBody>
+</RadzenLayout>
+
+@code {
+    private bool sidebarExpanded = true;
+}
