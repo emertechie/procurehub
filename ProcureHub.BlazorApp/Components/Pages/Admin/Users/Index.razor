@@ -1,0 +1,239 @@
+@page "/admin/users"
+@attribute [Authorize(Roles = "Admin")]
+@layout AuthenticatedLayout
+
+@using ProcureHub.Features.Users
+@using ProcureHub.Common.Pagination
+@using ProcureHub.Infrastructure
+
+@inject IRequestHandler<QueryUsers.Request, PagedResult<QueryUsers.Response>> QueryUsersHandler
+@inject IRequestHandler<EnableUser.Request, Result> EnableUserHandler
+@inject IRequestHandler<DisableUser.Request, Result> DisableUserHandler
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<PageTitle>Users</PageTitle>
+
+<RadzenStack Gap="1rem">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+        <RadzenText TextStyle="TextStyle.H4">Users</RadzenText>
+        <RadzenButton Text="Add User" Icon="add" Click="@OpenCreateUserDialog" ButtonStyle="ButtonStyle.Primary" />
+    </RadzenStack>
+
+    <RadzenTextBox Placeholder="Search users..." @bind-Value="@searchTerm" 
+                   Change="@(() => LoadUsers())" Style="width: 300px;" />
+
+    <RadzenDataGrid @ref="grid" Data="@users" TItem="QueryUsers.Response"
+                    Count="@totalCount"
+                    LoadData="@OnLoadData"
+                    AllowPaging="true"
+                    PageSize="10"
+                    IsLoading="@isLoading"
+                    PagerHorizontalAlign="HorizontalAlign.Center">
+        <Columns>
+            <RadzenDataGridColumn TItem="QueryUsers.Response" Title="User" Width="300px">
+                <Template Context="user">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                        <RadzenGravatar Email="@user.Email" Style="width: 32px; height: 32px;" />
+                        <RadzenStack Gap="0">
+                            <RadzenText TextStyle="TextStyle.Body1">@user.FirstName @user.LastName</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Caption">@user.Email</RadzenText>
+                        </RadzenStack>
+                    </RadzenStack>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="QueryUsers.Response" Property="Roles" Title="Roles">
+                <Template Context="user">
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" Wrap="FlexWrap.Wrap">
+                        @foreach (var role in user.Roles)
+                        {
+                            <RadzenBadge Text="@role" Variant="Variant.Outlined" />
+                        }
+                    </RadzenStack>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="QueryUsers.Response" Property="DepartmentName" Title="Department" />
+
+            <RadzenDataGridColumn TItem="QueryUsers.Response" Title="Status" Width="120px">
+                <Template Context="user">
+                    @if (user.EnabledAt.HasValue)
+                    {
+                        <RadzenBadge Text="Enabled" BadgeStyle="BadgeStyle.Success" />
+                    }
+                    else
+                    {
+                        <RadzenBadge Text="Disabled" BadgeStyle="BadgeStyle.Danger" />
+                    }
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="QueryUsers.Response" Title="Actions" Width="150px">
+                <Template Context="user">
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+                        <RadzenButton Icon="edit" Size="ButtonSize.Small" 
+                                    Click="@(() => OpenEditUserDialog(Guid.Parse(user.Id)))" 
+                                    ButtonStyle="ButtonStyle.Light" />
+                        <RadzenButton Icon="group" Size="ButtonSize.Small"
+                                    Click="@(() => OpenManageRolesDialog(Guid.Parse(user.Id)))"
+                                    ButtonStyle="ButtonStyle.Light" />
+                        <RadzenButton Icon="business" Size="ButtonSize.Small"
+                                    Click="@(() => OpenAssignDepartmentDialog(Guid.Parse(user.Id)))"
+                                    ButtonStyle="ButtonStyle.Light" />
+                        @if (user.EnabledAt.HasValue)
+                        {
+                            <RadzenButton Icon="block" Size="ButtonSize.Small"
+                                        Click="@(() => DisableUserAsync(Guid.Parse(user.Id)))"
+                                        ButtonStyle="ButtonStyle.Danger" />
+                        }
+                        else
+                        {
+                            <RadzenButton Icon="check_circle" Size="ButtonSize.Small"
+                                        Click="@(() => EnableUserAsync(Guid.Parse(user.Id)))"
+                                        ButtonStyle="ButtonStyle.Success" />
+                        }
+                    </RadzenStack>
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</RadzenStack>
+
+@code {
+    RadzenDataGrid<QueryUsers.Response> grid = default!;
+    IEnumerable<QueryUsers.Response> users = new List<QueryUsers.Response>();
+    int totalCount;
+    bool isLoading;
+    string searchTerm = "";
+    int currentPage = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    async Task OnLoadData(LoadDataArgs args)
+    {
+        currentPage = (args.Skip ?? 0) / (args.Top ?? 10) + 1;
+        await LoadUsers();
+    }
+
+    async Task LoadUsers()
+    {
+        isLoading = true;
+        var request = new QueryUsers.Request
+        (
+            Email: string.IsNullOrWhiteSpace(searchTerm) ? null : searchTerm,
+            Page: currentPage,
+            PageSize: 10
+        );
+
+        var result = await QueryUsersHandler.HandleAsync(request, default);
+        users = result.Data;
+        totalCount = result.TotalCount;
+        isLoading = false;
+    }
+
+    async Task OpenCreateUserDialog()
+    {
+        var result = await DialogService.OpenAsync<UserDialog>(
+            "Create User",
+            new Dictionary<string, object?>(),
+            new DialogOptions { Width = "500px" }
+        );
+
+        if (result == true)
+        {
+            await LoadUsers();
+        }
+    }
+
+    async Task OpenEditUserDialog(Guid userId)
+    {
+        var result = await DialogService.OpenAsync<UserDialog>(
+            "Edit User",
+            new Dictionary<string, object> { { "UserId", userId } },
+            new DialogOptions { Width = "500px" }
+        );
+
+        if (result == true)
+        {
+            await LoadUsers();
+        }
+    }
+
+    async Task OpenManageRolesDialog(Guid userId)
+    {
+        var result = await DialogService.OpenAsync<ManageRolesDialog>(
+            "Manage Roles",
+            new Dictionary<string, object> { { "UserId", userId } },
+            new DialogOptions { Width = "400px" }
+        );
+
+        if (result == true)
+        {
+            await LoadUsers();
+        }
+    }
+
+    async Task OpenAssignDepartmentDialog(Guid userId)
+    {
+        var result = await DialogService.OpenAsync<AssignDepartmentDialog>(
+            "Assign Department",
+            new Dictionary<string, object> { { "UserId", userId } },
+            new DialogOptions { Width = "400px" }
+        );
+
+        if (result == true)
+        {
+            await LoadUsers();
+        }
+    }
+
+    async Task EnableUserAsync(Guid userId)
+    {
+        var confirmed = await DialogService.Confirm(
+            "Are you sure you want to enable this user?",
+            "Enable User",
+            new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" }
+        );
+
+        if (confirmed == true)
+        {
+            var result = await EnableUserHandler.HandleAsync(new EnableUser.Request(userId.ToString()), default);
+            if (result.IsSuccess)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Success", "User enabled");
+                await LoadUsers();
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", result.Error.Message);
+            }
+        }
+    }
+
+    async Task DisableUserAsync(Guid userId)
+    {
+        var confirmed = await DialogService.Confirm(
+            "Are you sure you want to disable this user?",
+            "Disable User",
+            new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" }
+        );
+
+        if (confirmed == true)
+        {
+            var result = await DisableUserHandler.HandleAsync(new DisableUser.Request(userId.ToString()), default);
+            if (result.IsSuccess)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Success", "User disabled");
+                await LoadUsers();
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", result.Error.Message);
+            }
+        }
+    }
+}

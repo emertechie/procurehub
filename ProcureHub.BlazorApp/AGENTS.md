@@ -111,3 +111,7 @@ Icon reference: https://fonts.google.com/icons
 - `wwwroot/` - Static assets
   - `app.css` - Custom styles and theme overrides
 - `Program.cs` - App configuration and DI setup
+
+## General
+
+- After any significant change, make sure there are no build errors

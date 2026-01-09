@@ -1,0 +1,49 @@
+@using ProcureHub.Features.Users
+@using ProcureHub.Features.Departments
+@inject DialogService DialogService
+
+<RadzenStack Gap="1rem">
+    <RadzenFormField Text="Department">
+        <RadzenDropDown @bind-Value="@selectedDepartmentId" 
+                        Data="@departments" 
+                        TextProperty="Name" 
+                        ValueProperty="Id"
+                        AllowClear="true"
+                        Placeholder="Select department..."
+                        Style="width: 100%;" />
+    </RadzenFormField>
+
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+        <RadzenButton Text="Save" Click="@OnSave" ButtonStyle="ButtonStyle.Primary" />
+        <RadzenButton Text="Cancel" Click="@Cancel" ButtonStyle="ButtonStyle.Light" />
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+    [Parameter] public Guid UserId { get; set; }
+
+    private Guid? selectedDepartmentId;
+    private List<DepartmentDto> departments = new();
+
+    private class DepartmentDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // TODO: Load departments and user's current department
+    }
+
+    private async Task OnSave()
+    {
+        // TODO: Implement department assignment logic
+        DialogService.Close(true);
+    }
+
+    private void Cancel()
+    {
+        DialogService.Close(false);
+    }
+}

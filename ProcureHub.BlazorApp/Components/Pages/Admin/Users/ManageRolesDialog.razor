@@ -1,0 +1,43 @@
+@using ProcureHub.Features.Users
+@using ProcureHub.Features.Roles
+@inject DialogService DialogService
+
+<RadzenStack Gap="1rem">
+    <RadzenCheckBoxList @bind-Value="@selectedRoles" TValue="string" Orientation="Orientation.Vertical">
+        <Items>
+            @foreach (var role in availableRoles)
+            {
+                <RadzenCheckBoxListItem Text="@role" Value="@role" />
+            }
+        </Items>
+    </RadzenCheckBoxList>
+
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+        <RadzenButton Text="Save" Click="@OnSave" ButtonStyle="ButtonStyle.Primary" />
+        <RadzenButton Text="Cancel" Click="@Cancel" ButtonStyle="ButtonStyle.Light" />
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+    [Parameter] public Guid UserId { get; set; }
+
+    private IEnumerable<string> selectedRoles = new List<string>();
+    private List<string> availableRoles = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // TODO: Load available roles and user's current roles
+        availableRoles = new List<string> { "Admin", "Approver", "Requester" };
+    }
+
+    private async Task OnSave()
+    {
+        // TODO: Implement role assignment logic
+        DialogService.Close(true);
+    }
+
+    private void Cancel()
+    {
+        DialogService.Close(false);
+    }
+}

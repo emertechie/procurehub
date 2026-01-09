@@ -1,0 +1,54 @@
+@using ProcureHub.Features.Users
+@inject DialogService DialogService
+
+<RadzenStack Gap="1rem">
+    <RadzenFormField Text="Email">
+        <RadzenTextBox @bind-Value="@model.Email" Style="width: 100%;" />
+    </RadzenFormField>
+
+    <RadzenFormField Text="First Name">
+        <RadzenTextBox @bind-Value="@model.FirstName" Style="width: 100%;" />
+    </RadzenFormField>
+
+    <RadzenFormField Text="Last Name">
+        <RadzenTextBox @bind-Value="@model.LastName" Style="width: 100%;" />
+    </RadzenFormField>
+
+    @if (!IsEdit)
+    {
+        <RadzenFormField Text="Password">
+            <RadzenPassword @bind-Value="@model.Password" Style="width: 100%;" />
+        </RadzenFormField>
+    }
+
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+        <RadzenButton Text="Save" Click="@OnSubmit" ButtonStyle="ButtonStyle.Primary" />
+        <RadzenButton Text="Cancel" Click="@Cancel" ButtonStyle="ButtonStyle.Light" />
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+    [Parameter] public Guid? UserId { get; set; }
+
+    private UserFormModel model = new();
+    private bool IsEdit => UserId.HasValue;
+
+    private class UserFormModel
+    {
+        public string Email { get; set; } = "";
+        public string FirstName { get; set; } = "";
+        public string LastName { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+
+    private async Task OnSubmit()
+    {
+        // TODO: Implement create/update logic
+        DialogService.Close(true);
+    }
+
+    private void Cancel()
+    {
+        DialogService.Close(false);
+    }
+}
