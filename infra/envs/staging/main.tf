@@ -43,6 +43,7 @@ module "container_app" {
   postgres_server_fqdn   = module.postgres.server_fqdn
   postgres_database_name = module.postgres.database_name
   migrate_db_on_startup  = true
+  allowed_origins        = ["https://${module.static_web_app.default_host_name}"]
   tags                   = var.tags
 }
 

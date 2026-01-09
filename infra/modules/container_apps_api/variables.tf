@@ -91,3 +91,9 @@ variable "migrate_db_on_startup" {
   type        = bool
   default     = false
 }
+
+variable "allowed_origins" {
+  description = "Allowed CORS origins (e.g., Static Web App URLs)"
+  type        = list(string)
+  default     = []
+}

@@ -152,6 +152,22 @@ void RegisterServices(WebApplicationBuilder appBuilder)
     // Add health checks
     appBuilder.Services.AddHealthChecks()
         .AddDbContextCheck<ApplicationDbContext>("database");
+
+    // Configure CORS
+    var allowedOrigins = appBuilder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
+    if (allowedOrigins.Length > 0)
+    {
+        appBuilder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.WithOrigins(allowedOrigins)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+            });
+        });
+    }
 }
 
 async Task ConfigureApplication(WebApplication app)
@@ -197,6 +213,9 @@ async Task ConfigureApplication(WebApplication app)
     }
 
     app.UseHttpsRedirection();
+
+    // Enable CORS (must be before authentication/authorization)
+    app.UseCors();
 
     // Add authentication and authorization middleware
     app.UseAuthentication();

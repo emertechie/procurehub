@@ -37,6 +37,11 @@ resource "azurerm_container_app" "this" {
       }
 
       env {
+        name  = "AllowedOrigins__0"
+        value = length(var.allowed_origins) > 0 ? var.allowed_origins[0] : ""
+      }
+
+      env {
         name  = "ConnectionStrings__DefaultConnection"
         value = "Host=${var.postgres_server_fqdn};Database=${var.postgres_database_name};Port=5432;Username=${var.postgres_admin_login};Ssl Mode=Require"
       }
