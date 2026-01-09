@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using ProcureHub;
 using ProcureHub.BlazorApp.Components;
 using ProcureHub.BlazorApp.Components.Account;
+using ProcureHub.BlazorApp.Infrastructure.Authentication;
+using ProcureHub.Infrastructure;
+using ProcureHub.Infrastructure.Authentication;
 using ProcureHub.Models;
 using Radzen;
 
@@ -14,10 +17,12 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddRadzenComponents();
+builder.Services.AddDomainServices();
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+builder.Services.AddScoped<ICurrentUserProvider, AuthStateCurrentUserProvider>();
 
 builder.Services.AddAuthentication(options =>
     {

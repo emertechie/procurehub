@@ -44,19 +44,21 @@ public static class GetPurchaseRequestById
     public record RequesterInfo(string Id, string Email, string FirstName, string LastName);
     public record ReviewerInfo(string Id, string Email, string FirstName, string LastName);
 
-    public class Handler(ApplicationDbContext dbContext, ICurrentUser currentUser)
+    public class Handler(ApplicationDbContext dbContext, ICurrentUserProvider currentUserProvider)
         : IRequestHandler<Request, Result<Response>>
     {
         public async Task<Result<Response>> HandleAsync(Request request, CancellationToken token)
         {
+            var currentUser = await currentUserProvider.GetCurrentUserAsync();
+
             if (!currentUser.UserId.HasValue)
             {
                 return Result.Failure<Response>(Error.Unauthorized());
             }
 
             var currentUserId = currentUser.UserId.Value.ToString();
-            var isAdmin = currentUser.Roles.Contains(RoleNames.Admin);
-            var isApprover = currentUser.Roles.Contains(RoleNames.Approver);
+            var isAdmin = currentUser.IsInRole(RoleNames.Admin);
+            var isApprover = currentUser.IsInRole(RoleNames.Approver);
 
             Guid? currentUserDeptId = await dbContext.Users
                 .AsNoTracking()

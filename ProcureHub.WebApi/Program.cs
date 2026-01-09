@@ -144,7 +144,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
     appBuilder.Services.AddDomainServices();
 
     builder.Services.AddHttpContextAccessor();
-    builder.Services.AddScoped<ICurrentUser, CurrentUserFromHttpContext>();
+    builder.Services.AddScoped<ICurrentUserProvider, HttpContextCurrentUserProvider>();
 
     // Register all FluentValidation validators 
     appBuilder.Services.AddValidatorsFromAssemblyContaining<CreateUser.Request>();
