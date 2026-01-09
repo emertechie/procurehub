@@ -5,4 +5,12 @@ resource "azurerm_static_web_app" "main" {
   sku_tier            = "Free"
   sku_size            = "Free"
   tags                = var.tags
+
+  lifecycle {
+    ignore_changes = [
+      repository_url,
+      repository_branch,
+      repository_token
+    ]
+  }
 }
