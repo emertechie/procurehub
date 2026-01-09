@@ -22,6 +22,7 @@ const problemDetailsMiddleware: Middleware = {
 
 const fetchClient = createFetchClient<paths>({
   baseUrl: import.meta.env.VITE_API_BASE_URL || "/api",
+  credentials: "include",
 });
 
 fetchClient.use(problemDetailsMiddleware);
