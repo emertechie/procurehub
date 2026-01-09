@@ -14,7 +14,12 @@ public static class DemoEndpoints
             return;
         }
 
-        app.MapGet("/demo-users", (IConfiguration configuration) =>
+        var group = app.MapGroup("")
+            .RequireAuthorization(AuthorizationPolicyNames.Authenticated)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .WithTags("Auth");
+
+        group.MapGet("/demo-users", (IConfiguration configuration) =>
             {
                 var demoUserEmails = configuration.GetSection("DemoUsers").Get<string[]>() ?? Array.Empty<string>();
                 var seedUsersSection = configuration.GetSection("SeedUsers");
@@ -41,10 +46,9 @@ public static class DemoEndpoints
                 return Results.Ok(demoUsers);
             })
             .WithName("GetDemoUsers")
-            .WithTags("Auth")
             .Produces<List<DemoUser>>();
 
-        app.MapPost("/demo-login", async (
+        group.MapPost("/demo-login", async (
                 [FromBody] DemoLoginRequest request,
                 [FromServices] UserManager<Models.User> userManager,
                 [FromServices] SignInManager<Models.User> signInManager,
@@ -77,7 +81,6 @@ public static class DemoEndpoints
                 return Results.Ok(new { success = true });
             })
             .WithName("DemoLogin")
-            .WithTags("Auth")
             .Produces(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound);
