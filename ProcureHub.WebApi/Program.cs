@@ -153,7 +153,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
     appBuilder.Services.AddHealthChecks()
         .AddDbContextCheck<ApplicationDbContext>("database");
 
-    // Configure CORS
+    // Configure CORS and cookie for cross-origin requests (e.g. SWA frontend -> Container Apps API)
     var allowedOrigins = appBuilder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
     if (allowedOrigins.Length > 0)
     {
@@ -166,6 +166,13 @@ void RegisterServices(WebApplicationBuilder appBuilder)
                     .AllowAnyHeader()
                     .AllowCredentials();
             });
+        });
+
+        // SameSite=None required for cross-origin cookies; Secure is required for SameSite=None
+        appBuilder.Services.ConfigureApplicationCookie(options =>
+        {
+            options.Cookie.SameSite = SameSiteMode.None;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         });
     }
 }
