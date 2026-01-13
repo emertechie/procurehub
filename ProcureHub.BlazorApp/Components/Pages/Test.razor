@@ -1,0 +1,46 @@
+@page "/test/{id:int?}"
+@using System.Diagnostics.Eventing.Reader
+
+<h1>Test Page</h1>
+
+<pre>Id param: @Id</pre>
+
+<p>
+    The current count is <code>@count</code>
+</p>
+
+<button @onclick="Increment">Increment</button>
+
+<hr />
+
+<Widget Name="Widget A" Count="99" />
+<Widget Name="Widget B" Count="55" />
+<Widget Name="Widget C" Count="11" />
+
+<hr />
+
+<Panel Title="Panel A">
+    This is the content
+    for panel A
+</Panel>
+
+<hr>
+
+<div>
+    <RadzenCheckBox @bind-Value="testBool" Name="Test" />
+    Test bool value: @(testBool ? "true" : "false")
+</div>
+
+@code {
+    private int count = 0;
+
+    private bool testBool = false;
+
+    private void Increment()
+    {
+        count++;
+    }
+
+    [Parameter]
+    public int? Id { get; set; }
+}

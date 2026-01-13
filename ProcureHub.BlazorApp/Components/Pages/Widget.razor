@@ -1,0 +1,14 @@
+<div>
+    <h2>Widget</h2>
+
+    <p>Name: @Name</p>
+    <p>Count: @Count</p>
+</div>
+
+@code {
+    [Parameter]
+    public string Name { get; set; } = "";
+
+    [Parameter]
+    public int Count { get; set; }
+}
