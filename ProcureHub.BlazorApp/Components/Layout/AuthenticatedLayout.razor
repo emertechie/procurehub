@@ -19,7 +19,16 @@
                             </Template>
                             <ChildContent>
                                 <RadzenProfileMenuItem Text="Profile" Path="/Account/Manage" />
-                                <RadzenProfileMenuItem Text="Logout" Path="/Account/Logout" />
+                                <li class="rz-navigation-item" style="list-style: none;">
+                                    <form action="Account/Logout" method="post" style="margin: 0;">
+                                        <AntiforgeryToken />
+                                        <input type="hidden" name="ReturnUrl" value="@GetReturnUrl()" />
+                                        <button type="submit" class="rz-navigation-item-link"
+                                            style="width: 100%; text-align: left; border: none; background: none; cursor: pointer; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                            <span>Logout</span>
+                                        </button>
+                                    </form>
+                                </li>
                             </ChildContent>
                         </RadzenProfileMenu>
                     </Authorized>
@@ -84,4 +93,6 @@
 
 @code {
     private bool sidebarExpanded = true;
+
+    private string GetReturnUrl() => Navigation.ToBaseRelativePath(Navigation.Uri);
 }
