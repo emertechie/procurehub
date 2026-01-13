@@ -40,7 +40,7 @@
         </RadzenStack>
     </RadzenHeader>
 
-    <RadzenSidebar @bind-Expanded="@sidebarExpanded" style="width: 250px">
+    <RadzenSidebar FullHeight="true" @bind-Expanded="@sidebarExpanded" style="width: 250px">
         <RadzenStack Gap="1rem" Class="rz-p-4">
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
                 <div style="display: flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; background-color: var(--rz-primary); border-radius: 0.375rem;">
@@ -55,11 +55,11 @@
         </RadzenStack>
 
         <RadzenPanelMenu>
-            <RadzenPanelMenuItem Text="Overview" Icon="dashboard">
+            <RadzenPanelMenuItem Text="Overview" Icon="dashboard" Expanded="true">
                 <RadzenPanelMenuItem Text="Home" Path="/dashboard" Icon="home" />
             </RadzenPanelMenuItem>
 
-            <RadzenPanelMenuItem Text="Request Management" Icon="description">
+            <RadzenPanelMenuItem Text="Request Management" Icon="description" Expanded="true">
                 <RadzenPanelMenuItem Text="Requests" Path="/requests" Icon="list_alt" />
                 <AuthorizeView Roles="Requester">
                     <RadzenPanelMenuItem Text="New Request" Path="/requests/new" Icon="add_circle" />
@@ -67,19 +67,19 @@
             </RadzenPanelMenuItem>
 
             <AuthorizeView Roles="Approver">
-                <RadzenPanelMenuItem Text="Approvals" Icon="check_circle">
+                <RadzenPanelMenuItem Text="Approvals" Icon="check_circle" Expanded="true">
                     <RadzenPanelMenuItem Text="Pending Approvals" Path="/approvals" Icon="pending_actions" />
                 </RadzenPanelMenuItem>
             </AuthorizeView>
 
             <AuthorizeView Roles="Admin">
-                <RadzenPanelMenuItem Text="Administration" Icon="settings">
+                <RadzenPanelMenuItem Text="Administration" Icon="settings" Expanded="true">
                     <RadzenPanelMenuItem Text="Users" Path="/admin/users" Icon="people" />
                     <RadzenPanelMenuItem Text="Departments" Path="/admin/departments" Icon="business" />
                 </RadzenPanelMenuItem>
             </AuthorizeView>
 
-            <RadzenPanelMenuItem Text="Sample Pages" Icon="widgets">
+            <RadzenPanelMenuItem Text="Sample Pages" Icon="widgets" Expanded="true">
                 <RadzenPanelMenuItem Text="Counter" Path="/counter" Icon="calculate" />
                 <RadzenPanelMenuItem Text="Weather" Path="/weather" Icon="wb_cloudy" />
                 <RadzenPanelMenuItem Text="Auth Test" Path="/auth" Icon="verified_user" />
