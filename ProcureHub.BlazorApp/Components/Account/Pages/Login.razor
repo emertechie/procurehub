@@ -47,10 +47,10 @@
                 </Helper>
             </RadzenFormField>
 
-            <div class="rz-mb-2">
-                <RadzenCheckBox @bind-Value="Input.RememberMe" Name="Input.RememberMe" />
+            @* <div class="rz-mb-2">
+                <RadzenCheckBox @bind-Value="Input.RememberMe" Name="Input.RememberMe" TriState="false" />
                 <RadzenLabel Text="Remember me" Component="Input.RememberMe" Style="margin-left: 0.5rem;" />
-            </div>
+            </div> *@
 
             <RadzenButton ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Style="width: 100%;"
                 Size="ButtonSize.Large" Text="Log in" />
@@ -66,14 +66,13 @@
         </RadzenStack>
     </EditForm>
 
-    @if (false)
-    {
-        <RadzenStack Gap="0.5rem" Style="margin-top: 1rem;">
-            <RadzenText TextStyle="TextStyle.Subtitle2" Style="text-align: center;">Use another service to log in
-            </RadzenText>
-            <ExternalLoginPicker />
-        </RadzenStack>
-    }
+    @*
+    <RadzenStack Gap="0.5rem" Style="margin-top: 1rem;">
+        <RadzenText TextStyle="TextStyle.Subtitle2" Style="text-align: center;">Use another service to log in
+        </RadzenText>
+        <ExternalLoginPicker />
+    </RadzenStack>
+    *@
 </RadzenStack>
 
 @code {
