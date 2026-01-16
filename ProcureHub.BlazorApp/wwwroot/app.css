@@ -10,6 +10,8 @@
     --rz-primary-lighter: rgba(13, 148, 136, 0.16);
     --rz-primary-dark: #0f766e;
     --rz-primary-darker: #115e59; */
+
+    --rz-badge-text-transform: lowercase;
 }
 /* 
 html, body {

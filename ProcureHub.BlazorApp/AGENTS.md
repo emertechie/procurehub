@@ -6,10 +6,8 @@ This app uses **Radzen Blazor Components** for the UI. Documentation: https://bl
 
 ### Theme Selection
 
-- Theme is set via CSS stylesheet link in `Components/App.razor`
-- Current theme: `humanistic-base.css`
+- Theme is set via RadzenTheme component. Example: `<RadzenTheme Theme="software" />
 - Available free themes: `material`, `material-dark`, `standard`, `standard-dark`, `default`, `dark`, `humanistic`, `humanistic-dark`, `software`, `software-dark`
-- Append `-base` for base theme variants (e.g., `humanistic-base.css`)
 
 ### Customizing Theme Colors
 

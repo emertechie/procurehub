@@ -22,9 +22,9 @@ indent_size = 2
 [*.md]
 indent_size = 2
 
-# Tests
+# Razor files
 [*.razor]
-max_line_length = 300
+# max_line_length = 300 << doesn't work. Need to use "wrapLineLength" setting
 
 # C# files
 [*.cs]
