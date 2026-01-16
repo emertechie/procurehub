@@ -54,10 +54,8 @@
             </RadzenStack>
         </RadzenStack>
 
-        <RadzenPanelMenu>
-            <RadzenPanelMenuItem Text="Overview" Icon="dashboard" Expanded="true">
-                <RadzenPanelMenuItem Text="Home" Path="/dashboard" Icon="home" />
-            </RadzenPanelMenuItem>
+        <RadzenPanelMenu ShowArrow="false">
+            <RadzenPanelMenuItem Text="Home" Path="/dashboard" Icon="home" />
 
             <RadzenPanelMenuItem Text="Request Management" Icon="description" Expanded="true">
                 <RadzenPanelMenuItem Text="Requests" Path="/requests" Icon="list_alt" />
@@ -78,13 +76,6 @@
                     <RadzenPanelMenuItem Text="Departments" Path="/admin/departments" Icon="business" />
                 </RadzenPanelMenuItem>
             </AuthorizeView>
-
-            <RadzenPanelMenuItem Text="Sample Pages" Icon="widgets" Expanded="true">
-                <RadzenPanelMenuItem Text="Counter" Path="/counter" Icon="calculate" />
-                <RadzenPanelMenuItem Text="Weather" Path="/weather" Icon="wb_cloudy" />
-                <RadzenPanelMenuItem Text="Auth Test" Path="/auth" Icon="verified_user" />
-                <RadzenPanelMenuItem Text="Test" Path="/test/11" Icon="experiment" />
-            </RadzenPanelMenuItem>
         </RadzenPanelMenu>
     </RadzenSidebar>
 
