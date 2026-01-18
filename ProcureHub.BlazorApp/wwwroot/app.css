@@ -24,3 +24,8 @@ body {
 .rz-panel-menu .rz-navigation-item-link {
     padding-block: 0.5em;
 }
+
+.rz-button .rz-button-text {
+    text-transform: none;
+    letter-spacing: normal;
+}
