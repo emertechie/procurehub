@@ -7,7 +7,6 @@ This is a .Net Blazor app.
 - This app uses **Radzen Blazor Components** for the UI
   - Documentation: https://blazor.radzen.com
   - Use the "radzen.mcp" MCP tool to answer questions about the library
-- When customizing theme elements, refer to `ProcureHub.BlazorApp/reference/material-base.css`, which is the full theme CSS that gets included at runtime.
 
 ### Theme Selection
 
