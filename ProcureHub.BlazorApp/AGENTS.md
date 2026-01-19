@@ -86,3 +86,5 @@ Icon reference: https://fonts.google.com/icons?icon.set=Material+Symbols
 ## General
 
 - After any significant change, make sure there are no build errors
+- Private fields in a Razor code block must use correct naming style (leading underscore)
+  - Correct: `@code { int _totalCount; }`

@@ -12,6 +12,7 @@
 @inject DialogService DialogService
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService
+@inject ILogger<Index> Logger
 
 <PageTitle>Users</PageTitle>
 
@@ -21,15 +22,15 @@
         <RadzenButton Text="Add User" Icon="add" Click="@OpenCreateUserDialog" ButtonStyle="ButtonStyle.Primary" />
     </RadzenStack>
 
-    <RadzenTextBox Placeholder="Search users..." @bind-Value="@searchTerm" 
+    <RadzenTextBox Placeholder="Search users..." @bind-Value="@_searchTerm" 
                    Change="@(() => LoadUsers())" Style="width: 300px;" />
 
-    <RadzenDataGrid @ref="grid" Data="@users" TItem="QueryUsers.Response"
-                    Count="@totalCount"
+    <RadzenDataGrid @ref="_grid" Data="@_users" TItem="QueryUsers.Response"
+                    Count="@_totalCount"
                     LoadData="@OnLoadData"
                     AllowPaging="true"
                     PageSize="10"
-                    IsLoading="@isLoading"
+                    IsLoading="@_isLoading"
                     PagerHorizontalAlign="HorizontalAlign.Center">
         <Columns>
             <RadzenDataGridColumn TItem="QueryUsers.Response" Title="User" Width="300px">
@@ -75,28 +76,28 @@
                     <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
                         <RadzenButton Icon="edit" Size="ButtonSize.Small"
                                       Click="@(() => OpenEditUserDialog(Guid.Parse(user.Id)))"
-                                      MouseEnter="@((element) => ShowToolip(element, "Edit user profile"))"
+                                      MouseEnter="@((element) => ShowTooltip(element, "Edit user profile"))"
                                       ButtonStyle="ButtonStyle.Light" />
                         <RadzenButton Icon="group" Size="ButtonSize.Small"
                                       Click="@(() => OpenManageRolesDialog(Guid.Parse(user.Id)))"
-                                      MouseEnter="@((element) => ShowToolip(element, "Manage roles"))"
+                                      MouseEnter="@((element) => ShowTooltip(element, "Manage roles"))"
                                       ButtonStyle="ButtonStyle.Light" />
                         <RadzenButton Icon="business" Size="ButtonSize.Small"
                                       Click="@(() => OpenAssignDepartmentDialog(Guid.Parse(user.Id)))"
-                                      MouseEnter="@((element) => ShowToolip(element, "Change department"))"
+                                      MouseEnter="@((element) => ShowTooltip(element, "Change department"))"
                                       ButtonStyle="ButtonStyle.Light" />
                         @if (user.EnabledAt.HasValue)
                         {
                             <RadzenButton Icon="block" Size="ButtonSize.Small"
                                           Click="@(() => DisableUserAsync(Guid.Parse(user.Id)))"
-                                          MouseEnter="@((element) => ShowToolip(element, "Disable user"))"
+                                          MouseEnter="@((element) => ShowTooltip(element, "Disable user"))"
                                           ButtonStyle="ButtonStyle.Danger" />
                         }
                         else
                         {
                             <RadzenButton Icon="check_circle" Size="ButtonSize.Small"
                                           Click="@(() => EnableUserAsync(Guid.Parse(user.Id)))"
-                                          MouseEnter="@((element) => ShowToolip(element, "Enable user"))"
+                                          MouseEnter="@((element) => ShowTooltip(element, "Enable user"))"
                                           ButtonStyle="ButtonStyle.Success" />
                         }
                     </RadzenStack>
@@ -107,12 +108,12 @@
 </RadzenStack>
 
 @code {
-    RadzenDataGrid<QueryUsers.Response> grid = default!;
-    IEnumerable<QueryUsers.Response> users = new List<QueryUsers.Response>();
-    int totalCount;
-    bool isLoading;
-    string searchTerm = "";
-    int currentPage = 1;
+    RadzenDataGrid<QueryUsers.Response> _grid = null!;
+    IEnumerable<QueryUsers.Response> _users = new List<QueryUsers.Response>();
+    int _totalCount;
+    bool _isLoading;
+    string _searchTerm = "";
+    int _currentPage = 1;
 
     protected override async Task OnInitializedAsync()
     {
@@ -121,31 +122,33 @@
 
     async Task OnLoadData(LoadDataArgs args)
     {
-        currentPage = (args.Skip ?? 0) / (args.Top ?? 10) + 1;
+        _currentPage = (args.Skip ?? 0) / (args.Top ?? 10) + 1;
         await LoadUsers();
     }
 
     async Task LoadUsers()
     {
-        isLoading = true;
+        Logger.LogInformation("Loading users");
+
+        _isLoading = true;
         var request = new QueryUsers.Request
         (
-            Email: string.IsNullOrWhiteSpace(searchTerm) ? null : searchTerm,
-            Page: currentPage,
+            Email: string.IsNullOrWhiteSpace(_searchTerm) ? null : _searchTerm,
+            Page: _currentPage,
             PageSize: 10
         );
 
-        var result = await QueryUsersHandler.HandleAsync(request, default);
-        users = result.Data;
-        totalCount = result.TotalCount;
-        isLoading = false;
+        var result = await QueryUsersHandler.HandleAsync(request, CancellationToken.None);
+        _users = result.Data;
+        _totalCount = result.TotalCount;
+        _isLoading = false;
     }
 
     async Task OpenCreateUserDialog()
     {
         var result = await DialogService.OpenAsync<UserDialog>(
             "Create User",
-            new Dictionary<string, object?>(),
+            new Dictionary<string, object>(),
             new DialogOptions { Width = "500px" }
         );
 
@@ -207,7 +210,7 @@
 
         if (confirmed == true)
         {
-            var result = await EnableUserHandler.HandleAsync(new EnableUser.Request(userId.ToString()), default);
+            var result = await EnableUserHandler.HandleAsync(new EnableUser.Request(userId.ToString()), CancellationToken.None);
             if (result.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Success, "Success", "User enabled");
@@ -230,7 +233,7 @@
 
         if (confirmed == true)
         {
-            var result = await DisableUserHandler.HandleAsync(new DisableUser.Request(userId.ToString()), default);
+            var result = await DisableUserHandler.HandleAsync(new DisableUser.Request(userId.ToString()), CancellationToken.None);
             if (result.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Success, "Success", "User disabled");
@@ -243,7 +246,7 @@
         }
     }
 
-    void ShowToolip(ElementReference element, string text)
+    void ShowTooltip(ElementReference element, string text)
     {
         var options = new TooltipOptions
         {
