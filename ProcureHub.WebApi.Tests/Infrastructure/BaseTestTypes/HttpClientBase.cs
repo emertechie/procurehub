@@ -46,11 +46,9 @@ public abstract class HttpClientBase : IHttpClientAuthHelper
     public async Task LoginAsync(string email, string password)
     {
         var loginRequest = JsonContent.Create(new { email, password });
-        var loginResp = await HttpClient.PostAsync("/login", loginRequest);
+        var loginResp = await HttpClient.PostAsync("/login?useCookies=true", loginRequest);
+        // Auth cookie should be set automatically by HttpClient's cookie container
         Assert.Equal(HttpStatusCode.OK, loginResp.StatusCode);
-        var loginResult = await loginResp.Content.ReadFromJsonAsync<LoginResponse>();
-
-        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult!.AccessToken);
     }
 
     public async Task LogoutAsync()
