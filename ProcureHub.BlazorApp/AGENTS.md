@@ -8,11 +8,6 @@ This is a .Net Blazor app.
   - Documentation: https://blazor.radzen.com
   - Use the "radzen.mcp" MCP tool to answer questions about the library
 
-### Theme Selection
-
-- Theme is set via RadzenTheme component. Example: `<RadzenTheme Theme="software" />
-- Available free themes: `material`, `material-dark`, `standard`, `standard-dark`, `default`, `dark`, `humanistic`, `humanistic-dark`, `software`, `software-dark`
-
 ### Customizing Theme Colors
 
 **Always use `--rz-` prefixed CSS variables** to customize Radzen component colors. Never override component class styles directly.
@@ -20,24 +15,6 @@ This is a .Net Blazor app.
 #### Core Theme Variables
 
 Override these in `:root` in `wwwroot/app.css`:
-
-```css
-:root {
-    /* Primary color palette */
-    --rz-primary: #0d9488;
-    --rz-primary-light: #2dd4bf;
-    --rz-primary-lighter: rgba(13, 148, 136, 0.16);
-    --rz-primary-dark: #0f766e;
-    --rz-primary-darker: #115e59;
-
-    /* Secondary, info, success, warning, danger follow same pattern */
-    --rz-secondary: #...;
-    --rz-info: #...;
-    --rz-success: #...;
-    --rz-warning: #...;
-    --rz-danger: #...;
-}
-```
 
 #### All Available Color Variables
 
@@ -77,23 +54,6 @@ Use `var(--rz-primary)` syntax in component styles:
 <RadzenIcon Icon="inventory_2" Style="color: var(--rz-primary);" />
 ```
 
-#### Using Color Utility Classes
-
-Radzen provides utility classes for colors:
-- Background: `.rz-background-color-primary`, `.rz-background-color-success`, etc.
-- Text: `.rz-color-primary`, `.rz-color-danger`, etc.
-- Border: `.rz-border-color-primary`, etc.
-
-### Component Services
-
-Register Radzen services in `Program.cs`:
-
-```csharp
-builder.Services.AddRadzenComponents();
-```
-
-This registers: `DialogService`, `NotificationService`, `TooltipService`, `ContextMenuService`, `ThemeService`
-
 ### Icons
 
 Use Material Icons with `RadzenIcon`:
@@ -102,7 +62,16 @@ Use Material Icons with `RadzenIcon`:
 <RadzenIcon Icon="inventory_2" />
 ```
 
-Icon reference: https://fonts.google.com/icons
+## Forms
+
+- Never use floating labels for form fields, and always use the `Text` variant:  
+```html
+    <RadzenFormField Text="First Name" AllowFloatingLabel="false" Variant="Variant.Text">
+        <RadzenTextBox @bind-Value="@model.FirstName" Style="width: 100%;" />
+    </RadzenFormField>
+```
+
+Icon reference: https://fonts.google.com/icons?icon.set=Material+Symbols
 
 ## Project Structure
 

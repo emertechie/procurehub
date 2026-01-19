@@ -2,21 +2,21 @@
 @inject DialogService DialogService
 
 <RadzenStack Gap="1rem">
-    <RadzenFormField Text="Email">
+    <RadzenFormField Text="Email" AllowFloatingLabel="false" Variant="Variant.Text">
         <RadzenTextBox @bind-Value="@model.Email" Style="width: 100%;" />
     </RadzenFormField>
 
-    <RadzenFormField Text="First Name">
+    <RadzenFormField Text="First Name" AllowFloatingLabel="false" Variant="Variant.Text">
         <RadzenTextBox @bind-Value="@model.FirstName" Style="width: 100%;" />
     </RadzenFormField>
 
-    <RadzenFormField Text="Last Name">
+    <RadzenFormField Text="Last Name" AllowFloatingLabel="false" Variant="Variant.Text">
         <RadzenTextBox @bind-Value="@model.LastName" Style="width: 100%;" />
     </RadzenFormField>
 
     @if (!IsEdit)
     {
-        <RadzenFormField Text="Password">
+        <RadzenFormField Text="Password" AllowFloatingLabel="false" Variant="Variant.Text">
             <RadzenPassword @bind-Value="@model.Password" Style="width: 100%;" />
         </RadzenFormField>
     }
