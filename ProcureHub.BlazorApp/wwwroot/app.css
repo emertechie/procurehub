@@ -9,6 +9,9 @@
 
     --rz-panel-menu-item-2nd-level-offset: 1em;
     --rz-panel-menu-2nd-level-vertical-offset: 0;
+
+    --rz-badge-padding: 0.25rem 0.5rem;
+    --rz-badge-font-weight: 500;
 }
 
 /* Apply consistent base styles to body (matches Tailwind's preflight) */
@@ -25,7 +28,3 @@ body {
     padding-block: 0.5em;
 }
 
-.rz-button .rz-button-text {
-    text-transform: none;
-    letter-spacing: normal;
-}

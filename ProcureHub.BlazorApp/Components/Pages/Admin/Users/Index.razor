@@ -48,7 +48,7 @@
                     <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" Wrap="FlexWrap.Wrap">
                         @foreach (var role in user.Roles)
                         {
-                            <RadzenBadge Text="@role" Variant="Variant.Outlined" />
+                            <RadzenBadge Text="@role" BadgeStyle="BadgeStyle.Base" Shade="Shade.Light" />
                         }
                     </RadzenStack>
                 </Template>
@@ -60,11 +60,11 @@
                 <Template Context="user">
                     @if (user.EnabledAt.HasValue)
                     {
-                        <RadzenBadge Text="Enabled" BadgeStyle="BadgeStyle.Success" />
+                        <RadzenBadge Text="Enabled" BadgeStyle="BadgeStyle.Success" Shade="Shade.Lighter" />
                     }
                     else
                     {
-                        <RadzenBadge Text="Disabled" BadgeStyle="BadgeStyle.Danger" />
+                        <RadzenBadge Text="Disabled" BadgeStyle="BadgeStyle.Danger" Shade="Shade.Lighter" />
                     }
                 </Template>
             </RadzenDataGridColumn>
