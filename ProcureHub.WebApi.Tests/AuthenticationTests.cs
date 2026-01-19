@@ -25,7 +25,29 @@ public class AuthenticationTests(ApiTestHostFixture hostFixture, ITestOutputHelp
     }
 
     [Fact]
-    public async Task Can_login_as_admin_and_use_API_with_token()
+    public async Task Can_login_as_admin_and_use_API_with_cookie()
+    {
+        // Login as the test admin using cookie authentication
+        var loginRequest = JsonContent.Create(new { email = AdminEmail, password = AdminPassword });
+        var loginResp = await HttpClient.PostAsync("/login?useCookies=true", loginRequest);
+        Assert.Equal(HttpStatusCode.OK, loginResp.StatusCode);
+
+        // Cookie should be set automatically by HttpClient's cookie container
+        // Test the /me endpoint which should work with cookie auth
+        var meResp = await HttpClient.GetAsync("/me");
+        Assert.Equal(HttpStatusCode.OK, meResp.StatusCode);
+        var meResult = await meResp.Content.ReadFromJsonAsync<MeResponse>();
+        Assert.NotNull(meResult);
+        Assert.NotEmpty(meResult.Id);
+        Assert.Equal(AdminEmail, meResult.Email);
+
+        // Make sure can call the /users endpoint with cookie
+        var usersResp = await HttpClient.GetAsync("/users");
+        Assert.Equal(HttpStatusCode.OK, usersResp.StatusCode);
+    }
+
+    [Fact]
+    public async Task Can_login_as_admin_and_use_API_with_JWT_token()
     {
         // Login as the test admin (using credentials defined in WebApiTestFactory)
         var loginRequest = JsonContent.Create(new { email = AdminEmail, password = AdminPassword });
@@ -47,28 +69,6 @@ public class AuthenticationTests(ApiTestHostFixture hostFixture, ITestOutputHelp
         Assert.Equal(AdminEmail, meResult!.Email);
 
         // Make sure can call the /users endpoint
-        var usersResp = await HttpClient.GetAsync("/users");
-        Assert.Equal(HttpStatusCode.OK, usersResp.StatusCode);
-    }
-
-    [Fact]
-    public async Task Can_login_as_admin_and_use_API_with_cookie()
-    {
-        // Login as the test admin using cookie authentication
-        var loginRequest = JsonContent.Create(new { email = AdminEmail, password = AdminPassword });
-        var loginResp = await HttpClient.PostAsync("/login?useCookies=true", loginRequest);
-        Assert.Equal(HttpStatusCode.OK, loginResp.StatusCode);
-
-        // Cookie should be set automatically by HttpClient's cookie container
-        // Test the /me endpoint which should work with cookie auth
-        var meResp = await HttpClient.GetAsync("/me");
-        Assert.Equal(HttpStatusCode.OK, meResp.StatusCode);
-        var meResult = await meResp.Content.ReadFromJsonAsync<MeResponse>();
-        Assert.NotNull(meResult);
-        Assert.NotEmpty(meResult.Id);
-        Assert.Equal(AdminEmail, meResult.Email);
-
-        // Make sure can call the /users endpoint with cookie
         var usersResp = await HttpClient.GetAsync("/users");
         Assert.Equal(HttpStatusCode.OK, usersResp.StatusCode);
     }
