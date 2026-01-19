@@ -2,6 +2,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using FluentValidation;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
@@ -154,10 +155,12 @@ void RegisterServices(WebApplicationBuilder appBuilder)
         .AddDbContextCheck<ApplicationDbContext>("database");
 
     // Configure CORS and cookie for cross-origin requests (e.g. SWA frontend -> Container Apps API)
+    appBuilder.Services.AddCors();
+
     var allowedOrigins = appBuilder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
     if (allowedOrigins.Length > 0)
     {
-        appBuilder.Services.AddCors(options =>
+        appBuilder.Services.Configure<CorsOptions>(options =>
         {
             options.AddDefaultPolicy(policy =>
             {

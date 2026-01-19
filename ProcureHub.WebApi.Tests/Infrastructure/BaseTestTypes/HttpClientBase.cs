@@ -1,10 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using ProcureHub.Features.Roles;
-using ProcureHub.Models;
-using ProcureHub.WebApi.Responses;
-using ProcureHub.WebApi.Tests.Infrastructure.Helpers;
 using ProcureHub.WebApi.Tests.Infrastructure.Xunit;
 
 namespace ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
