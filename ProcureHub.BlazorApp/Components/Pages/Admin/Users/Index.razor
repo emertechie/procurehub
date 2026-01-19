@@ -11,6 +11,7 @@
 @inject IRequestHandler<DisableUser.Request, Result> DisableUserHandler
 @inject DialogService DialogService
 @inject NotificationService NotificationService
+@inject TooltipService TooltipService
 
 <PageTitle>Users</PageTitle>
 
@@ -72,26 +73,31 @@
             <RadzenDataGridColumn TItem="QueryUsers.Response" Title="Actions" Width="150px">
                 <Template Context="user">
                     <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
-                        <RadzenButton Icon="edit" Size="ButtonSize.Small" 
-                                    Click="@(() => OpenEditUserDialog(Guid.Parse(user.Id)))" 
-                                    ButtonStyle="ButtonStyle.Light" />
+                        <RadzenButton Icon="edit" Size="ButtonSize.Small"
+                                      Click="@(() => OpenEditUserDialog(Guid.Parse(user.Id)))"
+                                      MouseEnter="@((element) => ShowToolip(element, "Edit user profile"))"
+                                      ButtonStyle="ButtonStyle.Light" />
                         <RadzenButton Icon="group" Size="ButtonSize.Small"
-                                    Click="@(() => OpenManageRolesDialog(Guid.Parse(user.Id)))"
-                                    ButtonStyle="ButtonStyle.Light" />
+                                      Click="@(() => OpenManageRolesDialog(Guid.Parse(user.Id)))"
+                                      MouseEnter="@((element) => ShowToolip(element, "Manage roles"))"
+                                      ButtonStyle="ButtonStyle.Light" />
                         <RadzenButton Icon="business" Size="ButtonSize.Small"
-                                    Click="@(() => OpenAssignDepartmentDialog(Guid.Parse(user.Id)))"
-                                    ButtonStyle="ButtonStyle.Light" />
+                                      Click="@(() => OpenAssignDepartmentDialog(Guid.Parse(user.Id)))"
+                                      MouseEnter="@((element) => ShowToolip(element, "Change department"))"
+                                      ButtonStyle="ButtonStyle.Light" />
                         @if (user.EnabledAt.HasValue)
                         {
                             <RadzenButton Icon="block" Size="ButtonSize.Small"
-                                        Click="@(() => DisableUserAsync(Guid.Parse(user.Id)))"
-                                        ButtonStyle="ButtonStyle.Danger" />
+                                          Click="@(() => DisableUserAsync(Guid.Parse(user.Id)))"
+                                          MouseEnter="@((element) => ShowToolip(element, "Disable user"))"
+                                          ButtonStyle="ButtonStyle.Danger" />
                         }
                         else
                         {
                             <RadzenButton Icon="check_circle" Size="ButtonSize.Small"
-                                        Click="@(() => EnableUserAsync(Guid.Parse(user.Id)))"
-                                        ButtonStyle="ButtonStyle.Success" />
+                                          Click="@(() => EnableUserAsync(Guid.Parse(user.Id)))"
+                                          MouseEnter="@((element) => ShowToolip(element, "Enable user"))"
+                                          ButtonStyle="ButtonStyle.Success" />
                         }
                     </RadzenStack>
                 </Template>
@@ -235,5 +241,15 @@
                 NotificationService.Notify(NotificationSeverity.Error, "Error", result.Error.Message);
             }
         }
+    }
+
+    void ShowToolip(ElementReference element, string text)
+    {
+        var options = new TooltipOptions
+        {
+            Position = TooltipPosition.Top,
+            Delay = 300
+        };
+        TooltipService.Open(element, text, options);
     }
 }
