@@ -81,6 +81,8 @@
 body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Override Radzen theme gradient background */
+    background: var(--rz-base-background-color) !important;
 }
 
 .rz-panel-menu .rz-navigation-item {
