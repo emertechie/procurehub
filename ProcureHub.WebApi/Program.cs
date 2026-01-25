@@ -16,7 +16,6 @@ using ProcureHub.Infrastructure;
 using ProcureHub.Infrastructure.Authentication;
 using ProcureHub.Models;
 using ProcureHub.WebApi;
-using ProcureHub.WebApi.Authentication;
 using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Features.Auth;
 using ProcureHub.WebApi.Helpers;
@@ -114,15 +113,6 @@ void RegisterServices(WebApplicationBuilder appBuilder)
     // Replace default SignInManager<TUser>
     builder.Services.AddScoped<SignInManager<User>, ApplicationSigninManager>();
 
-    // Add API Key authentication scheme (AddIdentityApiEndpoints already added Bearer token)
-    builder.Services.AddAuthentication()
-        .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(
-            ApiKeyAuthenticationOptions.DefaultScheme,
-            options => { });
-
-    // Register API Key validator
-    builder.Services.AddScoped<IApiKeyValidator, ApiKeyValidator>();
-
     // Configure Authorization with flexible policies
     builder.Services.AddAuthorization(options =>
     {
@@ -131,8 +121,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
         {
             policy.AddAuthenticationSchemes(
                 IdentityConstants.BearerScheme,
-                IdentityConstants.ApplicationScheme,
-                ApiKeyAuthenticationOptions.DefaultScheme);
+                IdentityConstants.ApplicationScheme);
             policy.RequireAuthenticatedUser();
         });
 
