@@ -1,10 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using ProcureHub.Features.Roles;
-using ProcureHub.Models;
-using ProcureHub.WebApi.Responses;
-using ProcureHub.WebApi.Tests.Infrastructure.Helpers;
 using ProcureHub.WebApi.Tests.Infrastructure.Xunit;
 
 namespace ProcureHub.WebApi.Tests.Infrastructure.BaseTestTypes;
@@ -50,11 +46,9 @@ public abstract class HttpClientBase : IHttpClientAuthHelper
     public async Task LoginAsync(string email, string password)
     {
         var loginRequest = JsonContent.Create(new { email, password });
-        var loginResp = await HttpClient.PostAsync("/login", loginRequest);
+        var loginResp = await HttpClient.PostAsync("/login?useCookies=true", loginRequest);
+        // Auth cookie should be set automatically by HttpClient's cookie container
         Assert.Equal(HttpStatusCode.OK, loginResp.StatusCode);
-        var loginResult = await loginResp.Content.ReadFromJsonAsync<LoginResponse>();
-
-        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult!.AccessToken);
     }
 
     public async Task LogoutAsync()

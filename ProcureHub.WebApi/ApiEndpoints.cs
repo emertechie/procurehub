@@ -11,9 +11,6 @@ public static class ApiEndpoints
 {
     public static void Configure(WebApplication app)
     {
-        // TODO: remove this temp endpoint to test frontend API connection
-        app.MapGet("/test", async () => Results.Ok(new { DateTime = DateTime.UtcNow }));
-
         app.ConfigureAuthEndpoints();
         app.ConfigureDemoEndpoints();
         app.ConfigureUsersEndpoints();

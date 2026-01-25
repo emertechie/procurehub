@@ -2,6 +2,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using FluentValidation;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,6 @@ using ProcureHub.Infrastructure;
 using ProcureHub.Infrastructure.Authentication;
 using ProcureHub.Models;
 using ProcureHub.WebApi;
-using ProcureHub.WebApi.Authentication;
 using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Features.Auth;
 using ProcureHub.WebApi.Helpers;
@@ -107,20 +107,17 @@ void RegisterServices(WebApplicationBuilder appBuilder)
         .AddRoles<Role>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
 
+    // Unique cookie name to avoid conflicts with BlazorApp on localhost
+    builder.Services.ConfigureApplicationCookie(options =>
+    {
+        options.Cookie.Name = ".AspNetCore.Identity.WebApi";
+    });
+
     // Add custom user sign-in validator
     builder.Services.AddScoped<UserSigninValidator>();
 
     // Replace default SignInManager<TUser>
     builder.Services.AddScoped<SignInManager<User>, ApplicationSigninManager>();
-
-    // Add API Key authentication scheme (AddIdentityApiEndpoints already added Bearer token)
-    builder.Services.AddAuthentication()
-        .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(
-            ApiKeyAuthenticationOptions.DefaultScheme,
-            options => { });
-
-    // Register API Key validator
-    builder.Services.AddScoped<IApiKeyValidator, ApiKeyValidator>();
 
     // Configure Authorization with flexible policies
     builder.Services.AddAuthorization(options =>
@@ -130,8 +127,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
         {
             policy.AddAuthenticationSchemes(
                 IdentityConstants.BearerScheme,
-                IdentityConstants.ApplicationScheme,
-                ApiKeyAuthenticationOptions.DefaultScheme);
+                IdentityConstants.ApplicationScheme);
             policy.RequireAuthenticatedUser();
         });
 
@@ -154,10 +150,12 @@ void RegisterServices(WebApplicationBuilder appBuilder)
         .AddDbContextCheck<ApplicationDbContext>("database");
 
     // Configure CORS and cookie for cross-origin requests (e.g. SWA frontend -> Container Apps API)
+    appBuilder.Services.AddCors();
+
     var allowedOrigins = appBuilder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
     if (allowedOrigins.Length > 0)
     {
-        appBuilder.Services.AddCors(options =>
+        appBuilder.Services.Configure<CorsOptions>(options =>
         {
             options.AddDefaultPolicy(policy =>
             {

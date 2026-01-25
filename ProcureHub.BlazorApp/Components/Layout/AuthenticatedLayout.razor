@@ -42,19 +42,10 @@
 
     <RadzenSidebar FullHeight="true" @bind-Expanded="@sidebarExpanded" style="width: 250px">
         <RadzenStack Gap="1rem" Class="rz-p-4">
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-                <div style="display: flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; background-color: var(--rz-primary); border-radius: 0.375rem;">
-                    <RadzenIcon Icon="inventory_2" Style="font-size: 1rem; color: white;" />
-                </div>
-                <RadzenStack Gap="0">
-                    <RadzenText TextStyle="TextStyle.Subtitle1" Style="margin: 0; font-weight: 600; color: var(--rz-text-contrast-color);">ProcureHub
-                    </RadzenText>
-                    <RadzenText TextStyle="TextStyle.Caption" Style="margin: 0; color: var(--rz-base-200);">Procurement System</RadzenText>
-                </RadzenStack>
-            </RadzenStack>
+            <AppLogo />
         </RadzenStack>
 
-        <RadzenPanelMenu ShowArrow="false">
+        <RadzenPanelMenu ShowArrow="false" DisplayStyle="MenuItemDisplayStyle.Text">
             <RadzenPanelMenuItem Text="Home" Path="/dashboard" Icon="home" />
 
             <RadzenPanelMenuItem Text="Request Management" Icon="description" Expanded="true">

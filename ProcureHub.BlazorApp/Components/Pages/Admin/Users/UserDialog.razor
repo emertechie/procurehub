@@ -1,36 +1,51 @@
 @using ProcureHub.Features.Users
+@using ProcureHub.Infrastructure
+
 @inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject IRequestHandler<GetUserById.Request, GetUserById.Response?> GetUserHandler
+@inject IRequestHandler<CreateUser.Request, Result<string>> CreateUserHandler
+@inject IRequestHandler<UpdateUser.Request, Result> UpdateUserHandler
 
 <RadzenStack Gap="1rem">
-    <RadzenFormField Text="Email">
-        <RadzenTextBox @bind-Value="@model.Email" Style="width: 100%;" />
+    @if (_errorMessage != null)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">
+            @_errorMessage
+        </RadzenAlert>
+    }
+
+    <RadzenFormField Text="Email" AllowFloatingLabel="false" Variant="Variant.Text">
+        <RadzenTextBox @bind-Value="@_model.Email" Style="width: 100%;" />
     </RadzenFormField>
 
-    <RadzenFormField Text="First Name">
-        <RadzenTextBox @bind-Value="@model.FirstName" Style="width: 100%;" />
+    <RadzenFormField Text="First Name" AllowFloatingLabel="false" Variant="Variant.Text">
+        <RadzenTextBox @bind-Value="@_model.FirstName" Style="width: 100%;" />
     </RadzenFormField>
 
-    <RadzenFormField Text="Last Name">
-        <RadzenTextBox @bind-Value="@model.LastName" Style="width: 100%;" />
+    <RadzenFormField Text="Last Name" AllowFloatingLabel="false" Variant="Variant.Text">
+        <RadzenTextBox @bind-Value="@_model.LastName" Style="width: 100%;" />
     </RadzenFormField>
 
     @if (!IsEdit)
     {
-        <RadzenFormField Text="Password">
-            <RadzenPassword @bind-Value="@model.Password" Style="width: 100%;" />
+        <RadzenFormField Text="Password" AllowFloatingLabel="false" Variant="Variant.Text">
+            <RadzenPassword @bind-Value="@_model.Password" Style="width: 100%;" />
         </RadzenFormField>
     }
 
     <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
-        <RadzenButton Text="Save" Click="@OnSubmit" ButtonStyle="ButtonStyle.Primary" />
-        <RadzenButton Text="Cancel" Click="@Cancel" ButtonStyle="ButtonStyle.Light" />
+        <RadzenButton Text="Save" Click="@OnSubmit" ButtonStyle="ButtonStyle.Primary" Disabled="@_isSaving" />
+        <RadzenButton Text="Cancel" Click="@Cancel" ButtonStyle="ButtonStyle.Light" Disabled="@_isSaving" />
     </RadzenStack>
 </RadzenStack>
 
 @code {
     [Parameter] public Guid? UserId { get; set; }
 
-    private UserFormModel model = new();
+    private UserFormModel _model = new();
+    private bool _isSaving;
+    private string? _errorMessage;
     private bool IsEdit => UserId.HasValue;
 
     private class UserFormModel
@@ -41,10 +56,80 @@
         public string Password { get; set; } = "";
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        if (IsEdit)
+        {
+            await LoadUser();
+        }
+    }
+
+    private async Task LoadUser()
+    {
+        var user = await GetUserHandler.HandleAsync(new GetUserById.Request(UserId!.Value.ToString()), CancellationToken.None);
+        if (user == null)
+        {
+            _errorMessage = "User not found";
+            return;
+        }
+
+        _model.Email = user.Email;
+        _model.FirstName = user.FirstName;
+        _model.LastName = user.LastName;
+    }
+
     private async Task OnSubmit()
     {
-        // TODO: Implement create/update logic
-        DialogService.Close(true);
+        _errorMessage = null;
+        _isSaving = true;
+
+        try
+        {
+            if (IsEdit)
+            {
+                var updateRequest = new UpdateUser.Request(
+                    UserId!.Value.ToString(),
+                    _model.Email,
+                    _model.FirstName,
+                    _model.LastName
+                );
+
+                var result = await UpdateUserHandler.HandleAsync(updateRequest, CancellationToken.None);
+                if (result.IsSuccess)
+                {
+                    NotificationService.Notify(NotificationSeverity.Success, "Success", "User updated");
+                    DialogService.Close(true);
+                }
+                else
+                {
+                    _errorMessage = result.Error.Message;
+                }
+            }
+            else
+            {
+                var createRequest = new CreateUser.Request(
+                    _model.Email,
+                    _model.Password,
+                    _model.FirstName,
+                    _model.LastName
+                );
+
+                var result = await CreateUserHandler.HandleAsync(createRequest, CancellationToken.None);
+                if (result.IsSuccess)
+                {
+                    NotificationService.Notify(NotificationSeverity.Success, "Success", "User created");
+                    DialogService.Close(true);
+                }
+                else
+                {
+                    _errorMessage = result.Error.Message;
+                }
+            }
+        }
+        finally
+        {
+            _isSaving = false;
+        }
     }
 
     private void Cancel()
