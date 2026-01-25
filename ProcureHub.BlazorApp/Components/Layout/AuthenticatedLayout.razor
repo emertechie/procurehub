@@ -16,7 +16,9 @@
                     <Authorized>
                         <RadzenProfileMenu>
                             <Template>
-                                <RadzenGravatar Email="@context.User.Identity?.Name" />
+                                <Gravatar Email="@context.User.Identity?.Name"
+                                          Style="width: 32px; height: 32px;"
+                                          GravatarStyle="GravatarStyle.Identicon" />
                             </Template>
                             <ChildContent>
                                 <RadzenProfileMenuItem Text="Profile" Path="/Account/Manage" />

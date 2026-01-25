@@ -37,7 +37,9 @@
             <RadzenDataGridColumn TItem="QueryUsers.Response" Title="User" Width="300px">
                 <Template Context="user">
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-                        <RadzenGravatar Email="@user.Email" Style="width: 32px; height: 32px;" />
+                        <Gravatar Email="@user.Email"
+                                  Style="width: 32px; height: 32px;"
+                                  GravatarStyle="GravatarStyle.Identicon" />
                         <RadzenStack Gap="0">
                             <RadzenText TextStyle="TextStyle.Body2">@user.FirstName @user.LastName</RadzenText>
                             <RadzenText TextStyle="TextStyle.Caption">@user.Email</RadzenText>

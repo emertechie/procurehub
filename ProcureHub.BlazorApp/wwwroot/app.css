@@ -1,2 +1,6 @@
 :root {
 }
+
+.rz-gravatar {
+    border: solid 1px var(--rz-base-200);
+}
