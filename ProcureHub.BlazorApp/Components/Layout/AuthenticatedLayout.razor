@@ -47,10 +47,10 @@
             <AppLogo />
         </RadzenStack>
 
-        <RadzenPanelMenu ShowArrow="false" DisplayStyle="MenuItemDisplayStyle.Text">
+        <RadzenPanelMenu ShowArrow="false" DisplayStyle="MenuItemDisplayStyle.IconAndText">
             <RadzenPanelMenuItem Text="Home" Path="/dashboard" Icon="home" />
 
-            <RadzenPanelMenuItem Text="Request Management" Icon="description" Expanded="true">
+            <RadzenPanelMenuItem Text="Request Management" Expanded="true">
                 <RadzenPanelMenuItem Text="Requests" Path="/requests" Icon="list_alt" />
                 <AuthorizeView Roles="Requester">
                     <RadzenPanelMenuItem Text="New Request" Path="/requests/new" Icon="add_circle" />
@@ -58,13 +58,13 @@
             </RadzenPanelMenuItem>
 
             <AuthorizeView Roles="Approver">
-                <RadzenPanelMenuItem Text="Approvals" Icon="check_circle" Expanded="true">
+                <RadzenPanelMenuItem Text="Approvals" Expanded="true">
                     <RadzenPanelMenuItem Text="Pending Approvals" Path="/approvals" Icon="pending_actions" />
                 </RadzenPanelMenuItem>
             </AuthorizeView>
 
             <AuthorizeView Roles="Admin">
-                <RadzenPanelMenuItem Text="Administration" Icon="settings" Expanded="true">
+                <RadzenPanelMenuItem Text="Administration" Expanded="true">
                     <RadzenPanelMenuItem Text="Users" Path="/admin/users" Icon="people" />
                     <RadzenPanelMenuItem Text="Departments" Path="/admin/departments" Icon="business" />
                 </RadzenPanelMenuItem>

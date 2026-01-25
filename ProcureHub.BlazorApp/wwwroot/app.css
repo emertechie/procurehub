@@ -27,3 +27,8 @@
 .rz-gravatar {
     border: solid 1px var(--rz-base-200);
 }
+
+.rz-panel-menu > .rz-navigation-item > .rz-navigation-item-wrapper:hover {
+    background-color: inherit;
+}
+
