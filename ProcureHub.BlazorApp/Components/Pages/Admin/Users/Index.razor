@@ -31,14 +31,15 @@
                     AllowPaging="true"
                     PageSize="@PageSize"
                     IsLoading="@_isLoading"
-                    PagerHorizontalAlign="HorizontalAlign.Center">
+                    PagerHorizontalAlign="HorizontalAlign.Center"
+                    AllowAlternatingRows="false">
         <Columns>
             <RadzenDataGridColumn TItem="QueryUsers.Response" Title="User" Width="300px">
                 <Template Context="user">
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
                         <RadzenGravatar Email="@user.Email" Style="width: 32px; height: 32px;" />
                         <RadzenStack Gap="0">
-                            <RadzenText TextStyle="TextStyle.Body1">@user.FirstName @user.LastName</RadzenText>
+                            <RadzenText TextStyle="TextStyle.Body2">@user.FirstName @user.LastName</RadzenText>
                             <RadzenText TextStyle="TextStyle.Caption">@user.Email</RadzenText>
                         </RadzenStack>
                     </RadzenStack>
@@ -60,7 +61,7 @@
                 <Template Context="user">
                     @if (user.Department != null)
                     {
-                        <RadzenText TextStyle="TextStyle.Body1">@user.Department.Name</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body2">@user.Department.Name</RadzenText>
                     }
                     else
                     {
