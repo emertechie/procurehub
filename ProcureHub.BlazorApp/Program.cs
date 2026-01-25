@@ -29,7 +29,11 @@ builder.Services.AddAuthentication(options =>
         options.DefaultScheme = IdentityConstants.ApplicationScheme;
         options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
     })
-    .AddIdentityCookies();
+    .AddIdentityCookies(options =>
+    {
+        // Unique cookie name to avoid conflicts with WebApi on localhost
+        options.ApplicationCookie!.Configure(cookie => cookie.Cookie.Name = ".AspNetCore.Identity.BlazorApp");
+    });
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
     throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");

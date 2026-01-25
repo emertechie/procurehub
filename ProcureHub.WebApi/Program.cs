@@ -107,6 +107,12 @@ void RegisterServices(WebApplicationBuilder appBuilder)
         .AddRoles<Role>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
 
+    // Unique cookie name to avoid conflicts with BlazorApp on localhost
+    builder.Services.ConfigureApplicationCookie(options =>
+    {
+        options.Cookie.Name = ".AspNetCore.Identity.WebApi";
+    });
+
     // Add custom user sign-in validator
     builder.Services.AddScoped<UserSigninValidator>();
 
