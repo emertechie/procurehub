@@ -14,24 +14,28 @@
             @_errorMessage
         </RadzenAlert>
     }
-
-    <RadzenFormField Text="Email" AllowFloatingLabel="false" Variant="Variant.Text">
-        <RadzenTextBox @bind-Value="@_model.Email" Style="width: 100%;" />
-    </RadzenFormField>
-
-    <RadzenFormField Text="First Name" AllowFloatingLabel="false" Variant="Variant.Text">
-        <RadzenTextBox @bind-Value="@_model.FirstName" Style="width: 100%;" />
-    </RadzenFormField>
-
-    <RadzenFormField Text="Last Name" AllowFloatingLabel="false" Variant="Variant.Text">
-        <RadzenTextBox @bind-Value="@_model.LastName" Style="width: 100%;" />
-    </RadzenFormField>
+    
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+        <RadzenLabel Text="Email" Component="EmailInput" />
+        <RadzenTextBox Name="EmailInput" @bind-Value="@_model.Email" Placeholder="Enter your email" />
+    </RadzenStack>
+    
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+        <RadzenLabel Text="First Name" Component="FirstNameInput" />
+        <RadzenTextBox Name="FirstNameInput" @bind-Value="@_model.FirstName" Placeholder="Enter your first name" />
+    </RadzenStack>
+    
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+        <RadzenLabel Text="Last Name" Component="LastNameInput" />
+        <RadzenTextBox Name="LastNameInput" @bind-Value="@_model.LastName" Placeholder="Enter your last name" />
+    </RadzenStack>
 
     @if (!IsEdit)
     {
-        <RadzenFormField Text="Password" AllowFloatingLabel="false" Variant="Variant.Text">
-            <RadzenPassword @bind-Value="@_model.Password" Style="width: 100%;" />
-        </RadzenFormField>
+        <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+            <RadzenLabel Text="Password" Component="PasswordInput" />
+            <RadzenPassword Name="PasswordInput" @bind-Value="@_model.Password" Placeholder="Enter your password" />
+        </RadzenStack>
     }
 
     <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">

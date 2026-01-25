@@ -62,16 +62,17 @@ Use Material Icons with `RadzenIcon`:
 <RadzenIcon Icon="inventory_2" />
 ```
 
+Icon reference: https://fonts.google.com/icons?icon.set=Material+Symbols
+
 ## Forms
 
-- Never use floating labels for form fields, and always use the `Text` variant:  
+- Never use floating labels for form fields. Always use a separate label above the form control like below:  
 ```html
-    <RadzenFormField Text="First Name" AllowFloatingLabel="false" Variant="Variant.Text">
-        <RadzenTextBox @bind-Value="@model.FirstName" Style="width: 100%;" />
-    </RadzenFormField>
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+        <RadzenLabel Text="First Name" Component="FirstNameInput" />
+        <RadzenTextBox Name="FirstNameInput" @bind-Value="@_model.FirstName" Placeholder="Enter your first name" />
+    </RadzenStack>
 ```
-
-Icon reference: https://fonts.google.com/icons?icon.set=Material+Symbols
 
 ## Project Structure
 
