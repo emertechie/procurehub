@@ -1,4 +1,27 @@
 :root {
+    --background: oklch(0.985 0 0);
+    --rz-sidebar-background-color: #edeff3;
+    --rz-header-background-color: var(--background);
+    --rz-layout-background-color: var(--background);
+    --rz-profile-menu-top-item-background-color: var(--background);
+    --rz-panel-menu-item-background-color: inherit;
+    --rz-panel-menu-item-2nd-level-background-color: inherit;
+    --rz-panel-menu-item-3rd-level-background-color: inherit;
+    
+    --rz-panel-menu-item-2nd-level-hover-background-color: var(--rz-base-100);
+    --rz-panel-menu-item-2nd-level-active-color: var(--rz-on-primary-lighter);
+    --rz-panel-menu-item-2nd-level-active-background-color: inherit;
+    --rz-panel-menu-item-3rd-level-active-background-color: inherit;
+    --rz-panel-menu-item-3rd-level-active-color: var(--rz-on-primary-lighter);
+    --rz-panel-menu-item-2nd-level-active-font-weight: 500;
+}
+
+.rz-layout .rz-header .rz-stack {
+    padding: 0 !important;
+
+    .rz-sidebar-toggle {
+        padding: 1rem;
+    }
 }
 
 .rz-gravatar {
