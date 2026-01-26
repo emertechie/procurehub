@@ -13,7 +13,6 @@
 @inject DialogService DialogService
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService
-@inject ILogger<Index> Logger
 
 <PageTitle>Users</PageTitle>
 
@@ -26,7 +25,8 @@
     <RadzenTextBox Placeholder="Search users..." @bind-Value="@_searchTerm" 
                    Change="@(() => LoadUsers())" Style="width: 300px;" />
 
-    <RadzenDataGrid @ref="_grid" Data="@_queryUsersState.Response?.Data" TItem="QueryUsers.Response"
+    <RadzenDataGrid TItem="QueryUsers.Response"
+                    Data="@_queryUsersState.Response?.Data"
                     Count="@(_queryUsersState.Response?.TotalCount ?? 0)"
                     LoadData="@OnLoadData"
                     AllowPaging="true"
@@ -128,7 +128,6 @@
     readonly QueryState<PagedResult<QueryUsers.Response>> _queryUsersState = new();
     string _searchTerm = "";
     int _currentPage = 1;
-    RadzenDataGrid<QueryUsers.Response> _grid = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -143,19 +142,12 @@
 
     async Task LoadUsers()
     {
-        Logger.LogInformation("Loading users");
-
-        var request = new QueryUsers.Request
-        (
-            Email: string.IsNullOrWhiteSpace(_searchTerm) ? null : _searchTerm,
-            Page: _currentPage,
-            PageSize: PageSize
-        );
+        var email = string.IsNullOrWhiteSpace(_searchTerm) ? null : _searchTerm;
+        var request = new QueryUsers.Request(email, _currentPage, PageSize);
 
         await AsyncOperation.Query(
             _queryUsersState,
-            () => QueryUsersHandler.HandleAsync(request, CancellationToken.None),
-            StateHasChanged);
+            () => QueryUsersHandler.HandleAsync(request, CancellationToken.None));
     }
 
     async Task OpenCreateUserDialog()
