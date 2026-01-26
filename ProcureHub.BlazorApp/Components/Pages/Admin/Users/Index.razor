@@ -2,6 +2,7 @@
 @attribute [Authorize(Roles = "Admin")]
 @layout AuthenticatedLayout
 
+@using ProcureHub.BlazorApp.Helpers
 @using ProcureHub.Features.Users
 @using ProcureHub.Common.Pagination
 @using ProcureHub.Infrastructure
@@ -25,12 +26,12 @@
     <RadzenTextBox Placeholder="Search users..." @bind-Value="@_searchTerm" 
                    Change="@(() => LoadUsers())" Style="width: 300px;" />
 
-    <RadzenDataGrid @ref="_grid" Data="@_users" TItem="QueryUsers.Response"
-                    Count="@_totalCount"
+    <RadzenDataGrid @ref="_grid" Data="@_queryUsersState.Response?.Data" TItem="QueryUsers.Response"
+                    Count="@(_queryUsersState.Response?.TotalCount ?? 0)"
                     LoadData="@OnLoadData"
                     AllowPaging="true"
                     PageSize="@PageSize"
-                    IsLoading="@_isLoading"
+                    IsLoading="@_queryUsersState.IsLoading"
                     PagerHorizontalAlign="HorizontalAlign.Center"
                     AllowAlternatingRows="false">
         <Columns>
@@ -123,13 +124,11 @@
 
 @code {
     const int PageSize = 10;
-    
-    RadzenDataGrid<QueryUsers.Response> _grid = null!;
-    IEnumerable<QueryUsers.Response> _users = new List<QueryUsers.Response>();
-    int _totalCount;
-    bool _isLoading;
+
+    readonly QueryState<PagedResult<QueryUsers.Response>> _queryUsersState = new();
     string _searchTerm = "";
     int _currentPage = 1;
+    RadzenDataGrid<QueryUsers.Response> _grid = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -146,7 +145,6 @@
     {
         Logger.LogInformation("Loading users");
 
-        _isLoading = true;
         var request = new QueryUsers.Request
         (
             Email: string.IsNullOrWhiteSpace(_searchTerm) ? null : _searchTerm,
@@ -154,10 +152,10 @@
             PageSize: PageSize
         );
 
-        var result = await QueryUsersHandler.HandleAsync(request, CancellationToken.None);
-        _users = result.Data;
-        _totalCount = result.TotalCount;
-        _isLoading = false;
+        await AsyncOperation.Query(
+            _queryUsersState,
+            () => QueryUsersHandler.HandleAsync(request, CancellationToken.None),
+            StateHasChanged);
     }
 
     async Task OpenCreateUserDialog()
