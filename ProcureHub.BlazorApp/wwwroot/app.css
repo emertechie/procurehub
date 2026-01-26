@@ -14,6 +14,7 @@
     --rz-panel-menu-item-3rd-level-active-background-color: inherit;
     --rz-panel-menu-item-3rd-level-active-color: var(--rz-on-primary-lighter);
     --rz-panel-menu-item-2nd-level-active-font-weight: 500;
+
 }
 
 .rz-layout .rz-header .rz-stack {
@@ -32,3 +33,6 @@
     background-color: inherit;
 }
 
+.rz-panel-menu > .rz-navigation-item:not(:first-child) {
+    padding-bottom: 0.75em;
+}
