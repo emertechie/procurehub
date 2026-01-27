@@ -6,7 +6,7 @@ public class ResetDatabaseFixture(ApiTestHostFixture hostFixture) : IAsyncLifeti
     {
         // Accessing Services triggers the WebApplicationFactory to build and start,
         // which runs the database migrations. This must happen before ResetDatabaseAsync
-        // otherwise Respawn will fail with "No tables found".
+        // otherwise Respawn can fail with "No tables found" (depends on test run order).
         _ = hostFixture.ApiTestHost.Services;
 
         await DatabaseResetter.ResetDatabaseAsync();
