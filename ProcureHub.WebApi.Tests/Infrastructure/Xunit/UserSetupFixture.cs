@@ -8,7 +8,7 @@ namespace ProcureHub.WebApi.Tests.Infrastructure.Xunit;
 /// </summary>
 public class UserSetupFixture
 {
-    private ConcurrentDictionary<string, bool> _createdUsers = new();
+    private readonly ConcurrentDictionary<string, bool> _createdUsers = new();
 
     public async Task EnsureUserCreated(
         IHttpClientAuthHelper httpClientAuthHelper,
