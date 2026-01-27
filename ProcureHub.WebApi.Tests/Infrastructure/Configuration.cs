@@ -7,6 +7,7 @@ public static class Configuration
     private static readonly Lazy<IConfigurationRoot> ConfigurationBuilder = new(() => new ConfigurationBuilder()
         .SetBasePath(Directory.GetCurrentDirectory())
         .AddJsonFile("appsettings.json")
+        .AddEnvironmentVariables()
         .Build());
 
     public static string GetConnectionString()
