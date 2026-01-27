@@ -41,9 +41,19 @@ public class RoleTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
         return new TheoryData<EndpointInfo>
         {
             new EndpointInfo("/roles", "GET", "QueryRoles"),
-            new EndpointInfo("/users/{id}/roles", "POST", "AssignRole"),
+            new EndpointInfo("/users/{userId}/roles", "POST", "AssignRole"),
             new EndpointInfo("/users/{userId}/roles/{roleId}", "DELETE", "RemoveRole")
         };
+    }
+
+    private static string ReplaceTestIds(string path)
+    {
+        const string testUserId = "test-user-id";
+        const string testRoleId = "test-role-id";
+
+        return path
+            .Replace("{userId}", testUserId)
+            .Replace("{roleId}", testRoleId);
     }
 
     [Theory]
@@ -52,13 +62,7 @@ public class RoleTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
     {
         // Note: Not logging in to test unauth access
 
-        const string testUserId = "test-user-id";
-        const string testRoleId = "test-role-id";
-
-        var path = endpoint.Path
-            .Replace("{id}", testUserId)
-            .Replace("{userId}", testUserId)
-            .Replace("{roleId}", testRoleId);
+        var path = ReplaceTestIds(endpoint.Path);
         var request = new HttpRequestMessage(new HttpMethod(endpoint.Method), path);
 
         var resp = await HttpClient.SendAsync(request);
@@ -72,9 +76,7 @@ public class RoleTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
         // Log in as a regular user, not an admin
         await LoginAsync(RequesterUserEmail, RequesterUserPassword);
 
-        const string testId = "test-id";
-
-        var path = endpoint.Path.Replace("{id}", testId);
+        var path = ReplaceTestIds(endpoint.Path);
         var request = new HttpRequestMessage(new HttpMethod(endpoint.Method), path);
 
         var resp = await HttpClient.SendAsync(request);

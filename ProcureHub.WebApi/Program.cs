@@ -107,10 +107,22 @@ void RegisterServices(WebApplicationBuilder appBuilder)
         .AddRoles<Role>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
 
-    // Unique cookie name to avoid conflicts with BlazorApp on localhost
     builder.Services.ConfigureApplicationCookie(options =>
     {
+        // Unique cookie name to avoid conflicts with BlazorApp on localhost
         options.Cookie.Name = ".AspNetCore.Identity.WebApi";
+        
+        // Always return status codes rather than redirect:
+        options.Events.OnRedirectToLogin = ctx =>
+        {
+            ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return Task.CompletedTask;
+        };
+        options.Events.OnRedirectToAccessDenied = ctx =>
+        {
+            ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return Task.CompletedTask;
+        };
     });
 
     // Add custom user sign-in validator
@@ -276,7 +288,7 @@ void ConfigureIdentityApiEndpoints(WebApplication app)
     {
         await signInManager.SignOutAsync();
         return Results.Ok();
-    }).RequireAuthorization();
+    }).RequireAuthorization(AuthorizationPolicyNames.Authenticated);
 
     // NOTE: Crude approach for demo app to block self-registration. (Only admins can create / invite users)
     // TODO: use derived `UserManager<User>` and override CreateAsync instead

@@ -61,7 +61,7 @@ public class AuthenticationTests(ApiTestHostFixture hostFixture, ITestOutputHelp
         // Set up the Bearer header with token
         HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResult.AccessToken);
 
-        // The /me endpoint not available for token access
+        // The /me endpoint is available for token access
         var meResp = await HttpClient.GetAsync("/me");
         Assert.Equal(HttpStatusCode.OK, meResp.StatusCode);
         var meResult = await meResp.Content.ReadFromJsonAsync<MeResponse>();

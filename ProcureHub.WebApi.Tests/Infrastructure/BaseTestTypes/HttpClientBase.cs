@@ -23,6 +23,7 @@ public abstract class HttpClientBase : IHttpClientAuthHelper
     {
         ApiTestHost = hostFixture.ApiTestHost;
         ApiTestHost.OutputHelper = testOutputHelper;
+        ApiTestHost.ClientOptions.AllowAutoRedirect = false;
         HttpClient = ApiTestHost.CreateClient();
     }
 
