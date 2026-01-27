@@ -7,6 +7,21 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: dbuser
+          POSTGRES_PASSWORD: dbpassword
+          POSTGRES_DB: procurehub_tests
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,6 +37,7 @@ jobs:
       - name: Build
         run: dotnet build ProcureHub.sln --no-restore --configuration Release
 
-      # Temporarily disabling tests until pipeline set up (Need to set up PG DB)
-      # - name: Test
-      #   run: dotnet test ProcureHub.sln --no-build --configuration Release --verbosity normal
+      - name: Test
+        run: dotnet test ProcureHub.sln --no-build --configuration Release --verbosity normal
+        env:
+          ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=procurehub_tests;Username=dbuser;Password=dbpassword"
