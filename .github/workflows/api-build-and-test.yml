@@ -38,6 +38,14 @@ jobs:
         run: dotnet build ProcureHub.sln --no-restore --configuration Release
 
       - name: Test
-        run: dotnet test ProcureHub.sln --no-build --configuration Release --verbosity normal
+        run: dotnet test ProcureHub.sln --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=ProcureHubTests.trx"  --results-directory ./TestResults
         env:
           ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=procurehub_tests;Username=dbuser;Password=dbpassword"
+
+      - name: Test Report
+          uses: dorny/test-reporter@v2
+          if: ${{ !cancelled() }} # run this step even if previous step failed
+          with:
+            name: Test Report
+            path: TestResults/*.trx
+            reporter: dotnet-trx
