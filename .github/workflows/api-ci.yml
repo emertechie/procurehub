@@ -7,7 +7,7 @@ on:
       - 'ProcureHub/**'
       - 'ProcureHub.WebApi/**'
       - 'ProcureHub.WebApi.Tests/**'
-      - '.github/workflows/api-build.yml'
+      - '.github/workflows/api-build-and-test.yml'
       - '.github/workflows/api-ci.yml'
   pull_request:
     branches: [main]
@@ -15,7 +15,7 @@ on:
       - 'ProcureHub/**'
       - 'ProcureHub.WebApi/**'
       - 'ProcureHub.WebApi.Tests/**'
-      - '.github/workflows/api-build.yml'
+      - '.github/workflows/api-build-and-test.yml'
       - '.github/workflows/api-ci.yml'
 
 jobs:
