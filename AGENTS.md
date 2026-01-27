@@ -10,7 +10,7 @@
 
 # Plans
 
-- Store plans in the `./plans` folder
+- Store plans in the `./plans` folder in the root of the repo.
 
 # Tech Stack
 
