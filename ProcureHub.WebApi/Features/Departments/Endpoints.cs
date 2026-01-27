@@ -18,7 +18,7 @@ public static class Endpoints
             .WithTags("Departments");
 
         group.MapPost("/departments", async (
-                [FromServices] IRequestHandler<CreateDepartment.Request, Result<Guid>> handler,
+                [FromServices] ICommandHandler<CreateDepartment.Request, Result<Guid>> handler,
                 [FromBody] CreateDepartment.Request request,
                 CancellationToken token
             ) =>
@@ -34,7 +34,7 @@ public static class Endpoints
             .ProducesValidationProblem();
 
         group.MapGet("/departments", async (
-                [FromServices] IRequestHandler<QueryDepartments.Request, QueryDepartments.Response[]> handler,
+                [FromServices] IQueryHandler<QueryDepartments.Request, QueryDepartments.Response[]> handler,
                 CancellationToken token
             ) =>
             {
@@ -45,7 +45,7 @@ public static class Endpoints
             .Produces<DataResponse<QueryDepartments.Response[]>>();
 
         group.MapGet("/departments/{id:guid}", async (
-                [FromServices] IRequestHandler<GetDepartmentById.Request, GetDepartmentById.Response?> handler,
+                [FromServices] IQueryHandler<GetDepartmentById.Request, GetDepartmentById.Response?> handler,
                 CancellationToken token,
                 Guid id
             ) =>
@@ -60,7 +60,7 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPut("/departments/{id:guid}", async (
-                [FromServices] IRequestHandler<UpdateDepartment.Request, Result> handler,
+                [FromServices] ICommandHandler<UpdateDepartment.Request, Result> handler,
                 [FromBody] UpdateDepartment.Request request,
                 CancellationToken token,
                 Guid id
@@ -84,7 +84,7 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapDelete("/departments/{id:guid}", async (
-                [FromServices] IRequestHandler<DeleteDepartment.Request, Result> handler,
+                [FromServices] ICommandHandler<DeleteDepartment.Request, Result> handler,
                 CancellationToken token,
                 Guid id
             ) =>

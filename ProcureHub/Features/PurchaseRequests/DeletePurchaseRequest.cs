@@ -18,7 +18,7 @@ public static class DeletePurchaseRequest
         }
     }
 
-    public class Handler(ApplicationDbContext dbContext) : IRequestHandler<Request, Result>
+    public class Handler(ApplicationDbContext dbContext) : ICommandHandler<Request, Result>
     {
         public async Task<Result> HandleAsync(Request request, CancellationToken token)
         {

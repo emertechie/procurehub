@@ -21,7 +21,7 @@ public static class Endpoints
             .WithTags("PurchaseRequests");
 
         group.MapPost("/purchase-requests", async (
-                [FromServices] IRequestHandler<CreatePurchaseRequest.Request, Result<Guid>> handler,
+                [FromServices] ICommandHandler<CreatePurchaseRequest.Request, Result<Guid>> handler,
                 [FromBody] CreatePurchaseRequest.Request request,
                 ClaimsPrincipal user,
                 CancellationToken token
@@ -45,7 +45,7 @@ public static class Endpoints
             .ProducesValidationProblem();
 
         group.MapGet("/purchase-requests", async (
-                [FromServices] IRequestHandler<QueryPurchaseRequests.Request, Result<PagedResult<QueryPurchaseRequests.Response>>> handler,
+                [FromServices] IQueryHandler<QueryPurchaseRequests.Request, Result<PagedResult<QueryPurchaseRequests.Response>>> handler,
                 ClaimsPrincipal user,
                 CancellationToken token,
                 [FromQuery] Models.PurchaseRequestStatus? status,
@@ -72,7 +72,7 @@ public static class Endpoints
             .ProducesValidationProblem();
 
         group.MapGet("/purchase-requests/{id:guid}", async (
-                [FromServices] IRequestHandler<GetPurchaseRequestById.Request, Result<GetPurchaseRequestById.Response>> handler,
+                [FromServices] IQueryHandler<GetPurchaseRequestById.Request, Result<GetPurchaseRequestById.Response>> handler,
                 ClaimsPrincipal user,
                 CancellationToken token,
                 Guid id
@@ -95,7 +95,7 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPut("/purchase-requests/{id:guid}", async (
-                [FromServices] IRequestHandler<UpdatePurchaseRequest.Request, Result> handler,
+                [FromServices] ICommandHandler<UpdatePurchaseRequest.Request, Result> handler,
                 [FromBody] UpdatePurchaseRequest.Request request,
                 CancellationToken token,
                 Guid id
@@ -119,7 +119,7 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("/purchase-requests/{id:guid}/submit", async (
-                [FromServices] IRequestHandler<SubmitPurchaseRequest.Request, Result> handler,
+                [FromServices] ICommandHandler<SubmitPurchaseRequest.Request, Result> handler,
                 CancellationToken token,
                 Guid id
             ) =>
@@ -136,7 +136,7 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("/purchase-requests/{id:guid}/approve", async (
-                [FromServices] IRequestHandler<ApprovePurchaseRequest.Request, Result> handler,
+                [FromServices] ICommandHandler<ApprovePurchaseRequest.Request, Result> handler,
                 ClaimsPrincipal user,
                 CancellationToken token,
                 Guid id
@@ -160,7 +160,7 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("/purchase-requests/{id:guid}/reject", async (
-                [FromServices] IRequestHandler<RejectPurchaseRequest.Request, Result> handler,
+                [FromServices] ICommandHandler<RejectPurchaseRequest.Request, Result> handler,
                 ClaimsPrincipal user,
                 CancellationToken token,
                 Guid id
@@ -184,7 +184,7 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapDelete("/purchase-requests/{id:guid}", async (
-                [FromServices] IRequestHandler<DeletePurchaseRequest.Request, Result> handler,
+                [FromServices] ICommandHandler<DeletePurchaseRequest.Request, Result> handler,
                 CancellationToken token,
                 Guid id
             ) =>

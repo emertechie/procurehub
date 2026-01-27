@@ -34,7 +34,7 @@ public static class CreatePurchaseRequest
     }
 
     public class Handler(ApplicationDbContext dbContext, PurchaseRequestNumberGenerator purchaseRequestNumberGenerator)
-        : IRequestHandler<Request, Result<Guid>>
+        : ICommandHandler<Request, Result<Guid>>
     {
         public async Task<Result<Guid>> HandleAsync(Request request, CancellationToken token)
         {

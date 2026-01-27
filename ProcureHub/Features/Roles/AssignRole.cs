@@ -24,7 +24,7 @@ public static class AssignRole
         UserManager<User> userManager,
         RoleManager<Role> roleManager,
         ILogger<Handler> logger)
-        : IRequestHandler<Request, Result>
+        : ICommandHandler<Request, Result>
     {
         public async Task<Result> HandleAsync(Request request, CancellationToken token)
         {

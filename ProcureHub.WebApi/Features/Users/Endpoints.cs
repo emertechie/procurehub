@@ -19,7 +19,7 @@ public static class Endpoints
             .WithTags("Users");
 
         group.MapPost("/users", async (
-                [FromServices] IRequestHandler<CreateUser.Request, Result<string>> handler,
+                [FromServices] ICommandHandler<CreateUser.Request, Result<string>> handler,
                 [FromBody] CreateUser.Request request,
                 CancellationToken token
             ) =>
@@ -35,7 +35,7 @@ public static class Endpoints
             .ProducesValidationProblem();
 
         group.MapGet("/users", async (
-                [FromServices] IRequestHandler<QueryUsers.Request, PagedResult<QueryUsers.Response>> handler,
+                [FromServices] IQueryHandler<QueryUsers.Request, PagedResult<QueryUsers.Response>> handler,
                 [AsParameters] QueryUsers.Request request,
                 CancellationToken token
             ) =>
@@ -47,7 +47,7 @@ public static class Endpoints
             .Produces<PagedResponse<QueryUsers.Response>>();
 
         group.MapGet("/users/{id}", async (
-                [FromServices] IRequestHandler<GetUserById.Request, GetUserById.Response?> handler,
+                [FromServices] IQueryHandler<GetUserById.Request, GetUserById.Response?> handler,
                 CancellationToken token,
                 string id) =>
             {
@@ -61,7 +61,7 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPut("/users/{id}", async (
-                [FromServices] IRequestHandler<UpdateUser.Request, Result> handler,
+                [FromServices] ICommandHandler<UpdateUser.Request, Result> handler,
                 [FromBody] UpdateUser.Request request,
                 CancellationToken token,
                 string id
@@ -84,7 +84,7 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPatch("/users/{id}/enable", async (
-                [FromServices] IRequestHandler<EnableUser.Request, Result> handler,
+                [FromServices] ICommandHandler<EnableUser.Request, Result> handler,
                 CancellationToken token,
                 string id
             ) =>
@@ -100,7 +100,7 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPatch("/users/{id}/disable", async (
-                [FromServices] IRequestHandler<DisableUser.Request, Result> handler,
+                [FromServices] ICommandHandler<DisableUser.Request, Result> handler,
                 CancellationToken token,
                 string id
             ) =>
@@ -116,7 +116,7 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPatch("/users/{id}/department", async (
-                [FromServices] IRequestHandler<AssignUserToDepartment.Request, Result> handler,
+                [FromServices] ICommandHandler<AssignUserToDepartment.Request, Result> handler,
                 [FromBody] AssignUserToDepartment.Request request,
                 CancellationToken token,
                 string id

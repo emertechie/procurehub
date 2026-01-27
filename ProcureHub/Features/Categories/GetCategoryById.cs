@@ -11,7 +11,7 @@ public static class GetCategoryById
     public record Response(Guid Id, string Name, DateTime CreatedAt, DateTime UpdatedAt);
 
     public class Handler(ApplicationDbContext dbContext)
-        : IRequestHandler<Request, Result<Response>>
+        : IQueryHandler<Request, Result<Response>>
     {
         public async Task<Result<Response>> HandleAsync(Request request, CancellationToken token)
         {

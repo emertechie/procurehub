@@ -20,7 +20,7 @@ public static class CreateCategory
     }
 
     public class Handler(ApplicationDbContext dbContext)
-        : IRequestHandler<Request, Result<Guid>>
+        : ICommandHandler<Request, Result<Guid>>
     {
         public async Task<Result<Guid>> HandleAsync(Request request, CancellationToken token)
         {

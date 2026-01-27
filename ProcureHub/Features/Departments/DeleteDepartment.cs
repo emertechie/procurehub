@@ -9,7 +9,7 @@ public static class DeleteDepartment
     public record Request(Guid Id);
 
     public class Handler(ApplicationDbContext dbContext)
-        : IRequestHandler<Request, Result>
+        : ICommandHandler<Request, Result>
     {
         public async Task<Result> HandleAsync(Request request, CancellationToken token)
         {

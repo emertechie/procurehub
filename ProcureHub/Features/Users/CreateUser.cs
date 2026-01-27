@@ -26,7 +26,7 @@ public static class CreateUser
     public class Handler(
         UserManager<User> userManager,
         ILogger<Handler> logger)
-        : IRequestHandler<Request, Result<string>>
+        : ICommandHandler<Request, Result<string>>
     {
         public async Task<Result<string>> HandleAsync(Request request, CancellationToken token)
         {

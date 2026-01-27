@@ -27,7 +27,7 @@ public static class UpdateUser
         ApplicationDbContext dbContext,
         UserManager<User> userManager,
         ILogger<Handler> logger)
-        : IRequestHandler<Request, Result>
+        : ICommandHandler<Request, Result>
     {
         public async Task<Result> HandleAsync(Request request, CancellationToken token)
         {

@@ -7,9 +7,9 @@
 @using ProcureHub.Common.Pagination
 @using ProcureHub.Infrastructure
 
-@inject IRequestHandler<QueryUsers.Request, PagedResult<QueryUsers.Response>> QueryUsersHandler
-@inject IRequestHandler<EnableUser.Request, Result> EnableUserHandler
-@inject IRequestHandler<DisableUser.Request, Result> DisableUserHandler
+@inject IQueryHandler<QueryUsers.Request, PagedResult<QueryUsers.Response>> QueryUsersHandler
+@inject ICommandHandler<EnableUser.Request, Result> EnableUserHandler
+@inject ICommandHandler<DisableUser.Request, Result> DisableUserHandler
 @inject DialogService DialogService
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService

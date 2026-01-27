@@ -18,7 +18,7 @@ public static class Endpoints
             .WithTags("Categories");
 
         group.MapPost("/categories", async (
-                [FromServices] IRequestHandler<CreateCategory.Request, Result<Guid>> handler,
+                [FromServices] ICommandHandler<CreateCategory.Request, Result<Guid>> handler,
                 [FromBody] CreateCategory.Request request,
                 CancellationToken token
             ) =>
@@ -34,7 +34,7 @@ public static class Endpoints
             .ProducesValidationProblem();
 
         group.MapGet("/categories", async (
-                [FromServices] IRequestHandler<QueryCategories.Request, QueryCategories.Response[]> handler,
+                [FromServices] IQueryHandler<QueryCategories.Request, QueryCategories.Response[]> handler,
                 CancellationToken token
             ) =>
             {
@@ -45,7 +45,7 @@ public static class Endpoints
             .Produces<DataResponse<QueryCategories.Response[]>>();
 
         group.MapGet("/categories/{id:guid}", async (
-                [FromServices] IRequestHandler<GetCategoryById.Request, Result<GetCategoryById.Response>> handler,
+                [FromServices] IQueryHandler<GetCategoryById.Request, Result<GetCategoryById.Response>> handler,
                 CancellationToken token,
                 Guid id
             ) =>
@@ -61,7 +61,7 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPut("/categories/{id:guid}", async (
-                [FromServices] IRequestHandler<UpdateCategory.Request, Result> handler,
+                [FromServices] ICommandHandler<UpdateCategory.Request, Result> handler,
                 [FromBody] UpdateCategory.Request request,
                 CancellationToken token,
                 Guid id
@@ -85,7 +85,7 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapDelete("/categories/{id:guid}", async (
-                [FromServices] IRequestHandler<DeleteCategory.Request, Result> handler,
+                [FromServices] ICommandHandler<DeleteCategory.Request, Result> handler,
                 CancellationToken token,
                 Guid id
             ) =>

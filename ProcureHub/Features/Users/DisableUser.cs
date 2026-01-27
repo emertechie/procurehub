@@ -21,7 +21,7 @@ public static class DisableUser
     public class Handler(
         ApplicationDbContext dbContext,
         ILogger<Handler> logger)
-        : IRequestHandler<Request, Result>
+        : ICommandHandler<Request, Result>
     {
         public async Task<Result> HandleAsync(Request request, CancellationToken token)
         {

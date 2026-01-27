@@ -3,9 +3,9 @@
 
 @inject DialogService DialogService
 @inject NotificationService NotificationService
-@inject IRequestHandler<GetUserById.Request, GetUserById.Response?> GetUserHandler
-@inject IRequestHandler<CreateUser.Request, Result<string>> CreateUserHandler
-@inject IRequestHandler<UpdateUser.Request, Result> UpdateUserHandler
+@inject IQueryHandler<GetUserById.Request, GetUserById.Response?> GetUserHandler
+@inject ICommandHandler<CreateUser.Request, Result<string>> CreateUserHandler
+@inject ICommandHandler<UpdateUser.Request, Result> UpdateUserHandler
 
 <RadzenStack Gap="1rem">
     @if (_errorMessage != null)

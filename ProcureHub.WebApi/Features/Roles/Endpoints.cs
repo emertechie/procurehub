@@ -18,7 +18,7 @@ public static class Endpoints
             .WithTags("Roles");
 
         group.MapGet("/roles", async (
-                [FromServices] IRequestHandler<QueryRoles.Request, QueryRoles.Role[]> handler,
+                [FromServices] IQueryHandler<QueryRoles.Request, QueryRoles.Role[]> handler,
                 CancellationToken token
             ) =>
             {
@@ -29,7 +29,7 @@ public static class Endpoints
             .Produces<DataResponse<QueryRoles.Role[]>>();
 
         group.MapPost("/users/{userId}/roles", async (
-                [FromServices] IRequestHandler<AssignRole.Request, Result> handler,
+                [FromServices] ICommandHandler<AssignRole.Request, Result> handler,
                 [FromBody] AssignRole.Request request,
                 CancellationToken token,
                 string userId
@@ -52,7 +52,7 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapDelete("/users/{userId}/roles/{roleId}", async (
-                [FromServices] IRequestHandler<RemoveRole.Request, Result> handler,
+                [FromServices] ICommandHandler<RemoveRole.Request, Result> handler,
                 CancellationToken token,
                 string userId,
                 string roleId
