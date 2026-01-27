@@ -43,9 +43,9 @@ jobs:
           ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=procurehub_tests;Username=dbuser;Password=dbpassword"
 
       - name: Test Report
-          uses: dorny/test-reporter@v2
-          if: ${{ !cancelled() }} # run this step even if previous step failed
-          with:
-            name: Test Report
-            path: TestResults/*.trx
-            reporter: dotnet-trx
+        uses: dorny/test-reporter@v2
+        if: ${{ !cancelled() }} # run this step even if previous step failed
+        with:
+          name: Test Report
+          path: TestResults/*.trx
+          reporter: dotnet-trx
