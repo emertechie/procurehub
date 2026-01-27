@@ -30,10 +30,9 @@ public class ValidationExceptionHandler(IProblemDetailsService problemDetailsSer
         {
             Status = StatusCodes.Status400BadRequest,
             Title = "Validation failed",
-            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-            Instance = $"{httpContext.Request.Method} {httpContext.Request.Path}"
+            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1"
         };
-        problemDetails.Extensions["requestId"] = httpContext.TraceIdentifier;
+        ProblemDetailsHelper.ExtendWithHttpContext(problemDetails, httpContext);
 
         httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
 

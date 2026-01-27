@@ -22,10 +22,9 @@ public class GlobalExceptionHandler(
         {
             Status = StatusCodes.Status500InternalServerError,
             Title = "An error occurred while processing your request.",
-            Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
-            Instance = $"{httpContext.Request.Method} {httpContext.Request.Path}"
+            Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1"
         };
-        problemDetails.Extensions["requestId"] = httpContext.TraceIdentifier;
+        ProblemDetailsHelper.ExtendWithHttpContext(problemDetails, httpContext);
 
         httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
 

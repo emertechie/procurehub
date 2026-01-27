@@ -41,12 +41,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
     builder.Services.AddProblemDetails(options =>
     {
         options.CustomizeProblemDetails = context =>
-        {
-            context.ProblemDetails.Instance =
-                $"{context.HttpContext.Request.Method} {context.HttpContext.Request.Path}";
-
-            context.ProblemDetails.Extensions.TryAdd("requestId", context.HttpContext.TraceIdentifier);
-        };
+            ProblemDetailsHelper.ExtendWithHttpContext(context.ProblemDetails, context.HttpContext);
     });
 
     builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
