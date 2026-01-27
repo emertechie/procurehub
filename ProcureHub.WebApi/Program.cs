@@ -50,6 +50,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
     });
 
     builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
     // Configure JSON serialization to use string enum values
     builder.Services.ConfigureHttpJsonOptions(options =>
