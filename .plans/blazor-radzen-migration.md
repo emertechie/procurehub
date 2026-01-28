@@ -1,6 +1,6 @@
 # Blazor Radzen Migration Plan
 
-Mirror the React app (ProcureHub.WebApp) in Blazor Server using Radzen components.
+Mirror the React app (ProcureHub.WebApp) in Blazor Server using Radzen components in the ProcureHub.BlazorApp project.
 
 ## Phase 1: Foundation (Layout + Radzen Setup)
 
@@ -188,7 +188,7 @@ Inject:
 - Inject `AssignRolesToUser` handler to save
 
 ### Step 2.5: Assign Department Dialog
-
+ 
 `AssignDepartmentDialog.razor`:
 - `RadzenDropDown` with departments
 - Inject `QueryDepartments` handler

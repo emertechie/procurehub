@@ -2,7 +2,6 @@
 @attribute [Authorize(Roles = "Admin")]
 @layout AuthenticatedLayout
 
-@using ProcureHub.BlazorApp.Helpers
 @using ProcureHub.Features.Users
 @using ProcureHub.Common.Pagination
 @using ProcureHub.Infrastructure
@@ -26,12 +25,12 @@
                    Change="@(() => LoadUsers())" Style="width: 300px;" />
 
     <RadzenDataGrid TItem="QueryUsers.Response"
-                    Data="@_queryUsersState.Response?.Data"
-                    Count="@(_queryUsersState.Response?.TotalCount ?? 0)"
+                    Data="@_pagedUsers?.Data"
+                    Count="@(_pagedUsers?.TotalCount ?? 0)"
                     LoadData="@OnLoadData"
                     AllowPaging="true"
                     PageSize="@PageSize"
-                    IsLoading="@_queryUsersState.IsLoading"
+                    IsLoading="@_loading"
                     PagerHorizontalAlign="HorizontalAlign.Center"
                     AllowAlternatingRows="false">
         <Columns>
@@ -125,7 +124,8 @@
 @code {
     const int PageSize = 10;
 
-    readonly QueryState<PagedResult<QueryUsers.Response>> _queryUsersState = new();
+    PagedResult<QueryUsers.Response>? _pagedUsers;
+    bool _loading;
     string _searchTerm = "";
     int _currentPage = 1;
 
@@ -145,9 +145,15 @@
         var email = string.IsNullOrWhiteSpace(_searchTerm) ? null : _searchTerm;
         var request = new QueryUsers.Request(email, _currentPage, PageSize);
 
-        await AsyncOperation.Query(
-            _queryUsersState,
-            () => QueryUsersHandler.HandleAsync(request, CancellationToken.None));
+        _loading = true;
+        try
+        {
+            _pagedUsers = await QueryUsersHandler.HandleAsync(request, CancellationToken.None);
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
 
     async Task OpenCreateUserDialog()

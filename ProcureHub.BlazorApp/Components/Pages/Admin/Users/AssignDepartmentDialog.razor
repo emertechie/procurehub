@@ -1,45 +1,107 @@
-@using ProcureHub.Features.Users
 @using ProcureHub.Features.Departments
+@using ProcureHub.Features.Users
+@using ProcureHub.Infrastructure
+
 @inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject IQueryHandler<QueryDepartments.Request, QueryDepartments.Response[]> QueryDepartmentsHandler
+@inject IQueryHandler<GetUserById.Request, GetUserById.Response?> GetUserHandler
+@inject ICommandHandler<AssignUserToDepartment.Command, Result> AssignDepartmentHandler
 
 <RadzenStack Gap="1rem">
-    <RadzenFormField Text="Department">
-        <RadzenDropDown @bind-Value="@selectedDepartmentId" 
-                        Data="@departments" 
-                        TextProperty="Name" 
-                        ValueProperty="Id"
-                        AllowClear="true"
-                        Placeholder="Select department..."
-                        Style="width: 100%;" />
-    </RadzenFormField>
+    @if (_errorMessage != null)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">
+            @_errorMessage
+        </RadzenAlert>
+    }
 
-    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
-        <RadzenButton Text="Save" Click="@OnSave" ButtonStyle="ButtonStyle.Primary" />
-        <RadzenButton Text="Cancel" Click="@Cancel" ButtonStyle="ButtonStyle.Light" />
-    </RadzenStack>
+    @if (_isLoading)
+    {
+        <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+    }
+    else
+    {
+        <RadzenFormField Text="Department">
+            <RadzenDropDown TValue="Guid?"
+                            @bind-Value="@_selectedDepartmentId"
+                            Data="@_departments"
+                            TextProperty="Name"
+                            ValueProperty="Id"
+                            AllowClear="true"
+                            Placeholder="Select department..."
+                            Style="width: 100%;" />
+        </RadzenFormField>
+
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" JustifyContent="JustifyContent.End">
+            <RadzenButton Text="Save" Click="@OnSubmit" ButtonStyle="ButtonStyle.Primary" Disabled="@_isSaving" />
+            <RadzenButton Text="Cancel" Click="@Cancel" ButtonStyle="ButtonStyle.Light" Disabled="@_isSaving" />
+        </RadzenStack>
+    }
 </RadzenStack>
 
 @code {
     [Parameter] public Guid UserId { get; set; }
-
-    private Guid? selectedDepartmentId;
-    private List<DepartmentDto> departments = new();
-
-    private class DepartmentDto
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; } = "";
-    }
+    
+    private QueryDepartments.Response[] _departments = [];
+    private Guid? _selectedDepartmentId;
+    private bool _isLoading = true;
+    private bool _isSaving;
+    private string? _errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        // TODO: Load departments and user's current department
+        await LoadData();
     }
 
-    private async Task OnSave()
+    private async Task LoadData()
     {
-        // TODO: Implement department assignment logic
-        DialogService.Close(true);
+        _isLoading = true;
+
+        try
+        {
+            // Load all departments
+            _departments = await QueryDepartmentsHandler.HandleAsync(new QueryDepartments.Request(), CancellationToken.None);
+
+            // Load user's current department
+            var user = await GetUserHandler.HandleAsync(new GetUserById.Request(UserId.ToString()), CancellationToken.None);
+            if (user == null)
+            {
+                _errorMessage = "User not found";
+                return;
+            }
+
+            _selectedDepartmentId = user.Department?.Id;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task OnSubmit()
+    {
+        _errorMessage = null;
+        _isSaving = true;
+
+        try
+        {
+            var command = new AssignUserToDepartment.Command(UserId.ToString(), _selectedDepartmentId);
+            var result = await AssignDepartmentHandler.HandleAsync(command, CancellationToken.None);
+            if (result.IsSuccess)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Success", "Department updated");
+                DialogService.Close(true);
+            }
+            else
+            {
+                _errorMessage = result.Error.Message;
+            }
+        }
+        finally
+        {
+            _isSaving = false;
+        }
     }
 
     private void Cancel()

@@ -1,39 +1,138 @@
-@using ProcureHub.Features.Users
 @using ProcureHub.Features.Roles
+@using ProcureHub.Features.Users
+@using ProcureHub.Infrastructure
+
 @inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject IQueryHandler<QueryRoles.Request, QueryRoles.Role[]> QueryRolesHandler
+@inject IQueryHandler<GetUserById.Request, GetUserById.Response?> GetUserHandler
+@inject ICommandHandler<AssignRole.Command, Result> AssignRoleHandler
+@inject ICommandHandler<RemoveRole.Command, Result> RemoveRoleHandler
 
 <RadzenStack Gap="1rem">
-    <RadzenCheckBoxList @bind-Value="@selectedRoles" TValue="string" Orientation="Orientation.Vertical">
-        <Items>
-            @foreach (var role in availableRoles)
-            {
-                <RadzenCheckBoxListItem Text="@role" Value="@role" />
-            }
-        </Items>
-    </RadzenCheckBoxList>
+    @if (_errorMessage != null)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">
+            @_errorMessage
+        </RadzenAlert>
+    }
 
-    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
-        <RadzenButton Text="Save" Click="@OnSave" ButtonStyle="ButtonStyle.Primary" />
-        <RadzenButton Text="Cancel" Click="@Cancel" ButtonStyle="ButtonStyle.Light" />
-    </RadzenStack>
+    @if (_isLoading)
+    {
+        <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+    }
+    else
+    {
+        <RadzenCheckBoxList TValue="string"
+                            Data="@_allRoles"
+                            TextProperty="Name"
+                            ValueProperty="Id"
+                            @bind-Value="@_selectedRoleIds"
+                            Orientation="Orientation.Vertical" />
+
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" JustifyContent="JustifyContent.End">
+            <RadzenButton Text="Save" Click="@OnSubmit" ButtonStyle="ButtonStyle.Primary" Disabled="@_isSaving" />
+            <RadzenButton Text="Cancel" Click="@Cancel" ButtonStyle="ButtonStyle.Light" Disabled="@_isSaving" />
+        </RadzenStack>
+    }
 </RadzenStack>
 
 @code {
     [Parameter] public Guid UserId { get; set; }
 
-    private IEnumerable<string> selectedRoles = new List<string>();
-    private List<string> availableRoles = new();
+    private QueryRoles.Role[] _allRoles = [];
+    private IEnumerable<string> _selectedRoleIds = [];
+    private HashSet<string> _originalRoleIds = [];
+    private bool _isLoading = true;
+    private bool _isSaving;
+    private string? _errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        // TODO: Load available roles and user's current roles
-        availableRoles = new List<string> { "Admin", "Approver", "Requester" };
+        await LoadData();
     }
 
-    private async Task OnSave()
+    private async Task LoadData()
     {
-        // TODO: Implement role assignment logic
-        DialogService.Close(true);
+        _isLoading = true;
+
+        try
+        {
+            // Load all available roles
+            _allRoles = await QueryRolesHandler.HandleAsync(new QueryRoles.Request(), CancellationToken.None);
+
+            // Load user's current roles
+            var user = await GetUserHandler.HandleAsync(new GetUserById.Request(UserId.ToString()), CancellationToken.None);
+            if (user == null)
+            {
+                _errorMessage = "User not found";
+                return;
+            }
+
+            // Map role names to role IDs
+            var userRoleNames = user.Roles.ToHashSet();
+            _originalRoleIds = _allRoles
+                .Where(r => userRoleNames.Contains(r.Name))
+                .Select(r => r.Id)
+                .ToHashSet();
+            _selectedRoleIds = _originalRoleIds.ToList();
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task OnSubmit()
+    {
+        _errorMessage = null;
+        _isSaving = true;
+
+        try
+        {
+            var selectedSet = _selectedRoleIds.ToHashSet();
+
+            // Roles to add (in selected but not in original)
+            var rolesToAdd = selectedSet.Except(_originalRoleIds);
+
+            // Roles to remove (in original but not in selected)
+            var rolesToRemove = _originalRoleIds.Except(selectedSet);
+
+            // Add new roles
+            foreach (var roleId in rolesToAdd)
+            {
+                var result = await AssignRoleHandler.HandleAsync(
+                    new AssignRole.Command(UserId.ToString(), roleId),
+                    CancellationToken.None);
+
+                if (!result.IsSuccess)
+                {
+                    _errorMessage = result.Error.Message;
+                    return;
+                }
+            }
+
+            // Remove unselected roles
+            foreach (var roleId in rolesToRemove)
+            {
+                var result = await RemoveRoleHandler.HandleAsync(
+                    new RemoveRole.Command(UserId.ToString(), roleId),
+                    CancellationToken.None);
+
+                if (!result.IsSuccess)
+                {
+                    _errorMessage = result.Error.Message;
+                    return;
+                }
+            }
+
+            NotificationService.Notify(NotificationSeverity.Success, "Success", "Roles updated");
+            DialogService.Close(true);
+        }
+        finally
+        {
+            _isSaving = false;
+        }
     }
 
     private void Cancel()
