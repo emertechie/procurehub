@@ -9,6 +9,7 @@ It does not call the `ProcureHub.WebApi`. Instead, command / query handlers from
 - This app uses **Radzen Blazor Components** for the UI
   - Documentation: https://blazor.radzen.com
   - Use the "radzen.mcp" MCP tool to answer questions about the library
+- If using a `RadzenDataGrid` with a `LoadData` attribute, don't also load the data in the `OnInitializedAsync` method as it's not needed.   
 
 ### Customizing Theme Colors
 
