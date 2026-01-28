@@ -1,6 +1,8 @@
 # ProcureHub Blazor App - LLM Guidelines
 
-This is a .Net Blazor app.
+This is a .Net Blazor client for the ProcureHub application.
+
+It does not call the `ProcureHub.WebApi`. Instead, command / query handlers from the `ProcureHub` project are injected into Razor components and used directly. Example: `ProcureHub.BlazorApp/Components/Pages/Admin/Users/Index.razor`.
 
 ## UI Framework
 
