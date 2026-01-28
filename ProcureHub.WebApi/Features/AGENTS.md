@@ -10,12 +10,12 @@
             .WithTags("Users");
 
         group.MapPost("/users", async (
-                [FromServices] IRequestHandler<CreateUser.Request, Result<string>> handler,
-                [FromBody] CreateUser.Request request,
+                [FromServices] ICommandHandler<CreateUser.Command, Result<string>> handler,
+                [FromBody] CreateUser.Command command,
                 CancellationToken token
             ) =>
             {
-                var result = await handler.HandleAsync(request, token);
+                var result = await handler.HandleAsync(command, token);
                 return result.Match(
                     newUserId => Results.Created($"/users/{newUserId}", new { userId = newUserId }),
                     error => error.ToProblemDetails()
@@ -28,8 +28,8 @@
 - When mapping an endpoint, order lambda arguments as follows: [FromServices], [FromBody], CancellationToken, (other parameters). Example:
 ```cs
         group.MapPut("/users/{id}", async (
-                [FromServices] IRequestHandler<UpdateUser.Request, Result> handler,
-                [FromBody] UpdateUser.Request request,
+                [FromServices] ICommandHandler<UpdateUser.Request, Result> handler,
+                [FromBody] UpdateUser.Command command,
                 CancellationToken token,
                 string id
             ) =>
@@ -37,5 +37,5 @@
 - Enums can be bound automatically like: `[FromQuery] Models.PurchaseRequestStatus? status,`
 - Each endpoint must assign an operation name using `.WithName`
 - Each endpoint must define all possible return values using `.Produces` calls. Example: `.ProducesValidationProblem()`, `.Produces<GetUserById.Response>()`, etc
-- If an `IRequestHandler` returns a `PagedResult<T>`, use `PagedResponse.From(pagedResult);` to return result from endpoint handler.
+- If an `IQueryHandler` returns a `PagedResult<T>`, use `PagedResponse.From(pagedResult);` to return result from endpoint handler.
 - Good example to follow: `ProcureHub.WebApi/Features/Users/Endpoints.cs`

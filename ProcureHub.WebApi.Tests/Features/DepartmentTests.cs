@@ -111,8 +111,8 @@ public class DepartmentTestsWithSharedDb(
         await LoginAsAdminAsync();
 
         // No name
-        var reqNoName = new CreateDepartment.Request(null!);
-        var respNoName = await HttpClient.PostAsync("/departments", JsonContent.Create(reqNoName));
+        var cmdNoName = new CreateDepartment.Command(null!);
+        var respNoName = await HttpClient.PostAsync("/departments", JsonContent.Create(cmdNoName));
         await respNoName.AssertValidationProblemAsync(
             errors: new Dictionary<string, string[]> { ["Name"] = ["'Name' must not be empty."] });
     }
@@ -135,16 +135,16 @@ public class DepartmentTestsWithSharedDb(
         await LoginAsAdminAsync();
 
         // No name
-        var reqNoName = new UpdateDepartment.Request(Guid.NewGuid(), null!);
-        var respNoName = await HttpClient.PutAsync($"/departments/{reqNoName.Id}", JsonContent.Create(reqNoName));
+        var cmdNoName = new UpdateDepartment.Command(Guid.NewGuid(), null!);
+        var respNoName = await HttpClient.PutAsync($"/departments/{cmdNoName.Id}", JsonContent.Create(cmdNoName));
         await respNoName.AssertValidationProblemAsync(
             errors: new Dictionary<string, string[]> { ["Name"] = ["'Name' must not be empty."] });
 
         // Route id must match body id
         var deptId = Guid.NewGuid();
-        var updateReq = new UpdateDepartment.Request(deptId, "IT Department");
+        var updateCmd = new UpdateDepartment.Command(deptId, "IT Department");
         var differentId = Guid.NewGuid();
-        var updateResp = await HttpClient.PutAsync($"/departments/{differentId}", JsonContent.Create(updateReq));
+        var updateResp = await HttpClient.PutAsync($"/departments/{differentId}", JsonContent.Create(updateCmd));
 
         await updateResp.AssertProblemDetailsAsync(
             HttpStatusCode.BadRequest,
@@ -177,8 +177,8 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
         Assert.Empty(departments1.Data);
 
         // Create department
-        var createDeptReq = new CreateDepartment.Request("New Department");
-        var createDeptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createDeptReq));
+        var createDeptCmd = new CreateDepartment.Command("New Department");
+        var createDeptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createDeptCmd));
         Assert.Equal(HttpStatusCode.Created, createDeptResp.StatusCode);
 
         // Extract department ID from response
@@ -207,11 +207,11 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
 
         const string departmentName = "Operations";
 
-        var createReq = new CreateDepartment.Request(departmentName);
-        var createResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createReq));
+        var createCmd = new CreateDepartment.Command(departmentName);
+        var createResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createCmd));
         Assert.Equal(HttpStatusCode.Created, createResp.StatusCode);
 
-        var duplicateResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createReq));
+        var duplicateResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createCmd));
         await duplicateResp.AssertValidationProblemAsync(
             title: "Department name must be unique.",
             detail: "Department.DuplicateName",
@@ -233,17 +233,17 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
         const string duplicateName = "Operations";
         const string marketingName = "Marketing";
 
-        var createOpsReq = new CreateDepartment.Request(duplicateName);
-        var opsResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createOpsReq));
+        var createOpsCmd = new CreateDepartment.Command(duplicateName);
+        var opsResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createOpsCmd));
         Assert.Equal(HttpStatusCode.Created, opsResp.StatusCode);
 
-        var createMarketingReq = new CreateDepartment.Request(marketingName);
-        var marketingResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createMarketingReq));
+        var createMarketingCmd = new CreateDepartment.Command(marketingName);
+        var marketingResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createMarketingCmd));
         var marketingDept = await marketingResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         var marketingId = marketingDept.Id;
 
-        var updateReq = new UpdateDepartment.Request(marketingId, duplicateName);
-        var updateResp = await HttpClient.PutAsync($"/departments/{marketingId}", JsonContent.Create(updateReq));
+        var updateCmd = new UpdateDepartment.Command(marketingId, duplicateName);
+        var updateResp = await HttpClient.PutAsync($"/departments/{marketingId}", JsonContent.Create(updateCmd));
 
         await updateResp.AssertValidationProblemAsync(
             title: "Department name must be unique.",
@@ -264,14 +264,14 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
         await LoginAsAdminAsync();
 
         // Create department
-        var createReq = new CreateDepartment.Request("Marketing");
-        var createResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createReq));
+        var createCmd = new CreateDepartment.Command("Marketing");
+        var createResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createCmd));
         var createdDept = await createResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         var deptId = createdDept.Id;
 
         // Update department name
-        var updateReq = new UpdateDepartment.Request(deptId, "Marketing & Sales");
-        var updateResp = await HttpClient.PutAsync($"/departments/{deptId}", JsonContent.Create(updateReq));
+        var updateCmd = new UpdateDepartment.Command(deptId, "Marketing & Sales");
+        var updateResp = await HttpClient.PutAsync($"/departments/{deptId}", JsonContent.Create(updateCmd));
         Assert.Equal(HttpStatusCode.NoContent, updateResp.StatusCode);
 
         // Verify update
@@ -286,8 +286,8 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
         await LoginAsAdminAsync();
 
         var nonexistentId = Guid.NewGuid();
-        var updateReq = new UpdateDepartment.Request(nonexistentId, "Nonexistent Dept");
-        var updateResp = await HttpClient.PutAsync($"/departments/{nonexistentId}", JsonContent.Create(updateReq));
+        var updateCmd = new UpdateDepartment.Command(nonexistentId, "Nonexistent Dept");
+        var updateResp = await HttpClient.PutAsync($"/departments/{nonexistentId}", JsonContent.Create(updateCmd));
 
         await updateResp.AssertProblemDetailsAsync(
             HttpStatusCode.NotFound,
@@ -302,8 +302,8 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
         await LoginAsAdminAsync();
 
         // Create department
-        var createReq = new CreateDepartment.Request("Temporary Dept");
-        var createResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createReq));
+        var createCmd = new CreateDepartment.Command("Temporary Dept");
+        var createResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createCmd));
         var createdDept = await createResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         var deptId = createdDept.Id;
 
@@ -328,20 +328,20 @@ public class DepartmentTests(ApiTestHostFixture hostFixture, ITestOutputHelper t
         await LoginAsAdminAsync();
 
         // Create department
-        var deptReq = new CreateDepartment.Request("Finance");
-        var deptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(deptReq));
+        var deptCmd = new CreateDepartment.Command("Finance");
+        var deptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(deptCmd));
         var createdDept = await deptResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         var deptId = createdDept.Id;
 
         // Create user
-        var userReq = new CreateUser.Request("finance.user@example.com", "Test1234!", "Finance", "User");
-        var userResp = await HttpClient.PostAsync("/users", JsonContent.Create(userReq));
+        var userCmd = new CreateUser.Command("finance.user@example.com", "Test1234!", "Finance", "User");
+        var userResp = await HttpClient.PostAsync("/users", JsonContent.Create(userCmd));
         var createdUser = await userResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         var userId = createdUser.Id.ToString();
 
         // Assign user to department
-        var assignReq = new AssignUserToDepartment.Request(userId, deptId);
-        var assignResp = await HttpClient.PatchAsync($"/users/{userId}/department", JsonContent.Create(assignReq));
+        var assignCmd = new AssignUserToDepartment.Command(userId, deptId);
+        var assignResp = await HttpClient.PatchAsync($"/users/{userId}/department", JsonContent.Create(assignCmd));
         Assert.Equal(HttpStatusCode.NoContent, assignResp.StatusCode);
 
         // Attempt to delete department - should fail with validation error

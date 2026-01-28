@@ -6,15 +6,15 @@ namespace ProcureHub.Features.Departments;
 
 public static class DeleteDepartment
 {
-    public record Request(Guid Id);
+    public record Command(Guid Id);
 
     public class Handler(ApplicationDbContext dbContext)
-        : IRequestHandler<Request, Result>
+        : ICommandHandler<Command, Result>
     {
-        public async Task<Result> HandleAsync(Request request, CancellationToken token)
+        public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {
             var department = await dbContext.Departments
-                .FirstOrDefaultAsync(d => d.Id == request.Id, token);
+                .FirstOrDefaultAsync(d => d.Id == command.Id, token);
 
             if (department is null)
             {
@@ -22,7 +22,7 @@ public static class DeleteDepartment
             }
 
             var usersForDept = await dbContext.Users
-                .CountAsync(u => u.DepartmentId == request.Id, token);
+                .CountAsync(u => u.DepartmentId == command.Id, token);
 
             if (usersForDept > 0)
             {

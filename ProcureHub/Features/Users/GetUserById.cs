@@ -31,7 +31,7 @@ public static class GetUserById
     public record Department(Guid Id, string Name);
 
     public class Handler(ApplicationDbContext dbContext)
-        : IRequestHandler<Request, Response?>
+        : IQueryHandler<Request, Response?>
     {
         public Task<Response?> HandleAsync(Request request, CancellationToken token)
         {

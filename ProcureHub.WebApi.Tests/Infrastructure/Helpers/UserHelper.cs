@@ -16,8 +16,8 @@ public static class UserHelper
     )
     {
         // Create user
-        var createUserRequest = new CreateUser.Request(userEmail, userPassword, "Some", "User");
-        var createUserResp = await httpClient.PostAsync("/users", JsonContent.Create(createUserRequest));
+        var createUserCmd = new CreateUser.Command(userEmail, userPassword, "Some", "User");
+        var createUserResp = await httpClient.PostAsync("/users", JsonContent.Create(createUserCmd));
         var createdUser = await createUserResp.ReadJsonAsync<EntityCreatedResponse<string>>();
 
         // Get roles
@@ -29,8 +29,8 @@ public static class UserHelper
             var role = roles.Data.First(r => r.Name == roleName);
 
             // Assign role
-            var assignRoleReq = new AssignRole.Request(createdUser.Id, role.Id);
-            var assignRoleResp = await httpClient.PostAsync($"/users/{createdUser.Id}/roles", JsonContent.Create(assignRoleReq));
+            var assignRoleCmd = new AssignRole.Command(createdUser.Id, role.Id);
+            var assignRoleResp = await httpClient.PostAsync($"/users/{createdUser.Id}/roles", JsonContent.Create(assignRoleCmd));
             Assert.Equal(HttpStatusCode.NoContent, assignRoleResp.StatusCode);
         }
 

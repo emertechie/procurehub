@@ -45,7 +45,7 @@ public static class GetPurchaseRequestById
     public record ReviewerInfo(string Id, string Email, string FirstName, string LastName);
 
     public class Handler(ApplicationDbContext dbContext, ICurrentUserProvider currentUserProvider)
-        : IRequestHandler<Request, Result<Response>>
+        : IQueryHandler<Request, Result<Response>>
     {
         public async Task<Result<Response>> HandleAsync(Request request, CancellationToken token)
         {

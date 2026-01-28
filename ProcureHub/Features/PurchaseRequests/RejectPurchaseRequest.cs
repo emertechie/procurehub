@@ -8,11 +8,11 @@ namespace ProcureHub.Features.PurchaseRequests;
 
 public static class RejectPurchaseRequest
 {
-    public record Request(Guid Id, string ReviewerUserId);
+    public record Command(Guid Id, string ReviewerUserId);
 
-    public class RequestValidator : AbstractValidator<Request>
+    public class CommandValidator : AbstractValidator<Command>
     {
-        public RequestValidator()
+        public CommandValidator()
         {
             RuleFor(r => r.Id).NotEmpty();
             RuleFor(r => r.ReviewerUserId).NotEmpty();
@@ -20,19 +20,19 @@ public static class RejectPurchaseRequest
     }
 
     public class Handler(ApplicationDbContext dbContext)
-        : IRequestHandler<Request, Result>
+        : ICommandHandler<Command, Result>
     {
-        public async Task<Result> HandleAsync(Request request, CancellationToken token)
+        public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {
             var purchaseRequest = await dbContext.PurchaseRequests
-                .FirstOrDefaultAsync(pr => pr.Id == request.Id, token);
+                .FirstOrDefaultAsync(pr => pr.Id == command.Id, token);
 
             if (purchaseRequest is null)
             {
                 return Result.Failure(PurchaseRequestErrors.NotFound);
             }
 
-            var result = purchaseRequest.Reject(request.ReviewerUserId);
+            var result = purchaseRequest.Reject(command.ReviewerUserId);
             if (result.IsFailure)
             {
                 return result;

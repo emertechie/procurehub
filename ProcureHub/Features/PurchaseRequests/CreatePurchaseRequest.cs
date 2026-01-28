@@ -9,7 +9,7 @@ namespace ProcureHub.Features.PurchaseRequests;
 
 public static class CreatePurchaseRequest
 {
-    public record Request(
+    public record Command(
         string Title,
         string? Description,
         decimal EstimatedAmount,
@@ -19,9 +19,9 @@ public static class CreatePurchaseRequest
         string RequesterUserId
     );
 
-    public class RequestValidator : AbstractValidator<Request>
+    public class CommandValidator : AbstractValidator<Command>
     {
-        public RequestValidator()
+        public CommandValidator()
         {
             RuleFor(r => r.Title).NotEmpty().MaximumLength(PurchaseRequestConfiguration.TitleMaxLength);
             RuleFor(r => r.Description).MaximumLength(PurchaseRequestConfiguration.DescriptionMaxLength);
@@ -34,22 +34,22 @@ public static class CreatePurchaseRequest
     }
 
     public class Handler(ApplicationDbContext dbContext, PurchaseRequestNumberGenerator purchaseRequestNumberGenerator)
-        : IRequestHandler<Request, Result<Guid>>
+        : ICommandHandler<Command, Result<Guid>>
     {
-        public async Task<Result<Guid>> HandleAsync(Request request, CancellationToken token)
+        public async Task<Result<Guid>> HandleAsync(Command command, CancellationToken token)
         {
             var requestNumber = await purchaseRequestNumberGenerator.GenerateAsync(token);
 
             var now = DateTime.UtcNow;
             var purchaseRequest = new PurchaseRequest
             {
-                Title = request.Title,
-                Description = request.Description,
-                EstimatedAmount = request.EstimatedAmount,
-                BusinessJustification = request.BusinessJustification,
-                CategoryId = request.CategoryId,
-                DepartmentId = request.DepartmentId,
-                RequesterId = request.RequesterUserId,
+                Title = command.Title,
+                Description = command.Description,
+                EstimatedAmount = command.EstimatedAmount,
+                BusinessJustification = command.BusinessJustification,
+                CategoryId = command.CategoryId,
+                DepartmentId = command.DepartmentId,
+                RequesterId = command.RequesterUserId,
                 Status = PurchaseRequestStatus.Draft,
                 RequestNumber = requestNumber,
                 CreatedAt = now,

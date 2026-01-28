@@ -8,11 +8,11 @@ namespace ProcureHub.Features.Users;
 
 public static class AssignUserToDepartment
 {
-    public record Request(string Id, Guid? DepartmentId);
+    public record Command(string Id, Guid? DepartmentId);
 
-    public class RequestValidator : AbstractValidator<Request>
+    public class CommandValidator : AbstractValidator<Command>
     {
-        public RequestValidator()
+        public CommandValidator()
         {
             RuleFor(r => r.Id).NotEmpty();
         }
@@ -21,41 +21,41 @@ public static class AssignUserToDepartment
     public class Handler(
         ApplicationDbContext dbContext,
         ILogger<Handler> logger)
-        : IRequestHandler<Request, Result>
+        : ICommandHandler<Command, Result>
     {
-        public async Task<Result> HandleAsync(Request request, CancellationToken token)
+        public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {
             var user = await dbContext.Users
-                .FirstOrDefaultAsync(u => u.Id == request.Id, token);
+                .FirstOrDefaultAsync(u => u.Id == command.Id, token);
 
             if (user is null)
             {
                 return Result.Failure(Error.NotFound(
                     "User.NotFound",
-                    $"User with ID '{request.Id}' not found"));
+                    $"User with ID '{command.Id}' not found"));
             }
 
             // If a department is specified, verify it exists
-            if (request.DepartmentId.HasValue)
+            if (command.DepartmentId.HasValue)
             {
                 var departmentExists = await dbContext.Departments
-                    .AnyAsync(d => d.Id == request.DepartmentId.Value, token);
+                    .AnyAsync(d => d.Id == command.DepartmentId.Value, token);
 
                 if (!departmentExists)
                 {
                     return Result.Failure(Error.NotFound(
                         "Department.NotFound",
-                        $"Department with ID '{request.DepartmentId}' not found"));
+                        $"Department with ID '{command.DepartmentId}' not found"));
                 }
             }
 
-            user.DepartmentId = request.DepartmentId;
+            user.DepartmentId = command.DepartmentId;
             user.UpdatedAt = DateTime.UtcNow;
 
             await dbContext.SaveChangesAsync(token);
 
             logger.LogInformation("Assigned user {UserId} to department {DepartmentId}",
-                user.Id, request.DepartmentId?.ToString() ?? "null");
+                user.Id, command.DepartmentId?.ToString() ?? "null");
             return Result.Success();
         }
     }

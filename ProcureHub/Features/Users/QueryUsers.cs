@@ -35,7 +35,7 @@ public static class QueryUsers
     public record Department(Guid Id, string Name);
 
     public class Handler(ApplicationDbContext dbContext, UserManager<User> userManager)
-        : IRequestHandler<Request, PagedResult<Response>>
+        : IQueryHandler<Request, PagedResult<Response>>
     {
         public async Task<PagedResult<Response>> HandleAsync(Request request, CancellationToken token)
         {

@@ -53,7 +53,7 @@ public static class QueryPurchaseRequests
     public record ReviewerInfo(string Id, string Email, string FirstName, string LastName);
 
     public class Handler(ApplicationDbContext dbContext, ICurrentUserProvider currentUserProvider)
-        : IRequestHandler<Request, Result<PagedResult<Response>>>
+        : IQueryHandler<Request, Result<PagedResult<Response>>>
     {
         public async Task<Result<PagedResult<Response>>> HandleAsync(Request request, CancellationToken token)
         {

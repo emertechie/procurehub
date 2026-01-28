@@ -12,7 +12,7 @@ public static class QueryRoles
     public record Role(string Id, string Name);
 
     public class Handler(RoleManager<Models.Role> roleManager)
-        : IRequestHandler<Request, Role[]>
+        : IQueryHandler<Request, Role[]>
     {
         public async Task<Role[]> HandleAsync(Request request, CancellationToken token)
         {

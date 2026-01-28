@@ -9,11 +9,11 @@ namespace ProcureHub.Features.Roles;
 
 public static class RemoveRole
 {
-    public record Request(string UserId, string RoleId);
+    public record Command(string UserId, string RoleId);
 
-    public class RequestValidator : AbstractValidator<Request>
+    public class CommandValidator : AbstractValidator<Command>
     {
-        public RequestValidator()
+        public CommandValidator()
         {
             RuleFor(r => r.UserId).NotEmpty();
             RuleFor(r => r.RoleId).NotEmpty();
@@ -24,17 +24,17 @@ public static class RemoveRole
         UserManager<User> userManager,
         RoleManager<Role> roleManager,
         ILogger<Handler> logger)
-        : IRequestHandler<Request, Result>
+        : ICommandHandler<Command, Result>
     {
-        public async Task<Result> HandleAsync(Request request, CancellationToken token)
+        public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {
-            var user = await userManager.FindByIdAsync(request.UserId);
+            var user = await userManager.FindByIdAsync(command.UserId);
             if (user is null)
             {
                 return Result.Failure(Error.NotFound("User.NotFound", "User not found"));
             }
 
-            var role = await roleManager.FindByIdAsync(request.RoleId);
+            var role = await roleManager.FindByIdAsync(command.RoleId);
             if (role is null)
             {
                 return Result.Failure(Error.NotFound("Role.NotFound", "Role not found"));
@@ -44,11 +44,11 @@ public static class RemoveRole
             if (!result.Succeeded)
             {
                 logger.LogWarning("Failed to remove role {RoleId} from user {UserId}. Errors: {Errors}",
-                    request.RoleId, request.UserId, string.Join(", ", result.Errors.Select(e => e.Description)));
+                    command.RoleId, command.UserId, string.Join(", ", result.Errors.Select(e => e.Description)));
                 return Result.Failure(RoleRemovalFailed(result.Errors));
             }
 
-            logger.LogInformation("Removed role {RoleId} from user {UserId}", request.RoleId, request.UserId);
+            logger.LogInformation("Removed role {RoleId} from user {UserId}", command.RoleId, command.UserId);
             return Result.Success();
         }
 

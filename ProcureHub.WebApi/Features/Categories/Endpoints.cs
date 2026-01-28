@@ -18,12 +18,12 @@ public static class Endpoints
             .WithTags("Categories");
 
         group.MapPost("/categories", async (
-                [FromServices] IRequestHandler<CreateCategory.Request, Result<Guid>> handler,
-                [FromBody] CreateCategory.Request request,
+                [FromServices] ICommandHandler<CreateCategory.Command, Result<Guid>> handler,
+                [FromBody] CreateCategory.Command command,
                 CancellationToken token
             ) =>
             {
-                var result = await handler.HandleAsync(request, token);
+                var result = await handler.HandleAsync(command, token);
                 return result.Match(
                     newId => Results.Created($"/categories/{newId}", new EntityCreatedResponse<string>(newId.ToString())),
                     error => error.ToProblemDetails());
@@ -34,7 +34,7 @@ public static class Endpoints
             .ProducesValidationProblem();
 
         group.MapGet("/categories", async (
-                [FromServices] IRequestHandler<QueryCategories.Request, QueryCategories.Response[]> handler,
+                [FromServices] IQueryHandler<QueryCategories.Request, QueryCategories.Response[]> handler,
                 CancellationToken token
             ) =>
             {
@@ -45,7 +45,7 @@ public static class Endpoints
             .Produces<DataResponse<QueryCategories.Response[]>>();
 
         group.MapGet("/categories/{id:guid}", async (
-                [FromServices] IRequestHandler<GetCategoryById.Request, Result<GetCategoryById.Response>> handler,
+                [FromServices] IQueryHandler<GetCategoryById.Request, Result<GetCategoryById.Response>> handler,
                 CancellationToken token,
                 Guid id
             ) =>
@@ -61,18 +61,18 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPut("/categories/{id:guid}", async (
-                [FromServices] IRequestHandler<UpdateCategory.Request, Result> handler,
-                [FromBody] UpdateCategory.Request request,
+                [FromServices] ICommandHandler<UpdateCategory.Command, Result> handler,
+                [FromBody] UpdateCategory.Command command,
                 CancellationToken token,
                 Guid id
             ) =>
             {
-                if (id != request.Id)
+                if (id != command.Id)
                 {
                     return CustomResults.RouteIdMismatch();
                 }
 
-                var result = await handler.HandleAsync(request, token);
+                var result = await handler.HandleAsync(command, token);
                 return result.Match(
                     Results.NoContent,
                     error => error.ToProblemDetails()
@@ -85,12 +85,12 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapDelete("/categories/{id:guid}", async (
-                [FromServices] IRequestHandler<DeleteCategory.Request, Result> handler,
+                [FromServices] ICommandHandler<DeleteCategory.Command, Result> handler,
                 CancellationToken token,
                 Guid id
             ) =>
             {
-                var result = await handler.HandleAsync(new DeleteCategory.Request(id), token);
+                var result = await handler.HandleAsync(new DeleteCategory.Command(id), token);
                 return result.Match(
                     Results.NoContent,
                     error => error.ToProblemDetails()

@@ -9,11 +9,11 @@ namespace ProcureHub.Features.Departments;
 
 public static class UpdateDepartment
 {
-    public record Request(Guid Id, string Name);
+    public record Command(Guid Id, string Name);
 
-    public class RequestValidator : AbstractValidator<Request>
+    public class CommandValidator : AbstractValidator<Command>
     {
-        public RequestValidator()
+        public CommandValidator()
         {
             RuleFor(r => r.Id).NotEmpty();
             RuleFor(r => r.Name).NotEmpty().MaximumLength(DepartmentConfiguration.NameMaxLength);
@@ -21,17 +21,17 @@ public static class UpdateDepartment
     }
 
     public class Handler(ApplicationDbContext dbContext)
-        : IRequestHandler<Request, Result>
+        : ICommandHandler<Command, Result>
     {
-        public async Task<Result> HandleAsync(Request request, CancellationToken token)
+        public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {
             var department = await dbContext.Departments
-                .FirstOrDefaultAsync(d => d.Id == request.Id, token);
+                .FirstOrDefaultAsync(d => d.Id == command.Id, token);
 
             if (department is null)
                 return Result.Failure(Error.NotFound("Department not found"));
 
-            department.Name = request.Name;
+            department.Name = command.Name;
 
             try
             {
@@ -40,7 +40,7 @@ public static class UpdateDepartment
             }
             catch (DbUpdateException ex) when (ex.IsUniqueConstraintViolation("IX_Departments_Name"))
             {
-                return Result.Failure(DepartmentErrors.DuplicateName(request.Name));
+                return Result.Failure(DepartmentErrors.DuplicateName(command.Name));
             }
         }
     }

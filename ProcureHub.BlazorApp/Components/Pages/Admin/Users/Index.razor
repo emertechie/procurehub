@@ -7,9 +7,9 @@
 @using ProcureHub.Common.Pagination
 @using ProcureHub.Infrastructure
 
-@inject IRequestHandler<QueryUsers.Request, PagedResult<QueryUsers.Response>> QueryUsersHandler
-@inject IRequestHandler<EnableUser.Request, Result> EnableUserHandler
-@inject IRequestHandler<DisableUser.Request, Result> DisableUserHandler
+@inject IQueryHandler<QueryUsers.Request, PagedResult<QueryUsers.Response>> QueryUsersHandler
+@inject ICommandHandler<EnableUser.Command, Result> EnableUserHandler
+@inject ICommandHandler<DisableUser.Command, Result> DisableUserHandler
 @inject DialogService DialogService
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService
@@ -216,7 +216,7 @@
 
         if (confirmed == true)
         {
-            var result = await EnableUserHandler.HandleAsync(new EnableUser.Request(userId.ToString()), CancellationToken.None);
+            var result = await EnableUserHandler.HandleAsync(new EnableUser.Command(userId.ToString()), CancellationToken.None);
             if (result.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Success, "Success", "User enabled");
@@ -239,7 +239,7 @@
 
         if (confirmed == true)
         {
-            var result = await DisableUserHandler.HandleAsync(new DisableUser.Request(userId.ToString()), CancellationToken.None);
+            var result = await DisableUserHandler.HandleAsync(new DisableUser.Command(userId.ToString()), CancellationToken.None);
             if (result.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Success, "Success", "User disabled");

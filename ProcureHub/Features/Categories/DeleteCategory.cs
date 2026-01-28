@@ -6,15 +6,15 @@ namespace ProcureHub.Features.Categories;
 
 public static class DeleteCategory
 {
-    public record Request(Guid Id);
+    public record Command(Guid Id);
 
     public class Handler(ApplicationDbContext dbContext)
-        : IRequestHandler<Request, Result>
+        : ICommandHandler<Command, Result>
     {
-        public async Task<Result> HandleAsync(Request request, CancellationToken token)
+        public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {
             var category = await dbContext.Categories
-                .FirstOrDefaultAsync(c => c.Id == request.Id, token);
+                .FirstOrDefaultAsync(c => c.Id == command.Id, token);
 
             if (category is null)
             {

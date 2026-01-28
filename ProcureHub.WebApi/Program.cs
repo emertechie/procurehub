@@ -151,7 +151,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
     builder.Services.AddScoped<ICurrentUserProvider, HttpContextCurrentUserProvider>();
 
     // Register all FluentValidation validators 
-    appBuilder.Services.AddValidatorsFromAssemblyContaining<CreateUser.Request>();
+    appBuilder.Services.AddValidatorsFromAssemblyContaining<CreateUser.Command>();
 
     // Add health checks
     appBuilder.Services.AddHealthChecks()

@@ -10,11 +10,11 @@ namespace ProcureHub.Features.Users;
 
 public static class CreateUser
 {
-    public record Request(string Email, string Password, string FirstName, string LastName);
+    public record Command(string Email, string Password, string FirstName, string LastName);
 
-    public class RequestValidator : AbstractValidator<Request>
+    public class CommandValidator : AbstractValidator<Command>
     {
-        public RequestValidator()
+        public CommandValidator()
         {
             RuleFor(r => r.Email).NotEmpty().EmailAddress();
             RuleFor(r => r.Password).NotEmpty();
@@ -26,26 +26,26 @@ public static class CreateUser
     public class Handler(
         UserManager<User> userManager,
         ILogger<Handler> logger)
-        : IRequestHandler<Request, Result<string>>
+        : ICommandHandler<Command, Result<string>>
     {
-        public async Task<Result<string>> HandleAsync(Request request, CancellationToken token)
+        public async Task<Result<string>> HandleAsync(Command command, CancellationToken token)
         {
             var now = DateTime.UtcNow;
 
             // Create the ASP.NET Identity user
             var user = new User
             {
-                UserName = request.Email,
+                UserName = command.Email,
                 // Ensure email always stored in lowercase to enable case-insensitive search
-                Email = request.Email.ToLowerInvariant(),
-                FirstName = request.FirstName,
-                LastName = request.LastName,
+                Email = command.Email.ToLowerInvariant(),
+                FirstName = command.FirstName,
+                LastName = command.LastName,
                 CreatedAt = now,
                 UpdatedAt = now,
                 EnabledAt = now
             };
 
-            var result = await userManager.CreateAsync(user, request.Password);
+            var result = await userManager.CreateAsync(user, command.Password);
             if (!result.Succeeded)
             {
                 logger.LogWarning("Failed to create user. Errors: {Errors}",

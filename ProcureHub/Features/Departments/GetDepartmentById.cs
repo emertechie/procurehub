@@ -11,7 +11,7 @@ public static class GetDepartmentById
     public record Response(Guid Id, string Name);
 
     public class Handler(ApplicationDbContext dbContext)
-        : IRequestHandler<Request, Response?>
+        : IQueryHandler<Request, Response?>
     {
         public Task<Response?> HandleAsync(Request request, CancellationToken token)
         {
