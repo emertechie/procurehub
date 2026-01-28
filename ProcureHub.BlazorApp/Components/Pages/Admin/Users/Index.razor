@@ -2,6 +2,7 @@
 @attribute [Authorize(Roles = "Admin")]
 @layout AuthenticatedLayout
 
+@using ProcureHub.BlazorApp.Helpers
 @using ProcureHub.Features.Users
 @using ProcureHub.Common.Pagination
 @using ProcureHub.Infrastructure
@@ -123,16 +124,10 @@
 
 @code {
     const int PageSize = 10;
-
     PagedResult<QueryUsers.Response>? _pagedUsers;
     bool _loading;
     string _searchTerm = "";
     int _currentPage = 1;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadUsers();
-    }
 
     async Task OnLoadData(LoadDataArgs args)
     {
@@ -145,14 +140,9 @@
         var email = string.IsNullOrWhiteSpace(_searchTerm) ? null : _searchTerm;
         var request = new QueryUsers.Request(email, _currentPage, PageSize);
 
-        _loading = true;
-        try
+        using (new BusyScope(b => _loading = b))
         {
             _pagedUsers = await QueryUsersHandler.HandleAsync(request, CancellationToken.None);
-        }
-        finally
-        {
-            _loading = false;
         }
     }
 
