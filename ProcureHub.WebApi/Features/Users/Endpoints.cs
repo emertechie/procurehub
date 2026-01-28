@@ -19,12 +19,12 @@ public static class Endpoints
             .WithTags("Users");
 
         group.MapPost("/users", async (
-                [FromServices] ICommandHandler<CreateUser.Request, Result<string>> handler,
-                [FromBody] CreateUser.Request request,
+                [FromServices] ICommandHandler<CreateUser.Command, Result<string>> handler,
+                [FromBody] CreateUser.Command command,
                 CancellationToken token
             ) =>
             {
-                var result = await handler.HandleAsync(request, token);
+                var result = await handler.HandleAsync(command, token);
                 return result.Match(
                     newUserId => Results.Created($"/users/{newUserId}", new EntityCreatedResponse<string>(newUserId)),
                     error => error.ToProblemDetails()
@@ -61,18 +61,18 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPut("/users/{id}", async (
-                [FromServices] ICommandHandler<UpdateUser.Request, Result> handler,
-                [FromBody] UpdateUser.Request request,
+                [FromServices] ICommandHandler<UpdateUser.Command, Result> handler,
+                [FromBody] UpdateUser.Command command,
                 CancellationToken token,
                 string id
             ) =>
             {
-                if (id != request.Id)
+                if (id != command.Id)
                 {
                     return CustomResults.RouteIdMismatch();
                 }
 
-                var result = await handler.HandleAsync(request, token);
+                var result = await handler.HandleAsync(command, token);
                 return result.Match(
                     Results.NoContent,
                     error => error.ToProblemDetails()
@@ -84,12 +84,12 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPatch("/users/{id}/enable", async (
-                [FromServices] ICommandHandler<EnableUser.Request, Result> handler,
+                [FromServices] ICommandHandler<EnableUser.Command, Result> handler,
                 CancellationToken token,
                 string id
             ) =>
             {
-                var result = await handler.HandleAsync(new EnableUser.Request(id), token);
+                var result = await handler.HandleAsync(new EnableUser.Command(id), token);
                 return result.Match(
                     Results.NoContent,
                     error => error.ToProblemDetails()
@@ -100,12 +100,12 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPatch("/users/{id}/disable", async (
-                [FromServices] ICommandHandler<DisableUser.Request, Result> handler,
+                [FromServices] ICommandHandler<DisableUser.Command, Result> handler,
                 CancellationToken token,
                 string id
             ) =>
             {
-                var result = await handler.HandleAsync(new DisableUser.Request(id), token);
+                var result = await handler.HandleAsync(new DisableUser.Command(id), token);
                 return result.Match(
                     Results.NoContent,
                     error => error.ToProblemDetails()
@@ -116,18 +116,18 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPatch("/users/{id}/department", async (
-                [FromServices] ICommandHandler<AssignUserToDepartment.Request, Result> handler,
-                [FromBody] AssignUserToDepartment.Request request,
+                [FromServices] ICommandHandler<AssignUserToDepartment.Command, Result> handler,
+                [FromBody] AssignUserToDepartment.Command command,
                 CancellationToken token,
                 string id
             ) =>
             {
-                if (id != request.Id)
+                if (id != command.Id)
                 {
                     return CustomResults.RouteIdMismatch();
                 }
 
-                var result = await handler.HandleAsync(request, token);
+                var result = await handler.HandleAsync(command, token);
                 return result.Match(
                     Results.NoContent,
                     error => error.ToProblemDetails()

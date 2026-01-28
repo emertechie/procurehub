@@ -9,30 +9,30 @@ namespace ProcureHub.Features.Categories;
 
 public static class UpdateCategory
 {
-    public record Request(Guid Id, string Name);
+    public record Command(Guid Id, string Name);
 
-    public class RequestValidator : AbstractValidator<Request>
+    public class CommandValidator : AbstractValidator<Command>
     {
-        public RequestValidator()
+        public CommandValidator()
         {
             RuleFor(r => r.Name).NotEmpty().MaximumLength(CategoryConfiguration.NameMaxLength);
         }
     }
 
     public class Handler(ApplicationDbContext dbContext)
-        : ICommandHandler<Request, Result>
+        : ICommandHandler<Command, Result>
     {
-        public async Task<Result> HandleAsync(Request request, CancellationToken token)
+        public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {
             var category = await dbContext.Categories
-                .FirstOrDefaultAsync(c => c.Id == request.Id, token);
+                .FirstOrDefaultAsync(c => c.Id == command.Id, token);
 
             if (category is null)
             {
                 return Result.Failure(Error.NotFound("Category not found"));
             }
 
-            category.Name = request.Name;
+            category.Name = command.Name;
             category.UpdatedAt = DateTime.UtcNow;
 
             try
@@ -42,7 +42,7 @@ public static class UpdateCategory
             }
             catch (DbUpdateException ex) when (ex.IsUniqueConstraintViolation("IX_Categories_Name"))
             {
-                return Result.Failure(CategoryErrors.DuplicateName(request.Name));
+                return Result.Failure(CategoryErrors.DuplicateName(command.Name));
             }
         }
     }

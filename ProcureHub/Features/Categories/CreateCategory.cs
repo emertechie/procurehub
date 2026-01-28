@@ -9,25 +9,25 @@ namespace ProcureHub.Features.Categories;
 
 public static class CreateCategory
 {
-    public record Request(string Name);
+    public record Command(string Name);
 
-    public class RequestValidator : AbstractValidator<Request>
+    public class CommandValidator : AbstractValidator<Command>
     {
-        public RequestValidator()
+        public CommandValidator()
         {
             RuleFor(r => r.Name).NotEmpty().MaximumLength(CategoryConfiguration.NameMaxLength);
         }
     }
 
     public class Handler(ApplicationDbContext dbContext)
-        : ICommandHandler<Request, Result<Guid>>
+        : ICommandHandler<Command, Result<Guid>>
     {
-        public async Task<Result<Guid>> HandleAsync(Request request, CancellationToken token)
+        public async Task<Result<Guid>> HandleAsync(Command command, CancellationToken token)
         {
             var now = DateTime.UtcNow;
             var category = new Category
             {
-                Name = request.Name,
+                Name = command.Name,
                 CreatedAt = now,
                 UpdatedAt = now
             };
@@ -41,7 +41,7 @@ public static class CreateCategory
             }
             catch (DbUpdateException ex) when (ex.IsUniqueConstraintViolation("IX_Categories_Name"))
             {
-                return Result.Failure<Guid>(CategoryErrors.DuplicateName(request.Name));
+                return Result.Failure<Guid>(CategoryErrors.DuplicateName(command.Name));
             }
         }
     }

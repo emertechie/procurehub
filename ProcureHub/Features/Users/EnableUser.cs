@@ -8,11 +8,11 @@ namespace ProcureHub.Features.Users;
 
 public static class EnableUser
 {
-    public record Request(string Id);
+    public record Command(string Id);
 
-    public class RequestValidator : AbstractValidator<Request>
+    public class CommandValidator : AbstractValidator<Command>
     {
-        public RequestValidator()
+        public CommandValidator()
         {
             RuleFor(r => r.Id).NotEmpty();
         }
@@ -21,18 +21,18 @@ public static class EnableUser
     public class Handler(
         ApplicationDbContext dbContext,
         ILogger<Handler> logger)
-        : ICommandHandler<Request, Result>
+        : ICommandHandler<Command, Result>
     {
-        public async Task<Result> HandleAsync(Request request, CancellationToken token)
+        public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {
             var user = await dbContext.Users
-                .FirstOrDefaultAsync(u => u.Id == request.Id, token);
+                .FirstOrDefaultAsync(u => u.Id == command.Id, token);
 
             if (user is null)
             {
                 return Result.Failure(Error.NotFound(
                     "User.NotFound",
-                    $"User with ID '{request.Id}' not found"));
+                    $"User with ID '{command.Id}' not found"));
             }
 
             if (user.EnabledAt.HasValue)

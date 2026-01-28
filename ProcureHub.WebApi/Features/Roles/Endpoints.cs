@@ -29,18 +29,18 @@ public static class Endpoints
             .Produces<DataResponse<QueryRoles.Role[]>>();
 
         group.MapPost("/users/{userId}/roles", async (
-                [FromServices] ICommandHandler<AssignRole.Request, Result> handler,
-                [FromBody] AssignRole.Request request,
+                [FromServices] ICommandHandler<AssignRole.Command, Result> handler,
+                [FromBody] AssignRole.Command command,
                 CancellationToken token,
                 string userId
             ) =>
             {
-                if (userId != request.UserId)
+                if (userId != command.UserId)
                 {
                     return CustomResults.RouteIdMismatch();
                 }
 
-                var result = await handler.HandleAsync(request, token);
+                var result = await handler.HandleAsync(command, token);
                 return result.Match(
                     Results.NoContent,
                     error => error.ToProblemDetails()
@@ -52,13 +52,13 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapDelete("/users/{userId}/roles/{roleId}", async (
-                [FromServices] ICommandHandler<RemoveRole.Request, Result> handler,
+                [FromServices] ICommandHandler<RemoveRole.Command, Result> handler,
                 CancellationToken token,
                 string userId,
                 string roleId
             ) =>
             {
-                var result = await handler.HandleAsync(new RemoveRole.Request(userId, roleId), token);
+                var result = await handler.HandleAsync(new RemoveRole.Command(userId, roleId), token);
                 return result.Match(
                     Results.NoContent,
                     error => error.ToProblemDetails()

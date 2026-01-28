@@ -104,8 +104,8 @@ public class RoleTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
         await LoginAsAdminAsync();
 
         // Empty UserId -> route mismatch (since route has "user-1")
-        var reqNoUserId = new AssignRole.Request("", "role-1");
-        var respNoUserId = await HttpClient.PostAsync("/users/user-1/roles", JsonContent.Create(reqNoUserId));
+        var cmdNoUserId = new AssignRole.Command("", "role-1");
+        var respNoUserId = await HttpClient.PostAsync("/users/user-1/roles", JsonContent.Create(cmdNoUserId));
         await respNoUserId.AssertProblemDetailsAsync(
             HttpStatusCode.BadRequest,
             "Route ID mismatch",
@@ -113,14 +113,14 @@ public class RoleTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
             "POST /users/user-1/roles");
 
         // No role ID
-        var reqNoRoleId = new AssignRole.Request("user-1", "");
-        var respNoRoleId = await HttpClient.PostAsync("/users/user-1/roles", JsonContent.Create(reqNoRoleId));
+        var cmdNoRoleId = new AssignRole.Command("user-1", "");
+        var respNoRoleId = await HttpClient.PostAsync("/users/user-1/roles", JsonContent.Create(cmdNoRoleId));
         await respNoRoleId.AssertValidationProblemAsync(
             errors: new Dictionary<string, string[]> { ["RoleId"] = ["'Role Id' must not be empty."] });
 
         // User ID doesn't match query
-        var reqUser1Id = new AssignRole.Request("user-1", "role-1");
-        var respMismatch = await HttpClient.PostAsync("/users/user-2/roles", JsonContent.Create(reqUser1Id));
+        var cmdUser1Id = new AssignRole.Command("user-1", "role-1");
+        var respMismatch = await HttpClient.PostAsync("/users/user-2/roles", JsonContent.Create(cmdUser1Id));
         await respMismatch.AssertProblemDetailsAsync(
             HttpStatusCode.BadRequest,
             "Route ID mismatch",
@@ -177,11 +177,11 @@ public class RoleTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
 
         // Assign 2 roles
         var assignResp1 = await HttpClient.PostAsync($"/users/{userId}/roles",
-            JsonContent.Create(new AssignRole.Request(userId, approverRole.Id)));
+            JsonContent.Create(new AssignRole.Command(userId, approverRole.Id)));
         Assert.Equal(HttpStatusCode.NoContent, assignResp1.StatusCode);
 
         var assignResp2 = await HttpClient.PostAsync($"/users/{userId}/roles",
-            JsonContent.Create(new AssignRole.Request(userId, requesterRole.Id)));
+            JsonContent.Create(new AssignRole.Command(userId, requesterRole.Id)));
         Assert.Equal(HttpStatusCode.NoContent, assignResp2.StatusCode);
 
         // Verify roles assigned
@@ -211,7 +211,7 @@ public class RoleTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         var userId = "nonexistent-user-id";
 
         var resp = await HttpClient.PostAsync($"/users/{userId}/roles",
-            JsonContent.Create(new AssignRole.Request(userId, approverRole.Id)));
+            JsonContent.Create(new AssignRole.Command(userId, approverRole.Id)));
 
         Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
     }
@@ -223,7 +223,7 @@ public class RoleTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         var userId = await CreateTestUser();
 
         var resp = await HttpClient.PostAsync($"/users/{userId}/roles",
-            JsonContent.Create(new AssignRole.Request(userId, "nonexistent-role-id")));
+            JsonContent.Create(new AssignRole.Command(userId, "nonexistent-role-id")));
 
         Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
     }
@@ -251,8 +251,8 @@ public class RoleTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
 
     private async Task<string> CreateTestUser()
     {
-        var newUserRequest = new CreateUser.Request("roletest@example.com", "Test1234!", "Role", "Test");
-        var createResp = await HttpClient.PostAsync("/users", JsonContent.Create(newUserRequest))
+        var newUserCmd = new CreateUser.Command("roletest@example.com", "Test1234!", "Role", "Test");
+        var createResp = await HttpClient.PostAsync("/users", JsonContent.Create(newUserCmd))
             .ReadJsonAsync<EntityCreatedResponse<Guid>>();
         var userId = createResp.Id.ToString();
         return userId;

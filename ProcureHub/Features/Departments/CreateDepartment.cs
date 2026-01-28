@@ -9,22 +9,22 @@ namespace ProcureHub.Features.Departments;
 
 public static class CreateDepartment
 {
-    public record Request(string Name);
+    public record Command(string Name);
 
-    public class RequestValidator : AbstractValidator<Request>
+    public class CommandValidator : AbstractValidator<Command>
     {
-        public RequestValidator()
+        public CommandValidator()
         {
             RuleFor(r => r.Name).NotEmpty().MaximumLength(DepartmentConfiguration.NameMaxLength);
         }
     }
 
     public class Handler(ApplicationDbContext dbContext)
-        : ICommandHandler<Request, Result<Guid>>
+        : ICommandHandler<Command, Result<Guid>>
     {
-        public async Task<Result<Guid>> HandleAsync(Request request, CancellationToken token)
+        public async Task<Result<Guid>> HandleAsync(Command command, CancellationToken token)
         {
-            var department = new Department { Name = request.Name };
+            var department = new Department { Name = command.Name };
             await dbContext.Departments.AddAsync(department, token);
 
             try
@@ -34,7 +34,7 @@ public static class CreateDepartment
             }
             catch (DbUpdateException ex) when (ex.IsUniqueConstraintViolation("IX_Departments_Name"))
             {
-                return Result.Failure<Guid>(DepartmentErrors.DuplicateName(request.Name));
+                return Result.Failure<Guid>(DepartmentErrors.DuplicateName(command.Name));
             }
         }
     }

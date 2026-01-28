@@ -18,12 +18,12 @@ public static class Endpoints
             .WithTags("Departments");
 
         group.MapPost("/departments", async (
-                [FromServices] ICommandHandler<CreateDepartment.Request, Result<Guid>> handler,
-                [FromBody] CreateDepartment.Request request,
+                [FromServices] ICommandHandler<CreateDepartment.Command, Result<Guid>> handler,
+                [FromBody] CreateDepartment.Command command,
                 CancellationToken token
             ) =>
             {
-                var result = await handler.HandleAsync(request, token);
+                var result = await handler.HandleAsync(command, token);
                 return result.Match(
                     newId => Results.Created($"/departments/{newId}", new EntityCreatedResponse<string>(newId.ToString())),
                     error => error.ToProblemDetails());
@@ -60,18 +60,18 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPut("/departments/{id:guid}", async (
-                [FromServices] ICommandHandler<UpdateDepartment.Request, Result> handler,
-                [FromBody] UpdateDepartment.Request request,
+                [FromServices] ICommandHandler<UpdateDepartment.Command, Result> handler,
+                [FromBody] UpdateDepartment.Command command,
                 CancellationToken token,
                 Guid id
             ) =>
             {
-                if (id != request.Id)
+                if (id != command.Id)
                 {
                     return CustomResults.RouteIdMismatch();
                 }
 
-                var result = await handler.HandleAsync(request, token);
+                var result = await handler.HandleAsync(command, token);
                 return result.Match(
                     Results.NoContent,
                     error => error.ToProblemDetails()
@@ -84,12 +84,12 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapDelete("/departments/{id:guid}", async (
-                [FromServices] ICommandHandler<DeleteDepartment.Request, Result> handler,
+                [FromServices] ICommandHandler<DeleteDepartment.Command, Result> handler,
                 CancellationToken token,
                 Guid id
             ) =>
             {
-                var result = await handler.HandleAsync(new DeleteDepartment.Request(id), token);
+                var result = await handler.HandleAsync(new DeleteDepartment.Command(id), token);
                 return result.Match(
                     Results.NoContent,
                     error => error.ToProblemDetails()

@@ -4,8 +4,8 @@
 @inject DialogService DialogService
 @inject NotificationService NotificationService
 @inject IQueryHandler<GetUserById.Request, GetUserById.Response?> GetUserHandler
-@inject ICommandHandler<CreateUser.Request, Result<string>> CreateUserHandler
-@inject ICommandHandler<UpdateUser.Request, Result> UpdateUserHandler
+@inject ICommandHandler<CreateUser.Command, Result<string>> CreateUserHandler
+@inject ICommandHandler<UpdateUser.Command, Result> UpdateUserHandler
 
 <RadzenStack Gap="1rem">
     @if (_errorMessage != null)
@@ -91,14 +91,14 @@
         {
             if (IsEdit)
             {
-                var updateRequest = new UpdateUser.Request(
+                var updateCommand = new UpdateUser.Command(
                     UserId!.Value.ToString(),
                     _model.Email,
                     _model.FirstName,
                     _model.LastName
                 );
 
-                var result = await UpdateUserHandler.HandleAsync(updateRequest, CancellationToken.None);
+                var result = await UpdateUserHandler.HandleAsync(updateCommand, CancellationToken.None);
                 if (result.IsSuccess)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "Success", "User updated");
@@ -111,14 +111,14 @@
             }
             else
             {
-                var createRequest = new CreateUser.Request(
+                var createCommand = new CreateUser.Command(
                     _model.Email,
                     _model.Password,
                     _model.FirstName,
                     _model.LastName
                 );
 
-                var result = await CreateUserHandler.HandleAsync(createRequest, CancellationToken.None);
+                var result = await CreateUserHandler.HandleAsync(createCommand, CancellationToken.None);
                 if (result.IsSuccess)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "Success", "User created");

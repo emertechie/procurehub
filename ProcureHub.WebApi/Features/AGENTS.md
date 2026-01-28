@@ -10,12 +10,12 @@
             .WithTags("Users");
 
         group.MapPost("/users", async (
-                [FromServices] ICommandHandler<CreateUser.Request, Result<string>> handler,
-                [FromBody] CreateUser.Request request,
+                [FromServices] ICommandHandler<CreateUser.Command, Result<string>> handler,
+                [FromBody] CreateUser.Command command,
                 CancellationToken token
             ) =>
             {
-                var result = await handler.HandleAsync(request, token);
+                var result = await handler.HandleAsync(command, token);
                 return result.Match(
                     newUserId => Results.Created($"/users/{newUserId}", new { userId = newUserId }),
                     error => error.ToProblemDetails()
@@ -29,7 +29,7 @@
 ```cs
         group.MapPut("/users/{id}", async (
                 [FromServices] ICommandHandler<UpdateUser.Request, Result> handler,
-                [FromBody] UpdateUser.Request request,
+                [FromBody] UpdateUser.Command command,
                 CancellationToken token,
                 string id
             ) =>

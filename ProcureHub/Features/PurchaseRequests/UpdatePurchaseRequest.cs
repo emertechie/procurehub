@@ -9,7 +9,7 @@ namespace ProcureHub.Features.PurchaseRequests;
 
 public static class UpdatePurchaseRequest
 {
-    public record Request(
+    public record Command(
         Guid Id,
         string Title,
         string? Description,
@@ -19,9 +19,9 @@ public static class UpdatePurchaseRequest
         Guid DepartmentId
     );
 
-    public class RequestValidator : AbstractValidator<Request>
+    public class CommandValidator : AbstractValidator<Command>
     {
-        public RequestValidator()
+        public CommandValidator()
         {
             RuleFor(r => r.Id).NotEmpty();
             RuleFor(r => r.Title).NotEmpty().MaximumLength(PurchaseRequestConfiguration.TitleMaxLength);
@@ -33,12 +33,12 @@ public static class UpdatePurchaseRequest
         }
     }
 
-    public class Handler(ApplicationDbContext dbContext) : ICommandHandler<Request, Result>
+    public class Handler(ApplicationDbContext dbContext) : ICommandHandler<Command, Result>
     {
-        public async Task<Result> HandleAsync(Request request, CancellationToken token)
+        public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {
             var purchaseRequest = await dbContext.PurchaseRequests
-                .FirstOrDefaultAsync(pr => pr.Id == request.Id, token);
+                .FirstOrDefaultAsync(pr => pr.Id == command.Id, token);
 
             if (purchaseRequest is null)
             {
@@ -51,12 +51,12 @@ public static class UpdatePurchaseRequest
                 return result;
             }
 
-            purchaseRequest.Title = request.Title;
-            purchaseRequest.Description = request.Description;
-            purchaseRequest.EstimatedAmount = request.EstimatedAmount;
-            purchaseRequest.BusinessJustification = request.BusinessJustification;
-            purchaseRequest.CategoryId = request.CategoryId;
-            purchaseRequest.DepartmentId = request.DepartmentId;
+            purchaseRequest.Title = command.Title;
+            purchaseRequest.Description = command.Description;
+            purchaseRequest.EstimatedAmount = command.EstimatedAmount;
+            purchaseRequest.BusinessJustification = command.BusinessJustification;
+            purchaseRequest.CategoryId = command.CategoryId;
+            purchaseRequest.DepartmentId = command.DepartmentId;
             purchaseRequest.UpdatedAt = DateTime.UtcNow;
 
             try

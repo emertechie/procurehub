@@ -21,8 +21,8 @@ public static class Endpoints
             .WithTags("PurchaseRequests");
 
         group.MapPost("/purchase-requests", async (
-                [FromServices] ICommandHandler<CreatePurchaseRequest.Request, Result<Guid>> handler,
-                [FromBody] CreatePurchaseRequest.Request request,
+                [FromServices] ICommandHandler<CreatePurchaseRequest.Command, Result<Guid>> handler,
+                [FromBody] CreatePurchaseRequest.Command command,
                 ClaimsPrincipal user,
                 CancellationToken token
             ) =>
@@ -33,8 +33,8 @@ public static class Endpoints
                     return Results.Unauthorized();
                 }
 
-                var requestWithUser = request with { RequesterUserId = requesterUserId };
-                var result = await handler.HandleAsync(requestWithUser, token);
+                var commandWithUser = command with { RequesterUserId = requesterUserId };
+                var result = await handler.HandleAsync(commandWithUser, token);
                 return result.Match(
                     newId => Results.Created($"/purchase-requests/{newId}", new EntityCreatedResponse<string>(newId.ToString())),
                     error => error.ToProblemDetails());
@@ -95,18 +95,18 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPut("/purchase-requests/{id:guid}", async (
-                [FromServices] ICommandHandler<UpdatePurchaseRequest.Request, Result> handler,
-                [FromBody] UpdatePurchaseRequest.Request request,
+                [FromServices] ICommandHandler<UpdatePurchaseRequest.Command, Result> handler,
+                [FromBody] UpdatePurchaseRequest.Command command,
                 CancellationToken token,
                 Guid id
             ) =>
             {
-                if (id != request.Id)
+                if (id != command.Id)
                 {
                     return CustomResults.RouteIdMismatch();
                 }
 
-                var result = await handler.HandleAsync(request, token);
+                var result = await handler.HandleAsync(command, token);
                 return result.Match(
                     Results.NoContent,
                     error => error.ToProblemDetails()
@@ -119,12 +119,12 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("/purchase-requests/{id:guid}/submit", async (
-                [FromServices] ICommandHandler<SubmitPurchaseRequest.Request, Result> handler,
+                [FromServices] ICommandHandler<SubmitPurchaseRequest.Command, Result> handler,
                 CancellationToken token,
                 Guid id
             ) =>
             {
-                var result = await handler.HandleAsync(new SubmitPurchaseRequest.Request(id), token);
+                var result = await handler.HandleAsync(new SubmitPurchaseRequest.Command(id), token);
                 return result.Match(
                     Results.NoContent,
                     error => error.ToProblemDetails()
@@ -136,7 +136,7 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("/purchase-requests/{id:guid}/approve", async (
-                [FromServices] ICommandHandler<ApprovePurchaseRequest.Request, Result> handler,
+                [FromServices] ICommandHandler<ApprovePurchaseRequest.Command, Result> handler,
                 ClaimsPrincipal user,
                 CancellationToken token,
                 Guid id
@@ -148,7 +148,7 @@ public static class Endpoints
                     return Results.Unauthorized();
                 }
 
-                var result = await handler.HandleAsync(new ApprovePurchaseRequest.Request(id, reviewerUserId), token);
+                var result = await handler.HandleAsync(new ApprovePurchaseRequest.Command(id, reviewerUserId), token);
                 return result.Match(
                     Results.NoContent,
                     error => error.ToProblemDetails()
@@ -160,7 +160,7 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapPost("/purchase-requests/{id:guid}/reject", async (
-                [FromServices] ICommandHandler<RejectPurchaseRequest.Request, Result> handler,
+                [FromServices] ICommandHandler<RejectPurchaseRequest.Command, Result> handler,
                 ClaimsPrincipal user,
                 CancellationToken token,
                 Guid id
@@ -172,7 +172,7 @@ public static class Endpoints
                     return Results.Unauthorized();
                 }
 
-                var result = await handler.HandleAsync(new RejectPurchaseRequest.Request(id, userId), token);
+                var result = await handler.HandleAsync(new RejectPurchaseRequest.Command(id, userId), token);
                 return result.Match(
                     Results.NoContent,
                     error => error.ToProblemDetails()
@@ -184,12 +184,12 @@ public static class Endpoints
             .Produces(StatusCodes.Status404NotFound);
 
         group.MapDelete("/purchase-requests/{id:guid}", async (
-                [FromServices] ICommandHandler<DeletePurchaseRequest.Request, Result> handler,
+                [FromServices] ICommandHandler<DeletePurchaseRequest.Command, Result> handler,
                 CancellationToken token,
                 Guid id
             ) =>
             {
-                var result = await handler.HandleAsync(new DeletePurchaseRequest.Request(id), token);
+                var result = await handler.HandleAsync(new DeletePurchaseRequest.Command(id), token);
                 return result.Match(
                     Results.NoContent,
                     error => error.ToProblemDetails()

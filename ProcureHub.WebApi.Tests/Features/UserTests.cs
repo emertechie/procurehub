@@ -24,7 +24,7 @@ public class UserTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
     private const string RequesterUserEmail = "user1@example.com";
     private const string RequesterUserPassword = "Test1234!";
 
-    private static readonly CreateUser.Request ValidUserCreateRequest = new(RequesterUserEmail, RequesterUserPassword, "Some", "User");
+    private static readonly CreateUser.Command ValidUserCreateCommand = new(RequesterUserEmail, RequesterUserPassword, "Some", "User");
 
     public async ValueTask InitializeAsync()
     {
@@ -106,20 +106,20 @@ public class UserTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
         await LoginAsAdminAsync();
 
         // No email
-        var reqNoEmail = ValidUserCreateRequest with { Email = null! };
-        var respNoEmail = await HttpClient.PostAsync("/users", JsonContent.Create(reqNoEmail));
+        var cmdNoEmail = ValidUserCreateCommand with { Email = null! };
+        var respNoEmail = await HttpClient.PostAsync("/users", JsonContent.Create(cmdNoEmail));
         await respNoEmail.AssertValidationProblemAsync(
             errors: new Dictionary<string, string[]> { ["Email"] = ["'Email' must not be empty."] });
 
         // Not a valid email
-        var reqInvalidEmail = ValidUserCreateRequest with { Email = "not-an-email" };
-        var respInvalidEmail = await HttpClient.PostAsync("/users", JsonContent.Create(reqInvalidEmail));
+        var cmdInvalidEmail = ValidUserCreateCommand with { Email = "not-an-email" };
+        var respInvalidEmail = await HttpClient.PostAsync("/users", JsonContent.Create(cmdInvalidEmail));
         await respInvalidEmail.AssertValidationProblemAsync(
             errors: new Dictionary<string, string[]> { ["Email"] = ["'Email' is not a valid email address."] });
 
         // No password
-        var reqNoPwd = ValidUserCreateRequest with { Password = null! };
-        var respNoPwd = await HttpClient.PostAsync("/users", JsonContent.Create(reqNoPwd));
+        var cmdNoPwd = ValidUserCreateCommand with { Password = null! };
+        var respNoPwd = await HttpClient.PostAsync("/users", JsonContent.Create(cmdNoPwd));
         await respNoPwd.AssertValidationProblemAsync(
             errors: new Dictionary<string, string[]> { ["Password"] = ["'Password' must not be empty."] });
     }
@@ -161,8 +161,8 @@ public class UserTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
         const string user1Id = "user-id-1";
         const string user2Id = "user-id-2";
 
-        var updateReq = new UpdateUser.Request(user1Id, "test@example.com", "Test", "User");
-        var resp = await HttpClient.PutAsync($"/users/{user2Id}", JsonContent.Create(updateReq));
+        var updateCmd = new UpdateUser.Command(user1Id, "test@example.com", "Test", "User");
+        var resp = await HttpClient.PutAsync($"/users/{user2Id}", JsonContent.Create(updateCmd));
 
         await resp.AssertProblemDetailsAsync(
             HttpStatusCode.BadRequest,
@@ -182,8 +182,8 @@ public class UserTestsWithSharedDb(ApiTestHostFixture hostFixture, ITestOutputHe
         const string user2Id = "user-id-2";
         ;
 
-        var assignReq = new AssignUserToDepartment.Request(user1Id, Guid.NewGuid());
-        var resp = await HttpClient.PatchAsync($"/users/{user2Id}/department", JsonContent.Create(assignReq));
+        var assignCmd = new AssignUserToDepartment.Command(user1Id, Guid.NewGuid());
+        var resp = await HttpClient.PatchAsync($"/users/{user2Id}/department", JsonContent.Create(assignCmd));
 
         await resp.AssertProblemDetailsAsync(
             HttpStatusCode.BadRequest,
@@ -214,7 +214,7 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
     private const string ValidUserEmail = "user1@example.com";
     private const string ValidUserPassword = "Test1234!";
 
-    private static readonly CreateUser.Request ValidCreateRequest = new(ValidUserEmail, ValidUserPassword, "Some", "User");
+    private static readonly CreateUser.Command ValidCreateCommand = new(ValidUserEmail, ValidUserPassword, "Some", "User");
 
     /// <summary>
     /// Note: In a real-world system, this would use invite emails and a time-limited invite token.
@@ -236,8 +236,8 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         Assert.Empty(userList1.Data);
 
         // Admin creates user
-        var newUserReq = ValidCreateRequest with { Email = newUserEmailMixedCase };
-        var regResp = await HttpClient.PostAsync("/users", JsonContent.Create(newUserReq));
+        var newUserCmd = ValidCreateCommand with { Email = newUserEmailMixedCase };
+        var regResp = await HttpClient.PostAsync("/users", JsonContent.Create(newUserCmd));
         Assert.Equal(HttpStatusCode.Created, regResp.StatusCode);
 
         // Extract new user ID from response
@@ -267,14 +267,14 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         // Log in as admin to be able to manage users
         await LoginAsAdminAsync();
 
-        var newUserReq = ValidCreateRequest with { Email = email, Password = password };
+        var newUserCmd = ValidCreateCommand with { Email = email, Password = password };
 
         // Attempt 1: Admin creates user - should work
-        var regResp1 = await HttpClient.PostAsync("/users", JsonContent.Create(newUserReq));
+        var regResp1 = await HttpClient.PostAsync("/users", JsonContent.Create(newUserCmd));
         Assert.Equal(HttpStatusCode.Created, regResp1.StatusCode);
 
         // Attempt 2: Admin tries to create user with same email - should fail
-        var regResp2 = await HttpClient.PostAsync("/users", JsonContent.Create(newUserReq));
+        var regResp2 = await HttpClient.PostAsync("/users", JsonContent.Create(newUserCmd));
         await regResp2.AssertValidationProblemAsync(
             errors: new Dictionary<string, string[]>
             {
@@ -301,16 +301,16 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         Assert.Equal(AdminEmail, info1.Email);
 
         // Admin creates user
-        var regResp1 = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest));
+        var regResp1 = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateCommand));
         Assert.Equal(HttpStatusCode.Created, regResp1.StatusCode);
 
         // Log in as user
-        await LoginAsync(ValidCreateRequest.Email, ValidCreateRequest.Password);
+        await LoginAsync(ValidCreateCommand.Email, ValidCreateCommand.Password);
 
         // Confirm logged in as user: 
         var info2 = await HttpClient.GetAsync("/manage/info")
             .ReadJsonAsync<InfoResponse>();
-        Assert.Equal(ValidCreateRequest.Email, info2.Email);
+        Assert.Equal(ValidCreateCommand.Email, info2.Email);
     }
 
     [Fact]
@@ -319,13 +319,13 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         await LoginAsAdminAsync();
 
         // Create user
-        var createResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest));
+        var createResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateCommand));
         var createdUser = await createResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         var userId = createdUser.Id.ToString();
 
         // Update user profile
-        var updateReq = new UpdateUser.Request(userId, "updated@example.com", "Updated", "Name");
-        var updateResp = await HttpClient.PutAsync($"/users/{userId}", JsonContent.Create(updateReq));
+        var updateCmd = new UpdateUser.Command(userId, "updated@example.com", "Updated", "Name");
+        var updateResp = await HttpClient.PutAsync($"/users/{userId}", JsonContent.Create(updateCmd));
         Assert.Equal(HttpStatusCode.NoContent, updateResp.StatusCode);
 
         // Verify update
@@ -342,12 +342,12 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         await LoginAsAdminAsync();
 
         // Create user (enabled by default)
-        var createResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest));
+        var createResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateCommand));
         var createdUser = await createResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         var userId = createdUser.Id.ToString();
 
         // User can login initially
-        await LoginAsync(ValidCreateRequest.Email, ValidCreateRequest.Password);
+        await LoginAsync(ValidCreateCommand.Email, ValidCreateCommand.Password);
 
         // Switch back to admin
         await LoginAsAdminAsync();
@@ -357,7 +357,7 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         Assert.Equal(HttpStatusCode.NoContent, disableResp.StatusCode);
 
         // Disabled user cannot log in
-        var loginReq = new LoginRequest { Email = ValidCreateRequest.Email, Password = ValidCreateRequest.Password };
+        var loginReq = new LoginRequest { Email = ValidCreateCommand.Email, Password = ValidCreateCommand.Password };
         var loginResp = await HttpClient.PostAsync("/login?useCookies=true", JsonContent.Create(loginReq));
         Assert.Equal(HttpStatusCode.Unauthorized, loginResp.StatusCode);
 
@@ -369,7 +369,7 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         Assert.Equal(HttpStatusCode.NoContent, enableResp.StatusCode);
 
         // User can login again
-        await LoginAsync(ValidCreateRequest.Email, ValidCreateRequest.Password);
+        await LoginAsync(ValidCreateCommand.Email, ValidCreateCommand.Password);
 
         // Switch back to admin and enable again (idempotent)
         await LoginAsAdminAsync();
@@ -383,13 +383,13 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         await LoginAsAdminAsync();
 
         // Create department
-        var createDeptReq = new CreateDepartment.Request("Engineering");
-        var createDeptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createDeptReq));
+        var createDeptCmd = new CreateDepartment.Command("Engineering");
+        var createDeptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createDeptCmd));
         var createdDept = await createDeptResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         var deptId = createdDept.Id;
 
         // Create user
-        var createUserResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest));
+        var createUserResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateCommand));
         var createdUser = await createUserResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         var userId = createdUser.Id.ToString();
 
@@ -399,8 +399,8 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         Assert.Null(initialUser.Data.Department);
 
         // Assign user to department
-        var assignReq = new AssignUserToDepartment.Request(userId, deptId);
-        var assignResp = await HttpClient.PatchAsync($"/users/{userId}/department", JsonContent.Create(assignReq));
+        var assignCmd = new AssignUserToDepartment.Command(userId, deptId);
+        var assignResp = await HttpClient.PatchAsync($"/users/{userId}/department", JsonContent.Create(assignCmd));
         Assert.Equal(HttpStatusCode.NoContent, assignResp.StatusCode);
 
         // Verify assignment
@@ -411,8 +411,8 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         Assert.Equal("Engineering", user.Data.Department.Name);
 
         // Unassign user from department (set to null)
-        var unassignReq = new AssignUserToDepartment.Request(userId, null);
-        var unassignResp = await HttpClient.PatchAsync($"/users/{userId}/department", JsonContent.Create(unassignReq));
+        var unassignCmd = new AssignUserToDepartment.Command(userId, null);
+        var unassignResp = await HttpClient.PatchAsync($"/users/{userId}/department", JsonContent.Create(unassignCmd));
         Assert.Equal(HttpStatusCode.NoContent, unassignResp.StatusCode);
 
         // Verify unassignment
@@ -427,14 +427,14 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         await LoginAsAdminAsync();
 
         // Create user
-        var createUserResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest));
+        var createUserResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateCommand));
         var createdUser = await createUserResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         var userId = createdUser.Id.ToString();
 
         // Try to assign user to non-existent department
         var departmentId = Guid.NewGuid();
-        var assignReq = new AssignUserToDepartment.Request(userId, departmentId);
-        var assignResp = await HttpClient.PatchAsync($"/users/{userId}/department", JsonContent.Create(assignReq));
+        var assignCmd = new AssignUserToDepartment.Command(userId, departmentId);
+        var assignResp = await HttpClient.PatchAsync($"/users/{userId}/department", JsonContent.Create(assignCmd));
         await assignResp.AssertProblemDetailsAsync(
             HttpStatusCode.NotFound,
             detail: "Department.NotFound",
@@ -448,8 +448,8 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         await LoginAsAdminAsync();
 
         const string userId = "nonexistent-id";
-        var updateReq = new UpdateUser.Request("nonexistent-id", "test@example.com", "Test", "User");
-        var updateResp = await HttpClient.PutAsync($"/users/{userId}", JsonContent.Create(updateReq));
+        var updateCmd = new UpdateUser.Command("nonexistent-id", "test@example.com", "Test", "User");
+        var updateResp = await HttpClient.PutAsync($"/users/{userId}", JsonContent.Create(updateCmd));
         await updateResp.AssertProblemDetailsAsync(
             HttpStatusCode.NotFound,
             detail: "User.NotFound",
@@ -491,7 +491,7 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         Assert.Contains("Admin", adminUser.Roles);
 
         // Create regular user (should have no roles)
-        var createUserResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateRequest));
+        var createUserResp = await HttpClient.PostAsync("/users", JsonContent.Create(ValidCreateCommand));
         var createdUser = await createUserResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         var userId = createdUser.Id.ToString();
 
@@ -506,9 +506,9 @@ public class UserTests(ApiTestHostFixture hostFixture, ITestOutputHelper testOut
         await LoginAsAdminAsync();
 
         // Create 3 users with different email patterns
-        var user1Req = ValidCreateRequest with { Email = "alice@example.com" };
-        var user2Req = ValidCreateRequest with { Email = "bob@example.com" };
-        var user3Req = ValidCreateRequest with { Email = "alice@different.com" };
+        var user1Req = ValidCreateCommand with { Email = "alice@example.com" };
+        var user2Req = ValidCreateCommand with { Email = "bob@example.com" };
+        var user3Req = ValidCreateCommand with { Email = "alice@different.com" };
 
         await HttpClient.PostAsync("/users", JsonContent.Create(user1Req));
         await HttpClient.PostAsync("/users", JsonContent.Create(user2Req));

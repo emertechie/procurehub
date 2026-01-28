@@ -118,7 +118,7 @@ public class PurchaseRequestTestsWithSharedDb(
         await LoginAsync(RequesterUserEmail, RequesterUserPassword);
 
         // No title
-        var reqNoTitle = new CreatePurchaseRequest.Request(
+        var cmdNoTitle = new CreatePurchaseRequest.Command(
             Title: null!,
             Description: "Test description",
             EstimatedAmount: 1000,
@@ -127,12 +127,12 @@ public class PurchaseRequestTestsWithSharedDb(
             DepartmentId: Guid.NewGuid(),
             RequesterUserId: "user-id"
         );
-        var respNoTitle = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(reqNoTitle));
+        var respNoTitle = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(cmdNoTitle));
         await respNoTitle.AssertValidationProblemAsync(
             errors: new Dictionary<string, string[]> { ["Title"] = ["'Title' must not be empty."] });
 
         // Invalid amount (zero)
-        var reqZeroAmount = new CreatePurchaseRequest.Request(
+        var cmdZeroAmount = new CreatePurchaseRequest.Command(
             Title: "Test Request",
             Description: "Test description",
             EstimatedAmount: 0,
@@ -141,7 +141,7 @@ public class PurchaseRequestTestsWithSharedDb(
             DepartmentId: Guid.NewGuid(),
             RequesterUserId: "user-id"
         );
-        var respZeroAmount = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(reqZeroAmount));
+        var respZeroAmount = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(cmdZeroAmount));
         await respZeroAmount.AssertValidationProblemAsync(
             errors: new Dictionary<string, string[]> { ["EstimatedAmount"] = ["'Estimated Amount' must be greater than '0'."] });
     }
@@ -164,7 +164,7 @@ public class PurchaseRequestTestsWithSharedDb(
         await LoginAsync(RequesterUserEmail, RequesterUserPassword);
 
         // No title
-        var reqNoTitle = new UpdatePurchaseRequest.Request(
+        var cmdNoTitle = new UpdatePurchaseRequest.Command(
             Id: Guid.NewGuid(),
             Title: null!,
             Description: "Test",
@@ -173,13 +173,13 @@ public class PurchaseRequestTestsWithSharedDb(
             CategoryId: Guid.NewGuid(),
             DepartmentId: Guid.NewGuid()
         );
-        var respNoTitle = await HttpClient.PutAsync($"/purchase-requests/{reqNoTitle.Id}", JsonContent.Create(reqNoTitle));
+        var respNoTitle = await HttpClient.PutAsync($"/purchase-requests/{cmdNoTitle.Id}", JsonContent.Create(cmdNoTitle));
         await respNoTitle.AssertValidationProblemAsync(
             errors: new Dictionary<string, string[]> { ["Title"] = ["'Title' must not be empty."] });
 
         // Route id must match body id
         var prId = Guid.NewGuid();
-        var updateReq = new UpdatePurchaseRequest.Request(
+        var updateCmd = new UpdatePurchaseRequest.Command(
             Id: prId,
             Title: "Test",
             Description: "Test",
@@ -189,7 +189,7 @@ public class PurchaseRequestTestsWithSharedDb(
             DepartmentId: Guid.NewGuid()
         );
         var differentId = Guid.NewGuid();
-        var updateResp = await HttpClient.PutAsync($"/purchase-requests/{differentId}", JsonContent.Create(updateReq));
+        var updateResp = await HttpClient.PutAsync($"/purchase-requests/{differentId}", JsonContent.Create(updateCmd));
 
         await updateResp.AssertProblemDetailsAsync(
             HttpStatusCode.BadRequest,
@@ -234,8 +234,8 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         // Use unique names by appending timestamp or random guid
         var uniqueName = $"{name}-{Guid.NewGuid().ToString()[..8]}";
-        var createReq = new CreateCategory.Request(uniqueName);
-        var createResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createReq));
+        var createCmd = new CreateCategory.Command(uniqueName);
+        var createResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createCmd));
         var created = await createResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         return created.Id;
     }
@@ -245,8 +245,8 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsAdminAsync();
         // Use unique names by appending timestamp or random guid
         var uniqueName = $"{name}-{Guid.NewGuid().ToString()[..8]}";
-        var createReq = new CreateDepartment.Request(uniqueName);
-        var createResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createReq));
+        var createCmd = new CreateDepartment.Command(uniqueName);
+        var createResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createCmd));
         var created = await createResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         return created.Id;
     }
@@ -257,7 +257,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         string title = "New Laptop",
         decimal amount = 1500)
     {
-        var createReq = new CreatePurchaseRequest.Request(
+        var createCmd = new CreatePurchaseRequest.Command(
             Title: title,
             Description: "Need new laptop for development",
             EstimatedAmount: amount,
@@ -266,7 +266,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
             DepartmentId: departmentId,
             RequesterUserId: "will-be-replaced"
         );
-        var createResp = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(createReq));
+        var createResp = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(createCmd));
         Assert.Equal(HttpStatusCode.Created, createResp.StatusCode);
         var created = await createResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         return created.Id;
@@ -284,7 +284,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsync("requester@example.com", ValidPassword);
 
         // Create purchase request
-        var createReq = new CreatePurchaseRequest.Request(
+        var createCmd = new CreatePurchaseRequest.Command(
             Title: "Microsoft Office License",
             Description: "Need license for new employee",
             EstimatedAmount: 500,
@@ -293,7 +293,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
             DepartmentId: departmentId,
             RequesterUserId: "will-be-replaced"
         );
-        var createResp = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(createReq));
+        var createResp = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(createCmd));
         Assert.Equal(HttpStatusCode.Created, createResp.StatusCode);
 
         var created = await createResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
@@ -324,7 +324,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsync("requester@example.com", ValidPassword);
 
         var nonexistentCategoryId = Guid.NewGuid();
-        var createReq = new CreatePurchaseRequest.Request(
+        var createCmd = new CreatePurchaseRequest.Command(
             Title: "Test Request",
             Description: "Test",
             EstimatedAmount: 1000,
@@ -333,7 +333,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
             DepartmentId: departmentId,
             RequesterUserId: "will-be-replaced"
         );
-        var createResp = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(createReq));
+        var createResp = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(createCmd));
 
         await createResp.AssertValidationProblemAsync(
             title: "Category not found",
@@ -355,7 +355,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsync("requester@example.com", ValidPassword);
 
         var nonexistentDepartmentId = Guid.NewGuid();
-        var createReq = new CreatePurchaseRequest.Request(
+        var createCmd = new CreatePurchaseRequest.Command(
             Title: "Test Request",
             Description: "Test",
             EstimatedAmount: 1000,
@@ -364,7 +364,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
             DepartmentId: nonexistentDepartmentId,
             RequesterUserId: "will-be-replaced"
         );
-        var createResp = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(createReq));
+        var createResp = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(createCmd));
 
         await createResp.AssertValidationProblemAsync(
             title: "Department not found",
@@ -387,7 +387,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         var prId = await CreatePurchaseRequestAsync(categoryId, departmentId, "Original Title", 1000);
 
         // Update the purchase request
-        var updateReq = new UpdatePurchaseRequest.Request(
+        var updateCmd = new UpdatePurchaseRequest.Command(
             Id: prId,
             Title: "Updated Title",
             Description: "Updated description",
@@ -396,7 +396,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
             CategoryId: categoryId,
             DepartmentId: departmentId
         );
-        var updateResp = await HttpClient.PutAsync($"/purchase-requests/{prId}", JsonContent.Create(updateReq));
+        var updateResp = await HttpClient.PutAsync($"/purchase-requests/{prId}", JsonContent.Create(updateCmd));
         Assert.Equal(HttpStatusCode.NoContent, updateResp.StatusCode);
 
         // Verify update
@@ -477,7 +477,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await HttpClient.PostAsync($"/purchase-requests/{prId}/submit", null);
 
         // Try to update
-        var updateReq = new UpdatePurchaseRequest.Request(
+        var updateCmd = new UpdatePurchaseRequest.Command(
             Id: prId,
             Title: "Trying to update",
             Description: "Test",
@@ -486,7 +486,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
             CategoryId: categoryId,
             DepartmentId: departmentId
         );
-        var updateResp = await HttpClient.PutAsync($"/purchase-requests/{prId}", JsonContent.Create(updateReq));
+        var updateResp = await HttpClient.PutAsync($"/purchase-requests/{prId}", JsonContent.Create(updateCmd));
 
         await updateResp.AssertValidationProblemAsync(
             title: "Cannot update submitted request",
@@ -861,7 +861,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
         await LoginAsync("requester@example.com", ValidPassword);
 
         var nonexistentId = Guid.NewGuid();
-        var updateReq = new UpdatePurchaseRequest.Request(
+        var updateCmd = new UpdatePurchaseRequest.Command(
             Id: nonexistentId,
             Title: "Test",
             Description: "Test",
@@ -870,7 +870,7 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
             CategoryId: categoryId,
             DepartmentId: departmentId
         );
-        var updateResp = await HttpClient.PutAsync($"/purchase-requests/{nonexistentId}", JsonContent.Create(updateReq));
+        var updateResp = await HttpClient.PutAsync($"/purchase-requests/{nonexistentId}", JsonContent.Create(updateCmd));
 
         await updateResp.AssertProblemDetailsAsync(
             HttpStatusCode.NotFound,

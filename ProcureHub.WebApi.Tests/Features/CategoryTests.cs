@@ -112,8 +112,8 @@ public class CategoryTestsWithSharedDb(
         await LoginAsAdminAsync();
 
         // No name
-        var reqNoName = new CreateCategory.Request(null!);
-        var respNoName = await HttpClient.PostAsync("/categories", JsonContent.Create(reqNoName));
+        var cmdNoName = new CreateCategory.Command(null!);
+        var respNoName = await HttpClient.PostAsync("/categories", JsonContent.Create(cmdNoName));
         await respNoName.AssertValidationProblemAsync(
             errors: new Dictionary<string, string[]> { ["Name"] = ["'Name' must not be empty."] });
     }
@@ -136,16 +136,16 @@ public class CategoryTestsWithSharedDb(
         await LoginAsAdminAsync();
 
         // No name
-        var reqNoName = new UpdateCategory.Request(Guid.NewGuid(), null!);
-        var respNoName = await HttpClient.PutAsync($"/categories/{reqNoName.Id}", JsonContent.Create(reqNoName));
+        var cmdNoName = new UpdateCategory.Command(Guid.NewGuid(), null!);
+        var respNoName = await HttpClient.PutAsync($"/categories/{cmdNoName.Id}", JsonContent.Create(cmdNoName));
         await respNoName.AssertValidationProblemAsync(
             errors: new Dictionary<string, string[]> { ["Name"] = ["'Name' must not be empty."] });
 
         // Route id must match body id
         var catId = Guid.NewGuid();
-        var updateReq = new UpdateCategory.Request(catId, "Software");
+        var updateCmd = new UpdateCategory.Command(catId, "Software");
         var differentId = Guid.NewGuid();
-        var updateResp = await HttpClient.PutAsync($"/categories/{differentId}", JsonContent.Create(updateReq));
+        var updateResp = await HttpClient.PutAsync($"/categories/{differentId}", JsonContent.Create(updateCmd));
 
         await updateResp.AssertProblemDetailsAsync(
             HttpStatusCode.BadRequest,
@@ -173,8 +173,8 @@ public class CategoryTests(ApiTestHostFixture hostFixture, ITestOutputHelper tes
         await LoginAsAdminAsync();
 
         // Create category
-        var createCatReq = new CreateCategory.Request("New Category");
-        var createCatResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createCatReq));
+        var createCatCmd = new CreateCategory.Command("New Category");
+        var createCatResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createCatCmd));
         Assert.Equal(HttpStatusCode.Created, createCatResp.StatusCode);
 
         // Extract category ID from response
@@ -200,11 +200,11 @@ public class CategoryTests(ApiTestHostFixture hostFixture, ITestOutputHelper tes
 
         const string categoryName = "Facilities";
 
-        var createReq = new CreateCategory.Request(categoryName);
-        var createResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createReq));
+        var createCmd = new CreateCategory.Command(categoryName);
+        var createResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createCmd));
         Assert.Equal(HttpStatusCode.Created, createResp.StatusCode);
 
-        var duplicateResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createReq));
+        var duplicateResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createCmd));
         await duplicateResp.AssertValidationProblemAsync(
             title: "Category name must be unique.",
             detail: "Category.DuplicateName",
@@ -222,17 +222,17 @@ public class CategoryTests(ApiTestHostFixture hostFixture, ITestOutputHelper tes
         const string duplicateName = "Facilities";
         const string equipmentName = "Equipment";
 
-        var createFacilitiesReq = new CreateCategory.Request(duplicateName);
-        var facilitiesResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createFacilitiesReq));
+        var createFacilitiesCmd = new CreateCategory.Command(duplicateName);
+        var facilitiesResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createFacilitiesCmd));
         Assert.Equal(HttpStatusCode.Created, facilitiesResp.StatusCode);
 
-        var createEquipmentReq = new CreateCategory.Request(equipmentName);
-        var equipmentResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createEquipmentReq));
+        var createEquipmentCmd = new CreateCategory.Command(equipmentName);
+        var equipmentResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createEquipmentCmd));
         var equipmentCat = await equipmentResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         var equipmentId = equipmentCat.Id;
 
-        var updateReq = new UpdateCategory.Request(equipmentId, duplicateName);
-        var updateResp = await HttpClient.PutAsync($"/categories/{equipmentId}", JsonContent.Create(updateReq));
+        var updateCmd = new UpdateCategory.Command(equipmentId, duplicateName);
+        var updateResp = await HttpClient.PutAsync($"/categories/{equipmentId}", JsonContent.Create(updateCmd));
 
         await updateResp.AssertValidationProblemAsync(
             title: "Category name must be unique.",
@@ -253,14 +253,14 @@ public class CategoryTests(ApiTestHostFixture hostFixture, ITestOutputHelper tes
         await LoginAsAdminAsync();
 
         // Create category
-        var createReq = new CreateCategory.Request("Consulting");
-        var createResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createReq));
+        var createCmd = new CreateCategory.Command("Consulting");
+        var createResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createCmd));
         var createdCat = await createResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         var catId = createdCat.Id;
 
         // Update category name
-        var updateReq = new UpdateCategory.Request(catId, "Consulting Services");
-        var updateResp = await HttpClient.PutAsync($"/categories/{catId}", JsonContent.Create(updateReq));
+        var updateCmd = new UpdateCategory.Command(catId, "Consulting Services");
+        var updateResp = await HttpClient.PutAsync($"/categories/{catId}", JsonContent.Create(updateCmd));
         Assert.Equal(HttpStatusCode.NoContent, updateResp.StatusCode);
 
         // Verify update
@@ -275,8 +275,8 @@ public class CategoryTests(ApiTestHostFixture hostFixture, ITestOutputHelper tes
         await LoginAsAdminAsync();
 
         var nonexistentId = Guid.NewGuid();
-        var updateReq = new UpdateCategory.Request(nonexistentId, "Nonexistent Category");
-        var updateResp = await HttpClient.PutAsync($"/categories/{nonexistentId}", JsonContent.Create(updateReq));
+        var updateCmd = new UpdateCategory.Command(nonexistentId, "Nonexistent Category");
+        var updateResp = await HttpClient.PutAsync($"/categories/{nonexistentId}", JsonContent.Create(updateCmd));
 
         await updateResp.AssertProblemDetailsAsync(
             HttpStatusCode.NotFound,
@@ -291,8 +291,8 @@ public class CategoryTests(ApiTestHostFixture hostFixture, ITestOutputHelper tes
         await LoginAsAdminAsync();
 
         // Create category
-        var createReq = new CreateCategory.Request("Temporary Category");
-        var createResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createReq));
+        var createCmd = new CreateCategory.Command("Temporary Category");
+        var createResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createCmd));
         var createdCat = await createResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         var catId = createdCat.Id;
 
@@ -318,14 +318,14 @@ public class CategoryTests(ApiTestHostFixture hostFixture, ITestOutputHelper tes
 
         // Create category with unique name
         var uniqueCategoryName = $"Test Category {Guid.NewGuid()}";
-        var createCatReq = new CreateCategory.Request(uniqueCategoryName);
-        var createCatResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createCatReq));
+        var createCatCmd = new CreateCategory.Command(uniqueCategoryName);
+        var createCatResp = await HttpClient.PostAsync("/categories", JsonContent.Create(createCatCmd));
         var createdCat = await createCatResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         var catId = createdCat.Id;
 
         // Create department
-        var createDeptReq = new CreateDepartment.Request("IT Department");
-        var createDeptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createDeptReq));
+        var createDeptCmd = new CreateDepartment.Command("IT Department");
+        var createDeptResp = await HttpClient.PostAsync("/departments", JsonContent.Create(createDeptCmd));
         var createdDept = await createDeptResp.ReadJsonAsync<EntityCreatedResponse<Guid>>();
         var deptId = createdDept.Id;
 
@@ -336,7 +336,7 @@ public class CategoryTests(ApiTestHostFixture hostFixture, ITestOutputHelper tes
         await LoginAsync("requester@example.com", ValidPassword);
 
         // Create a purchase request with this category
-        var createPrReq = new CreatePurchaseRequest.Request(
+        var createPrCmd = new CreatePurchaseRequest.Command(
             Title: "Test Purchase Request",
             Description: "Test description",
             EstimatedAmount: 1000m,
@@ -345,7 +345,7 @@ public class CategoryTests(ApiTestHostFixture hostFixture, ITestOutputHelper tes
             DepartmentId: deptId,
             RequesterUserId: "will-be-replaced"
         );
-        var createPrResp = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(createPrReq));
+        var createPrResp = await HttpClient.PostAsync("/purchase-requests", JsonContent.Create(createPrCmd));
         Assert.Equal(HttpStatusCode.Created, createPrResp.StatusCode);
 
         // Login back as admin to attempt deletion
