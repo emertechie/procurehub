@@ -1,0 +1,93 @@
+@using ProcureHub.Features.Departments
+@using ProcureHub.Infrastructure
+
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject ICommandHandler<CreateDepartment.Command, Result<Guid>> CreateDepartmentHandler
+@inject ICommandHandler<UpdateDepartment.Command, Result> UpdateDepartmentHandler
+
+<RadzenStack Gap="1rem">
+    @if (_errorMessage != null)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">
+            @_errorMessage
+        </RadzenAlert>
+    }
+
+    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+        <RadzenLabel Text="Name" Component="NameInput" />
+        <RadzenTextBox Name="NameInput" @bind-Value="@_name" Placeholder="Enter department name" Style="width: 100%;" />
+    </RadzenStack>
+
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" JustifyContent="JustifyContent.End">
+        <RadzenButton Text="Save" Click="@OnSubmit" ButtonStyle="ButtonStyle.Primary" Disabled="@_isSaving" />
+        <RadzenButton Text="Cancel" Click="@Cancel" ButtonStyle="ButtonStyle.Light" Disabled="@_isSaving" />
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+    [Parameter] public Guid? DepartmentId { get; set; }
+    [Parameter] public string? InitialName { get; set; }
+
+    private string _name = "";
+    private bool _isSaving;
+    private string? _errorMessage;
+    private bool IsEdit => DepartmentId.HasValue;
+
+    protected override void OnInitialized()
+    {
+        if (IsEdit && InitialName != null)
+        {
+            _name = InitialName;
+        }
+    }
+
+    private async Task OnSubmit()
+    {
+        _errorMessage = null;
+        _isSaving = true;
+
+        try
+        {
+            if (IsEdit)
+            {
+                var command = new UpdateDepartment.Command(DepartmentId!.Value, _name);
+                var result = await UpdateDepartmentHandler.HandleAsync(command, CancellationToken.None);
+
+                if (result.IsSuccess)
+                {
+                    NotificationService.Notify(NotificationSeverity.Success, "Success", "Department updated");
+                    DialogService.Close(true);
+                }
+                else
+                {
+                    _errorMessage = result.Error.Message;
+                }
+            }
+            else
+            {
+                var command = new CreateDepartment.Command(_name);
+                var result = await CreateDepartmentHandler.HandleAsync(command, CancellationToken.None);
+
+                if (result.IsSuccess)
+                {
+                    NotificationService.Notify(NotificationSeverity.Success, "Success", "Department created");
+                    DialogService.Close(true);
+                }
+                else
+                {
+                    _errorMessage = result.Error.Message;
+                }
+            }
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        DialogService.Close(false);
+    }
+}

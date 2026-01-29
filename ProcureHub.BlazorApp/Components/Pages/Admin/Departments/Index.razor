@@ -1,9 +1,129 @@
 @page "/admin/departments"
 @attribute [Authorize(Roles = "Admin")]
+@layout AuthenticatedLayout
 
-@using Microsoft.AspNetCore.Authorization
+@using ProcureHub.BlazorApp.Helpers
+@using ProcureHub.Features.Departments
+@using ProcureHub.Infrastructure
+
+@inject IQueryHandler<QueryDepartments.Request, QueryDepartments.Response[]> QueryDepartmentsHandler
+@inject ICommandHandler<DeleteDepartment.Command, Result> DeleteDepartmentHandler
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject TooltipService TooltipService
 
 <PageTitle>Departments</PageTitle>
 
-<RadzenText TextStyle="TextStyle.H4">Departments</RadzenText>
-@* TODO: Implement departments management *@
+<RadzenStack Gap="1rem">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+        <RadzenText TextStyle="TextStyle.H4">Departments</RadzenText>
+        <RadzenButton Text="Add Department" Icon="add" Click="@OpenCreateDialog" ButtonStyle="ButtonStyle.Primary" />
+    </RadzenStack>
+
+    <RadzenDataGrid TItem="QueryDepartments.Response"
+                    Data="@_departments"
+                    IsLoading="@_loading"
+                    AllowAlternatingRows="false">
+        <Columns>
+            <RadzenDataGridColumn TItem="QueryDepartments.Response" Property="Name" Title="Name" />
+
+            <RadzenDataGridColumn TItem="QueryDepartments.Response" Title="Actions" Width="120px">
+                <Template Context="dept">
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem">
+                        <RadzenButton Icon="edit" Size="ButtonSize.Small"
+                                      Click="@(() => OpenEditDialog(dept))"
+                                      MouseEnter="@((element) => ShowTooltip(element, "Edit department"))"
+                                      ButtonStyle="ButtonStyle.Light" />
+                        <RadzenButton Icon="delete" Size="ButtonSize.Small"
+                                      Click="@(() => DeleteAsync(dept))"
+                                      MouseEnter="@((element) => ShowTooltip(element, "Delete department"))"
+                                      ButtonStyle="ButtonStyle.Danger" />
+                    </RadzenStack>
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</RadzenStack>
+
+@code {
+    QueryDepartments.Response[] _departments = [];
+    bool _loading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDepartments();
+    }
+
+    async Task LoadDepartments()
+    {
+        using (new BusyScope(b => _loading = b))
+        {
+            _departments = await QueryDepartmentsHandler.HandleAsync(new QueryDepartments.Request(), CancellationToken.None);
+        }
+    }
+
+    async Task OpenCreateDialog()
+    {
+        var result = await DialogService.OpenAsync<DepartmentDialog>(
+            "Create Department",
+            new Dictionary<string, object>(),
+            new DialogOptions { Width = "400px" }
+        );
+
+        if (result == true)
+        {
+            await LoadDepartments();
+        }
+    }
+
+    async Task OpenEditDialog(QueryDepartments.Response dept)
+    {
+        var result = await DialogService.OpenAsync<DepartmentDialog>(
+            "Edit Department",
+            new Dictionary<string, object>
+            {
+                { "DepartmentId", dept.Id },
+                { "InitialName", dept.Name }
+            },
+            new DialogOptions { Width = "400px" }
+        );
+
+        if (result == true)
+        {
+            await LoadDepartments();
+        }
+    }
+
+    async Task DeleteAsync(QueryDepartments.Response dept)
+    {
+        var confirmed = await DialogService.Confirm(
+            $"Are you sure you want to delete '{dept.Name}'?",
+            "Delete Department",
+            new ConfirmOptions { OkButtonText = "Yes", CancelButtonText = "No" }
+        );
+
+        if (confirmed == true)
+        {
+            var result = await DeleteDepartmentHandler.HandleAsync(new DeleteDepartment.Command(dept.Id), CancellationToken.None);
+            if (result.IsSuccess)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Success", "Department deleted");
+                await LoadDepartments();
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", result.Error.Message);
+            }
+        }
+    }
+
+    void ShowTooltip(ElementReference element, string text)
+    {
+        var options = new TooltipOptions
+        {
+            Position = TooltipPosition.Top,
+            Delay = 300
+        };
+        TooltipService.Open(element, text, options);
+    }
+}
