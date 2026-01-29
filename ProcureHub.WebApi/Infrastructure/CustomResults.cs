@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace ProcureHub.WebApi.Helpers;
+namespace ProcureHub.WebApi.Infrastructure;
 
 public class CustomResults
 {

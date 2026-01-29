@@ -3,7 +3,7 @@ using ProcureHub.Common;
 using ProcureHub.Features.Departments;
 using ProcureHub.Infrastructure;
 using ProcureHub.WebApi.Constants;
-using ProcureHub.WebApi.Helpers;
+using ProcureHub.WebApi.Infrastructure;
 using ProcureHub.WebApi.Responses;
 
 namespace ProcureHub.WebApi.Features.Departments;

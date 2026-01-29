@@ -6,7 +6,7 @@ using ProcureHub.Common.Pagination;
 using ProcureHub.Features.PurchaseRequests;
 using ProcureHub.Infrastructure;
 using ProcureHub.WebApi.Constants;
-using ProcureHub.WebApi.Helpers;
+using ProcureHub.WebApi.Infrastructure;
 using ProcureHub.WebApi.Responses;
 
 namespace ProcureHub.WebApi.Features.PurchaseRequests;

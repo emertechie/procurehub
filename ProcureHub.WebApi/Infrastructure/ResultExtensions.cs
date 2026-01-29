@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-
 using ProcureHub.Common;
 
-namespace ProcureHub.WebApi.Helpers;
+namespace ProcureHub.WebApi.Infrastructure;
 
 public static class ResultExtensions
 {
