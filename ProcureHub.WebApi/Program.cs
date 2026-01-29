@@ -18,6 +18,7 @@ using ProcureHub.Models;
 using ProcureHub.WebApi;
 using ProcureHub.WebApi.Constants;
 using ProcureHub.WebApi.Features.Auth;
+using ProcureHub.WebApi.Infrastructure;
 using User = ProcureHub.Models.User;
 
 // Customize FluentValidation messages

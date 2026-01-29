@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ProcureHub.WebApi;
+namespace ProcureHub.WebApi.Infrastructure;
 
 /// <summary>
 /// A fallback exception handler that catches all unhandled exceptions and converts them to ProblemDetails responses.

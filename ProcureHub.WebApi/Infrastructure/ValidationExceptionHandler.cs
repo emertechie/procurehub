@@ -2,7 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ProcureHub.WebApi;
+namespace ProcureHub.WebApi.Infrastructure;
 
 /// <summary>
 /// Handles FluentValidation.ValidationException and converts it to a ProblemDetails response.

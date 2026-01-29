@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace ProcureHub.WebApi;
+namespace ProcureHub.WebApi.Infrastructure;
 
 /// <summary>
 /// Centralizes customization of ProblemDetails responses to ensure consistent formatting.
