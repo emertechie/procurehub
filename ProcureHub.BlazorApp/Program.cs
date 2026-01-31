@@ -57,6 +57,7 @@ builder.Services.AddHealthChecks();
 var app = builder.Build();
 
 await app.ApplyMigrationsIfNeededAsync<ApplicationDbContext>();
+await app.ApplySeedDataIfNeededAsync();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

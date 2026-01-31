@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
 using ProcureHub;
 using ProcureHub.Constants;
-using ProcureHub.Data;
 using ProcureHub.Features.Users;
 using ProcureHub.Features.Users.Validation;
 using ProcureHub.Infrastructure;
@@ -193,22 +192,7 @@ async Task ConfigureApplication(WebApplication app)
         app.UseSwaggerUI(options => { options.SwaggerEndpoint("/openapi/v1.json", "v1"); });
     }
 
-    var shouldSeed = app.Environment.IsDevelopment()
-        || app.Configuration.GetValue<bool>("SEED_DATA");
-    if (shouldSeed)
-    {
-        using var scope = app.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-        // Seed database with roles, users, and initial data
-        var seeder = new DataSeeder(
-            dbContext,
-            scope.ServiceProvider.GetRequiredService<UserManager<User>>(),
-            scope.ServiceProvider.GetRequiredService<RoleManager<Role>>(),
-            app.Configuration,
-            scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>());
-        await seeder.SeedAsync();
-    }
+    await app.ApplySeedDataIfNeededAsync();
 
     app.UseHttpsRedirection();
 
