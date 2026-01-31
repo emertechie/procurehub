@@ -48,5 +48,5 @@ variable "deploy_react_variant" {
 variable "deploy_blazor_variant" {
   description = "Deploy Blazor variant: App Service (Blazor SSR + API)"
   type        = bool
-  default     = false
+  default     = true
 }
