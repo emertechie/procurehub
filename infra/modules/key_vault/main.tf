@@ -28,7 +28,7 @@ resource "azurerm_role_assignment" "kv_admin" {
 # Generate ephemeral random password for postgres
 ephemeral "random_password" "postgres_admin" {
   length           = 32
-  special          = true
+  special          = false
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 

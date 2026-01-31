@@ -50,4 +50,3 @@ jobs:
         with:
           app-name: ${{ env.APP_SERVICE_NAME }}
           package: ${{ env.PUBLISH_DIR }}
-

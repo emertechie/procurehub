@@ -3,7 +3,7 @@
 
 locals {
   # Increment this version to rotate the postgres admin password
-  postgres_password_version = 1
+  postgres_password_version = 2
 }
 
 module "rg" {

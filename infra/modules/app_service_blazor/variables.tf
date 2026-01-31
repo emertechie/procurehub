@@ -47,13 +47,13 @@ variable "postgres_admin_login" {
 variable "sku_name" {
   description = "App Service Plan SKU (e.g., B1, S1, P1v2)"
   type        = string
-  default     = "F1"
+  default     = "B1"
 }
 
 variable "dotnet_version" {
   description = ".NET version for the app"
   type        = string
-  default     = "9.0"
+  default     = "10.0"
 }
 
 variable "migrate_db_on_startup" {
