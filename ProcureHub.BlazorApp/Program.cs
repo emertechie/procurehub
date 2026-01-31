@@ -60,6 +60,8 @@ builder.Services.AddIdentityCore<User>(options =>
 
 builder.Services.AddSingleton<IEmailSender<User>, IdentityNoOpEmailSender>();
 
+builder.Services.AddHealthChecks();
+    
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -74,6 +76,12 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 app.UseHttpsRedirection();
 
 app.UseAntiforgery();
+
+// Basic liveness check - just confirms app is running
+app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = _ => false // Don't run any checks, just return healthy if app is running
+});
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

@@ -11,22 +11,28 @@ az ad sp create-for-rbac --role="Contributor" --scopes="/subscriptions/<SUBSCRIP
 Then set the following environment variables:
 
 ```bash
-ARM_CLIENT_ID=xxxx
-ARM_CLIENT_SECRET=xxxx
-ARM_SUBSCRIPTION_ID=xxxx
-ARM_TENANT_ID=xxxx
+export ARM_CLIENT_ID=xxxx
+export ARM_CLIENT_SECRET=xxxx
+export ARM_SUBSCRIPTION_ID=xxxx
+export ARM_TENANT_ID=xxxx
 ```
 
-Grant this role so that Terraform can perform role assignments (search for `azurerm_role_assignment`).
-Otherwise, a lot of manual commands needed.
+## Bootstrap Terraform Permissions
+
+Run the automated bootstrap script to grant required permissions:
 
 ```bash
-# Grant your Terraform SP Owner role on the RG
-az role assignment create \
-  --assignee $ARM_CLIENT_ID \
-  --role "Owner" \
-  --scope "/subscriptions/98a83e0e-404f-4773-9bce-c22c1e888481/resourceGroups/rg-procurehub-staging"
+cd infra
+./bootstrap.sh staging
 ```
+
+This script:
+- Grants "Owner" role to Terraform SP on the resource group (allows role assignments)
+- Grants "Key Vault Secrets User" role (if Key Vault exists, allows reading secrets)
+
+**First-time bootstrap:** If Key Vault doesn't exist yet, you may need to run `terraform apply` twice:
+1. First apply creates Key Vault + self-assigns Key Vault Administrator role
+2. Second apply (after ~30s for role propagation) can read secrets successfully
 
 Need to pass in repo when running plan:
 

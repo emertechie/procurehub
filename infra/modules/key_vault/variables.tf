@@ -18,6 +18,12 @@ variable "location" {
   type        = string
 }
 
+variable "postgres_password_version" {
+  description = "Version number for postgres admin password. Increment to rotate password."
+  type        = number
+  default     = 1
+}
+
 variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)

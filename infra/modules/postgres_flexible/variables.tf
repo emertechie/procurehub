@@ -25,9 +25,14 @@ variable "administrator_login" {
 }
 
 variable "administrator_password" {
-  description = "Administrator password"
+  description = "Ephemeral administrator password"
   type        = string
-  sensitive   = true
+  ephemeral   = true
+}
+
+variable "password_version" {
+  description = "Version number for administrator password"
+  type        = number
 }
 
 variable "database_name" {

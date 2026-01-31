@@ -37,3 +37,16 @@ variable "tags" {
     ManagedBy   = "Terraform"
   }
 }
+
+# Hosting variant flags - can both be true to deploy both variants
+variable "deploy_react_variant" {
+  description = "Deploy React variant: Container App API + Static Web App"
+  type        = bool
+  default     = false
+}
+
+variable "deploy_blazor_variant" {
+  description = "Deploy Blazor variant: App Service (Blazor SSR + API)"
+  type        = bool
+  default     = false
+}
