@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using ProcureHub;
 using ProcureHub.BlazorApp.Components;
 using ProcureHub.BlazorApp.Components.Account;
 using ProcureHub.BlazorApp.Infrastructure.Authentication;
 using ProcureHub.Infrastructure;
 using ProcureHub.Infrastructure.Authentication;
+using ProcureHub.Infrastructure.Hosting;
 using ProcureHub.Models;
 using Radzen;
 
@@ -35,17 +35,9 @@ builder.Services.AddAuthentication(options =>
         options.ApplicationCookie!.Configure(cookie => cookie.Cookie.Name = ".AspNetCore.Identity.BlazorApp");
     });
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
-    throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionString = DatabaseConnectionString.GetConnectionString(builder.Configuration);
 
-// Append password from separate env var (for Key Vault secret injection in production)
-var databasePassword = builder.Configuration["DatabasePassword"];
-if (!string.IsNullOrWhiteSpace(databasePassword))
-{
-    connectionString += $";Password={databasePassword}";
-}
-
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
+builder.Services.AddPostgresDbContext<ApplicationDbContext>(connectionString);
 
 builder.Services.AddIdentityCore<User>(options =>
     {
@@ -64,6 +56,8 @@ builder.Services.AddHealthChecks();
     
 var app = builder.Build();
 
+await app.ApplyMigrationsIfNeededAsync<ApplicationDbContext>();
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -78,10 +72,10 @@ app.UseHttpsRedirection();
 app.UseAntiforgery();
 
 // Basic liveness check - just confirms app is running
-app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
-{
-    Predicate = _ => false // Don't run any checks, just return healthy if app is running
-});
+app.MapLivenessHealthEndpoint();
+
+// Readiness check
+app.MapReadinessHealthEndpoint();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

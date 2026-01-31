@@ -5,7 +5,6 @@ using FluentValidation;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OpenApi;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using ProcureHub;
 using ProcureHub.Constants;
@@ -14,6 +13,7 @@ using ProcureHub.Features.Users;
 using ProcureHub.Features.Users.Validation;
 using ProcureHub.Infrastructure;
 using ProcureHub.Infrastructure.Authentication;
+using ProcureHub.Infrastructure.Hosting;
 using ProcureHub.Models;
 using ProcureHub.WebApi;
 using ProcureHub.WebApi.Constants;
@@ -81,18 +81,11 @@ void RegisterServices(WebApplicationBuilder appBuilder)
         });
     });
 
-    var connectionString = appBuilder.Configuration.GetConnectionString("DefaultConnection") ??
-                           throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+    var connectionString = DatabaseConnectionString.GetConnectionString(appBuilder.Configuration);
 
-    // Append password from separate env var (for Key Vault secret injection in production)
-    var databasePassword = appBuilder.Configuration["DatabasePassword"];
-    if (!string.IsNullOrWhiteSpace(databasePassword))
-    {
-        connectionString += $";Password={databasePassword}";
-    }
-
-    appBuilder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(connectionString, dbOptions => dbOptions.MigrationsAssembly("ProcureHub")));
+    appBuilder.Services.AddPostgresDbContext<ApplicationDbContext>(
+        connectionString,
+        migrationsAssembly: "ProcureHub");
 
     // Configure Identity with API endpoints (automatically adds Bearer token authentication)
     builder.Services.AddIdentityApiEndpoints<User>(options =>
@@ -191,19 +184,7 @@ async Task ConfigureApplication(WebApplication app)
     // Turn unhandled exceptions into ProblemDetails response:
     app.UseExceptionHandler();
 
-    var shouldMigrate = app.Environment.IsDevelopment()
-        || app.Configuration.GetValue<bool>("MIGRATE_DB_ON_STARTUP");
-
-    if (shouldMigrate)
-    {
-        using var scope = app.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-
-        logger.LogInformation("Applying database migrations...");
-        await dbContext.Database.MigrateAsync();
-        logger.LogInformation("Database migrations complete");
-    }
+    await app.ApplyMigrationsIfNeededAsync<ApplicationDbContext>();
 
     if (app.Environment.IsDevelopment())
     {
@@ -245,13 +226,10 @@ async Task ConfigureApplication(WebApplication app)
 void ConfigureHealthEndpoints(WebApplication app)
 {
     // Basic liveness check - just confirms app is running
-    app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
-    {
-        Predicate = _ => false // Don't run any checks, just return healthy if app is running
-    }).ExcludeFromDescription();
+    app.MapLivenessHealthEndpoint().ExcludeFromDescription();
 
     // Readiness check - includes database connectivity
-    app.MapHealthChecks("/health/ready").ExcludeFromDescription();
+    app.MapReadinessHealthEndpoint().ExcludeFromDescription();
 }
 
 void ConfigureIdentityApiEndpoints(WebApplication app)
