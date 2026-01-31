@@ -18,6 +18,11 @@ output "postgres_admin_password_secret_name" {
   value       = azurerm_key_vault_secret.postgres_admin_password.name
 }
 
+output "postgres_admin_password_secret_uri_with_version" {
+  description = "Versioned URI for postgres admin password secret"
+  value       = azurerm_key_vault_secret.postgres_admin_password.id
+}
+
 output "postgres_password_version" {
   description = "Current version of postgres admin password"
   value       = var.postgres_password_version

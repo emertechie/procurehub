@@ -28,6 +28,11 @@ variable "key_vault_uri" {
   type        = string
 }
 
+variable "postgres_admin_password_secret_uri_with_version" {
+  description = "Versioned secret URI for postgres admin password"
+  type        = string
+}
+
 variable "postgres_server_fqdn" {
   description = "PostgreSQL server FQDN"
   type        = string

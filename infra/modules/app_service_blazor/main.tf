@@ -37,7 +37,7 @@ resource "azurerm_linux_web_app" "this" {
     "SEED_DATA"                            = tostring(var.seed_data)
     "ENABLE_DEMO_MODE"                     = tostring(var.enable_demo_mode)
     "ConnectionStrings__DefaultConnection" = "Host=${var.postgres_server_fqdn};Database=${var.postgres_database_name};Port=5432;Username=${var.postgres_admin_login};Ssl Mode=Require"
-    "DatabasePassword"                     = "@Microsoft.KeyVault(SecretUri=${var.key_vault_uri}secrets/postgres-admin-password)"
+    "DatabasePassword"                     = "@Microsoft.KeyVault(SecretUri=${var.postgres_admin_password_secret_uri_with_version})"
   }
 
   tags = var.tags
