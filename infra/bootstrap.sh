@@ -6,7 +6,7 @@ set -e
 
 SUBSCRIPTION_ID="${ARM_SUBSCRIPTION_ID:-98a83e0e-404f-4773-9bce-c22c1e888481}"
 ENV="${1:-staging}"
-LOCATION="${AZURE_LOCATION:-northeurope}"
+LOCATION="${AZURE_LOCATION:-westeurope}"
 RESOURCE_GROUP="rg-procurehub-${ENV}"
 TERRAFORM_DIR="envs/$ENV"
 
