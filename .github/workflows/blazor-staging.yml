@@ -44,6 +44,8 @@ jobs:
 
       - name: Publish
         run: dotnet publish "${{ env.BLAZOR_APP_PATH }}/ProcureHub.BlazorApp.csproj" -c Release -o "${{ env.PUBLISH_DIR }}"
+        env:
+          ASPNETCORE_ENVIRONMENT: Staging
 
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v3

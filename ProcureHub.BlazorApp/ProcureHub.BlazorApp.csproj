@@ -29,4 +29,10 @@
     <ProjectReference Include="..\ProcureHub.Infrastructure.Hosting\ProcureHub.Infrastructure.Hosting.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="appsettings.Staging.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

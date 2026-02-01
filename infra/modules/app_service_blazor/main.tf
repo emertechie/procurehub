@@ -32,7 +32,7 @@ resource "azurerm_linux_web_app" "this" {
   }
 
   app_settings = {
-    "ASPNETCORE_ENVIRONMENT"               = "Production"
+    "ASPNETCORE_ENVIRONMENT"               = var.env == "staging" ? "Staging" : "Production"
     "MIGRATE_DB_ON_STARTUP"                = tostring(var.migrate_db_on_startup)
     "SEED_DATA"                            = tostring(var.seed_data)
     "ENABLE_DEMO_MODE"                     = tostring(var.enable_demo_mode)
