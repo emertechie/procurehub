@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Identity.Web;
 using ProcureHub;
 using ProcureHub.BlazorApp.Components;
 using ProcureHub.BlazorApp.Components.Account;
@@ -34,6 +36,19 @@ builder.Services.AddAuthentication(options =>
         // Unique cookie name to avoid conflicts with WebApi on localhost
         options.ApplicationCookie!.Configure(cookie => cookie.Cookie.Name = ".AspNetCore.Identity.BlazorApp");
     });
+
+// Add Microsoft Entra ID (Azure AD) authentication using authorization code flow with certificate
+builder.Services.AddAuthentication()
+    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
+    .EnableTokenAcquisitionToCallDownstreamApi()
+    .AddInMemoryTokenCaches();
+
+// Override the SignInScheme to use external identity scheme for the OIDC callback
+// This must be done AFTER AddMicrosoftIdentityWebApp to override its defaults
+builder.Services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
+{
+    options.SignInScheme = IdentityConstants.ExternalScheme;
+});
 
 var connectionString = DatabaseConnectionString.GetConnectionString(builder.Configuration);
 

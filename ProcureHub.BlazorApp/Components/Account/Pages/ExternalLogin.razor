@@ -1,60 +1,25 @@
-﻿@page "/Account/ExternalLogin"
+@page "/Account/ExternalLogin"
 
-@using System.ComponentModel.DataAnnotations
 @using System.Security.Claims
-@using System.Text
-@using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.WebUtilities
+@using ProcureHub.Constants
 @using ProcureHub.Models
 
 @inject SignInManager<User> SignInManager
 @inject UserManager<User> UserManager
-@inject IUserStore<User> UserStore
-@inject IEmailSender<User> EmailSender
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 @inject ILogger<ExternalLogin> Logger
 
-<PageTitle>Register</PageTitle>
-
-<StatusMessage Message="@message"/>
-<h1>Register</h1>
-<h2>Associate your @ProviderDisplayName account.</h2>
-<hr/>
-
-<div class="alert alert-info">
-    You've successfully authenticated with <strong>@ProviderDisplayName</strong>.
-    Please enter an email address for this site below and click the Register button to finish
-    logging in.
-</div>
-
-<div class="row">
-    <div class="col-md-4">
-        <EditForm Model="Input" OnValidSubmit="OnValidSubmitAsync" FormName="confirmation" method="post">
-            <DataAnnotationsValidator/>
-            <ValidationSummary class="text-danger" role="alert"/>
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="email" placeholder="Please enter your email."/>
-                <label for="Input.Email" class="form-label">Email</label>
-                <ValidationMessage For="() => Input.Email"/>
-            </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </EditForm>
-    </div>
-</div>
+<PageTitle>External Login</PageTitle>
 
 @code {
     public const string LoginCallbackAction = "LoginCallback";
 
-    private string? message;
-    private ExternalLoginInfo? externalLoginInfo;
+    private ExternalLoginInfo? _externalLoginInfo;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
-
-    [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = default!;
 
     [SupplyParameterFromQuery]
     private string? RemoteError { get; set; }
@@ -65,14 +30,11 @@
     [SupplyParameterFromQuery]
     private string? Action { get; set; }
 
-    private string? ProviderDisplayName => externalLoginInfo?.ProviderDisplayName;
-
     protected override async Task OnInitializedAsync()
     {
-        Input ??= new();
-
         if (RemoteError is not null)
         {
+            Logger.LogWarning("ExternalLogin: Remote error received: {RemoteError}", RemoteError);
             RedirectManager.RedirectToWithStatus("Account/Login", $"Error from external provider: {RemoteError}", HttpContext);
             return;
         }
@@ -80,11 +42,13 @@
         var info = await SignInManager.GetExternalLoginInfoAsync();
         if (info is null)
         {
+            Logger.LogInformation("ExternalLogin: GetExternalLoginInfoAsync returned null. " +
+                "This typically means the external identity cookie is missing or expired.");
             RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.", HttpContext);
             return;
         }
 
-        externalLoginInfo = info;
+        _externalLoginInfo = info;
 
         if (HttpMethods.IsGet(HttpContext.Request.Method))
         {
@@ -102,118 +66,146 @@
 
     private async Task OnLoginCallbackAsync()
     {
-        if (externalLoginInfo is null)
+        if (_externalLoginInfo is null)
         {
             RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information.", HttpContext);
             return;
         }
 
-        // Sign in the user with this external login provider if the user already has a login.
+        // Try to sign in with existing external login link
         var result = await SignInManager.ExternalLoginSignInAsync(
-            externalLoginInfo.LoginProvider,
-            externalLoginInfo.ProviderKey,
+            _externalLoginInfo.LoginProvider,
+            _externalLoginInfo.ProviderKey,
             isPersistent: false,
             bypassTwoFactor: true);
 
         if (result.Succeeded)
         {
-            Logger.LogInformation(
-                "{Name} logged in with {LoginProvider} provider.",
-                externalLoginInfo.Principal.Identity?.Name,
-                externalLoginInfo.LoginProvider);
+            Logger.LogInformation("{Name} logged in with {LoginProvider} provider.",
+                _externalLoginInfo.Principal.Identity?.Name,
+                _externalLoginInfo.LoginProvider);
             RedirectManager.RedirectTo(ReturnUrl);
             return;
         }
-        else if (result.IsLockedOut)
+
+        if (result.IsLockedOut)
         {
             RedirectManager.RedirectTo("Account/Lockout");
             return;
         }
 
-        // If the user does not have an account, then ask the user to create an account.
-        if (externalLoginInfo.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
+        // User doesn't have a linked external login - try to find or create them
+        // Try multiple claim types for email (Azure AD may use different claim types)
+        var email = _externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email)
+            ?? _externalLoginInfo.Principal.FindFirstValue("email")
+            ?? _externalLoginInfo.Principal.FindFirstValue("preferred_username")
+            ?? _externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Upn);
+        
+        if (string.IsNullOrEmpty(email))
         {
-            Input.Email = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email) ?? "";
-        }
-    }
-
-    private async Task OnValidSubmitAsync()
-    {
-        if (externalLoginInfo is null)
-        {
-            RedirectManager.RedirectToWithStatus("Account/Login", "Error loading external login information during confirmation.", HttpContext);
+            Logger.LogWarning("ExternalLogin: Could not extract email from any known claim type");
+            RedirectManager.RedirectToWithStatus("Account/Login",
+                "Error: Could not retrieve email from external provider.", HttpContext);
             return;
         }
 
-        var emailStore = GetEmailStore();
-        var user = CreateUser();
+        var user = await UserManager.FindByEmailAsync(email);
 
-        await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-        await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-
-        var result = await UserManager.CreateAsync(user);
-        if (result.Succeeded)
+        if (user is null)
         {
-            result = await UserManager.AddLoginAsync(user, externalLoginInfo);
-            if (result.Succeeded)
+            // Auto create new user from external provider claims with default Requester role
+            user = await CreateNewUserFromExternalLoginAsync(email);
+            if (user is null)
             {
-                Logger.LogInformation("User created an account using {Name} provider.", externalLoginInfo.LoginProvider);
-
-                var userId = await UserManager.GetUserIdAsync(user);
-                var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-
-                var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-                    NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-                    new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code });
-                await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
-
-                // If account confirmation is required, we need to show the link if we don't have a real email sender
-                if (UserManager.Options.SignIn.RequireConfirmedAccount)
-                {
-                    RedirectManager.RedirectTo("Account/RegisterConfirmation", new() { ["email"] = Input.Email });
-                }
-                else
-                {
-                    await SignInManager.SignInAsync(user, isPersistent: false, externalLoginInfo.LoginProvider);
-                    RedirectManager.RedirectTo(ReturnUrl);
-                }
+                return; // Error already handled with redirect
             }
         }
-        else
+        else if (user.EnabledAt is null)
         {
-            message = $"Error: {string.Join(",", result.Errors.Select(error => error.Description))}";
+            // Pre-provisioned user: Admin created a disabled user with pre-configured roles.
+            // Enable them now on first external login.
+            var now = DateTime.UtcNow;
+            user.EnabledAt = now;
+            user.UpdatedAt = now;
+            
+            // Update name from external provider if not already set
+            var firstName = _externalLoginInfo.Principal.FindFirstValue(ClaimTypes.GivenName);
+            var lastName = _externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Surname);
+            
+            if (!string.IsNullOrEmpty(firstName) && string.IsNullOrEmpty(user.FirstName))
+            {
+                user.FirstName = firstName;
+            }
+            if (!string.IsNullOrEmpty(lastName) && string.IsNullOrEmpty(user.LastName))
+            {
+                user.LastName = lastName;
+            }
+            
+            var updateResult = await UserManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                var errors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
+                RedirectManager.RedirectToWithStatus("Account/Login", $"Error enabling user: {errors}", HttpContext);
+                return;
+            }
+            
+            Logger.LogInformation("Pre-provisioned user {Email} enabled on first {LoginProvider} login.",
+                email, _externalLoginInfo.LoginProvider);
         }
+
+        // Link the external login to the user
+        var addLoginResult = await UserManager.AddLoginAsync(user, _externalLoginInfo);
+        if (!addLoginResult.Succeeded)
+        {
+            var errors = string.Join(", ", addLoginResult.Errors.Select(e => e.Description));
+            RedirectManager.RedirectToWithStatus("Account/Login", $"Error linking account: {errors}", HttpContext);
+            return;
+        }
+
+        // Sign in the user
+        await SignInManager.SignInAsync(user, isPersistent: false, _externalLoginInfo.LoginProvider);
+        Logger.LogInformation("{Email} logged in and linked with {LoginProvider} provider.",
+            email, _externalLoginInfo.LoginProvider);
+        RedirectManager.RedirectTo(ReturnUrl);
     }
 
-    private User CreateUser()
+    private async Task<User?> CreateNewUserFromExternalLoginAsync(string email)
     {
-        try
+        var firstName = _externalLoginInfo!.Principal.FindFirstValue(ClaimTypes.GivenName) ?? "";
+        var lastName = _externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Surname) ?? "";
+
+        var user = new User
         {
-            return Activator.CreateInstance<User>();
-        }
-        catch
+            UserName = email,
+            Email = email,
+            FirstName = firstName,
+            LastName = lastName,
+            EmailConfirmed = true, // Trust external provider's email verification
+            EnabledAt = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        var createResult = await UserManager.CreateAsync(user);
+        if (!createResult.Succeeded)
         {
-            throw new InvalidOperationException($"Can't create an instance of '{nameof(User)}'. " +
-                                                $"Ensure that '{nameof(User)}' is not an abstract class and has a parameterless constructor");
+            var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
+            RedirectManager.RedirectToWithStatus("Account/Login", $"Error creating user: {errors}", HttpContext);
+            return null;
         }
-    }
 
-    private IUserEmailStore<User> GetEmailStore()
-    {
-        if (!UserManager.SupportsUserEmail)
+        // Assign default Requester role to auto-created users
+        var roleResult = await UserManager.AddToRoleAsync(user, RoleNames.Requester);
+        if (!roleResult.Succeeded)
         {
-            throw new NotSupportedException("The default UI requires a user store with email support.");
+            Logger.LogWarning("Failed to assign default Requester role to auto-created user {Email}: {Errors}",
+                email, string.Join(", ", roleResult.Errors.Select(e => e.Description)));
+            // Don't fail the login - user can still sign in, admin can assign roles later
         }
 
-        return (IUserEmailStore<User>)UserStore;
-    }
+        Logger.LogInformation("Auto-created user {Email} from {LoginProvider} provider with default Requester role.",
+            email, _externalLoginInfo.LoginProvider);
 
-    private sealed class InputModel
-    {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; } = "";
+        return user;
     }
-
 }
