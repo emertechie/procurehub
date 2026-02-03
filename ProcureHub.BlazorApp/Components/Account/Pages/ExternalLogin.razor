@@ -1,5 +1,6 @@
 @page "/Account/ExternalLogin"
 
+@using System.Diagnostics.CodeAnalysis
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Identity
 @using ProcureHub.Constants
@@ -95,15 +96,9 @@
         }
 
         // User doesn't have a linked external login - try to find or create them
-        // Try multiple claim types for email (Azure AD may use different claim types)
-        var email = _externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email)
-            ?? _externalLoginInfo.Principal.FindFirstValue("email")
-            ?? _externalLoginInfo.Principal.FindFirstValue("preferred_username")
-            ?? _externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Upn);
-        
-        if (string.IsNullOrEmpty(email))
+
+        if (!ExtractEmailFromClaims(_externalLoginInfo.Principal, out var email))
         {
-            Logger.LogWarning("ExternalLogin: Could not extract email from any known claim type");
             RedirectManager.RedirectToWithStatus("Account/Login",
                 "Error: Could not retrieve email from external provider.", HttpContext);
             return;
@@ -135,6 +130,23 @@
         Logger.LogInformation("{Email} logged in and linked with {LoginProvider} provider.",
             email, _externalLoginInfo.LoginProvider);
         RedirectManager.RedirectTo(ReturnUrl);
+    }
+
+    private bool ExtractEmailFromClaims(ClaimsPrincipal claimsPrincipal, [NotNullWhen(true)] out string? email)
+    {
+        // Try multiple claim types for email (Azure AD may use different claim types)
+        email = claimsPrincipal.FindFirstValue(ClaimTypes.Email)
+                ?? claimsPrincipal.FindFirstValue("email")
+                ?? claimsPrincipal.FindFirstValue("preferred_username")
+                ?? claimsPrincipal.FindFirstValue(ClaimTypes.Upn);
+
+        if (string.IsNullOrEmpty(email))
+        {
+            Logger.LogWarning("ExternalLogin: Could not extract email from any known claim type");
+            return false;
+        }
+
+        return true;
     }
 
     private async Task<User?> CreateNewUserFromExternalLoginAsync(string email)
