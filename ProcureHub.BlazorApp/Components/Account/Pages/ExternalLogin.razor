@@ -120,38 +120,6 @@
                 return; // Error already handled with redirect
             }
         }
-        else if (user.EnabledAt is null)
-        {
-            // Pre-provisioned user: Admin created a disabled user with pre-configured roles.
-            // Enable them now on first external login.
-            var now = DateTime.UtcNow;
-            user.EnabledAt = now;
-            user.UpdatedAt = now;
-            
-            // Update name from external provider if not already set
-            var firstName = _externalLoginInfo.Principal.FindFirstValue(ClaimTypes.GivenName);
-            var lastName = _externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Surname);
-            
-            if (!string.IsNullOrEmpty(firstName) && string.IsNullOrEmpty(user.FirstName))
-            {
-                user.FirstName = firstName;
-            }
-            if (!string.IsNullOrEmpty(lastName) && string.IsNullOrEmpty(user.LastName))
-            {
-                user.LastName = lastName;
-            }
-            
-            var updateResult = await UserManager.UpdateAsync(user);
-            if (!updateResult.Succeeded)
-            {
-                var errors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
-                RedirectManager.RedirectToWithStatus("Account/Login", $"Error enabling user: {errors}", HttpContext);
-                return;
-            }
-            
-            Logger.LogInformation("Pre-provisioned user {Email} enabled on first {LoginProvider} login.",
-                email, _externalLoginInfo.LoginProvider);
-        }
 
         // Link the external login to the user
         var addLoginResult = await UserManager.AddLoginAsync(user, _externalLoginInfo);
