@@ -66,20 +66,14 @@
         </RadzenStack>
     </EditForm>
 
-    <RadzenStack Gap="0" Style="margin-top: 1.5rem;">
-        <RadzenRow Style="align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-            <RadzenColumn Size="5">
-                <hr style="border: none; border-top: 1px solid var(--rz-base-300);" />
-            </RadzenColumn>
-            <RadzenColumn Size="2" Style="text-align: center;">
-                <RadzenText TextStyle="TextStyle.Caption" Style="color: var(--rz-text-secondary-color); white-space: nowrap;">
-                    Or
-                </RadzenText>
-            </RadzenColumn>
-            <RadzenColumn Size="5">
-                <hr style="border: none; border-top: 1px solid var(--rz-base-300);" />
-            </RadzenColumn>
-        </RadzenRow>
+    <RadzenStack Gap="0">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+            <hr style="flex: 1; border: none; border-top: 1px solid var(--rz-base-300);" />
+            <RadzenText TextStyle="TextStyle.Caption" Style="color: var(--rz-text-secondary-color); white-space: nowrap;">
+                Or
+            </RadzenText>
+            <hr style="flex: 1; border: none; border-top: 1px solid var(--rz-base-300);" />
+        </div>
         <ExternalLoginPicker />
     </RadzenStack>
 </RadzenStack>
