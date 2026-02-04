@@ -59,10 +59,11 @@ public static class Extensions
                     .AddHttpClientInstrumentation()
                     .AddNpgsql();
             })
-            .ConfigureResource(resource =>
-            {
-                resource.AddService("ProcureHubService");
-            });
+            .ConfigureResource(resource => resource
+                .AddService(
+                    serviceName: builder.Environment.ApplicationName,
+                    serviceVersion: typeof(ApplicationDbContext).Assembly.GetName().Version?.ToString() ?? "unknown",
+                    serviceInstanceId: Environment.MachineName));
 
         builder.AddOpenTelemetryExporters();
 

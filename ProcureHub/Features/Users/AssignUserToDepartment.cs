@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -21,7 +22,6 @@ public static class AssignUserToDepartment
     internal class Handler(
         ApplicationDbContext dbContext,
         ILogger<Handler> logger,
-        Metrics metrics,
         Instrumentation instrumentation)
         : ICommandHandler<Command, Result>
     {
@@ -58,14 +58,22 @@ public static class AssignUserToDepartment
             logger.LogInformation("Found department {DepartmentId}", command.DepartmentId);
 
             var oldDepartmentId = user.DepartmentId;
-            metrics.DepartmentChanged(oldDepartmentId, command.DepartmentId);
+
+            instrumentation.DepartmentChangedCounter.Add(1, new TagList
+            {
+                { "old", oldDepartmentId },
+                { "new", command.DepartmentId }
+            });
 
             user.DepartmentId = command.DepartmentId;
             user.UpdatedAt = DateTime.UtcNow;
-
-            activity?.SetTag("user.id", user.Id);
-            activity?.SetTag("old_department_id", oldDepartmentId);
-            activity?.SetTag("new_department_id", command.DepartmentId);
+            
+            if (activity?.IsAllDataRequested == true)
+            {
+                activity?.SetTag("user.id", user.Id);
+                activity?.SetTag("old_department_id", oldDepartmentId);
+                activity?.SetTag("new_department_id", command.DepartmentId);
+            }
 
             // Simulate some work
             await Task.Delay(TimeSpan.FromMilliseconds(500), token);

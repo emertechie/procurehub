@@ -9,8 +9,6 @@ public static class DomainServiceExtensions
     {
         services.AddScoped<PurchaseRequestNumberGenerator>();
         services.AddRequestHandlers();
-        
-        services.AddSingleton<Metrics>();
         services.AddSingleton<Instrumentation>();
 
         return services;
