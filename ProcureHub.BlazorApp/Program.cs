@@ -67,7 +67,7 @@ builder.Services.AddIdentityCore<User>(options =>
 
 builder.Services.AddSingleton<IEmailSender<User>, IdentityNoOpEmailSender>();
 
-builder.Services.AddHealthChecks();
+builder.AddServiceDefaults();
     
 var app = builder.Build();
 
@@ -87,11 +87,7 @@ app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
-// Basic liveness check - just confirms app is running
-app.MapLivenessHealthEndpoint();
-
-// Readiness check
-app.MapReadinessHealthEndpoint();
+app.MapDefaultEndpoints();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

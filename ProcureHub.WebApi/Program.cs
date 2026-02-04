@@ -149,6 +149,8 @@ void RegisterServices(WebApplicationBuilder appBuilder)
     appBuilder.Services.AddHealthChecks()
         .AddDbContextCheck<ApplicationDbContext>("database");
 
+    appBuilder.AddServiceDefaults();
+
     // Configure CORS and cookie for cross-origin requests (e.g. SWA frontend -> Container Apps API)
     appBuilder.Services.AddCors();
 
@@ -204,16 +206,7 @@ async Task ConfigureApplication(WebApplication app)
     app.UseAuthorization();
 
     ConfigureIdentityApiEndpoints(app);
-    ConfigureHealthEndpoints(app);
-}
-
-void ConfigureHealthEndpoints(WebApplication app)
-{
-    // Basic liveness check - just confirms app is running
-    app.MapLivenessHealthEndpoint().ExcludeFromDescription();
-
-    // Readiness check - includes database connectivity
-    app.MapReadinessHealthEndpoint().ExcludeFromDescription();
+    app.MapDefaultEndpoints();
 }
 
 void ConfigureIdentityApiEndpoints(WebApplication app)
