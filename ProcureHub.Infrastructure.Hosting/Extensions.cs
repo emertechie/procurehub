@@ -74,6 +74,13 @@ public static class Extensions
     {
         var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
 
+        // Example config for Seq:
+        // "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:5341/ingest/otlp",
+        // "OTEL_EXPORTER_OTLP_PROTOCOL": "http/protobuf"
+
+        // Example config for Aspire dashboard:
+        // "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317"
+
         if (useOtlpExporter)
         {
             builder.Services.AddOpenTelemetry()
