@@ -1,4 +1,4 @@
-namespace ProcureHub.Infrastructure;
+namespace ProcureHub.Infrastructure.Validation;
 
 public class CustomLanguageManager : FluentValidation.Resources.LanguageManager
 {

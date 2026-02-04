@@ -1,14 +1,17 @@
 using Microsoft.Extensions.DependencyInjection;
+using ProcureHub.Infrastructure.Validation;
 
 namespace ProcureHub.Infrastructure;
 
 public static class DomainServiceExtensions
 {
-    // PurchaseRequestNumberGenerator
     public static IServiceCollection AddDomainServices(this IServiceCollection services)
     {
         services.AddScoped<PurchaseRequestNumberGenerator>();
         services.AddRequestHandlers();
+        
+        services.AddSingleton<Metrics>();
+        services.AddSingleton<Instrumentation>();
 
         return services;
     }

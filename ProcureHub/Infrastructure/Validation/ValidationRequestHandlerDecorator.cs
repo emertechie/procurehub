@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace ProcureHub.Infrastructure;
+namespace ProcureHub.Infrastructure.Validation;
 
 internal static class ValidationHelper
 {

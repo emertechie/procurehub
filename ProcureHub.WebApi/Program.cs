@@ -13,6 +13,7 @@ using ProcureHub.Features.Users.Validation;
 using ProcureHub.Infrastructure;
 using ProcureHub.Infrastructure.Authentication;
 using ProcureHub.Infrastructure.Hosting;
+using ProcureHub.Infrastructure.Validation;
 using ProcureHub.Models;
 using ProcureHub.WebApi;
 using ProcureHub.WebApi.Constants;
