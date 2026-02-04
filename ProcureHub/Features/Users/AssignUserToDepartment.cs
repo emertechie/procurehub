@@ -27,6 +27,8 @@ public static class AssignUserToDepartment
     {
         public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {
+            using var activity = instrumentation.ActivitySource.StartActivity("AssignUserToDepartment");
+
             var user = await dbContext.Users
                 .FirstOrDefaultAsync(u => u.Id == command.Id, token);
 
@@ -36,6 +38,8 @@ public static class AssignUserToDepartment
                     "User.NotFound",
                     $"User with ID '{command.Id}' not found"));
             }
+
+            logger.LogInformation("Found user {UserId}", user.Id);
 
             // If a department is specified, verify it exists
             if (command.DepartmentId.HasValue)
@@ -51,26 +55,26 @@ public static class AssignUserToDepartment
                 }
             }
 
+            logger.LogInformation("Found department {DepartmentId}", command.DepartmentId);
+
             var oldDepartmentId = user.DepartmentId;
             metrics.DepartmentChanged(oldDepartmentId, command.DepartmentId);
 
             user.DepartmentId = command.DepartmentId;
             user.UpdatedAt = DateTime.UtcNow;
 
-            using (var activity = instrumentation.ActivitySource.StartActivity("AssignUserToDepartment"))
-            {
-                activity?.SetTag("user.id", user.Id);
-                activity?.SetTag("old_department_id", oldDepartmentId);
-                activity?.SetTag("new_department_id", command.DepartmentId);
+            activity?.SetTag("user.id", user.Id);
+            activity?.SetTag("old_department_id", oldDepartmentId);
+            activity?.SetTag("new_department_id", command.DepartmentId);
 
-                // Simulate some work
-                await Task.Delay(TimeSpan.FromMilliseconds(500), token);
+            // Simulate some work
+            await Task.Delay(TimeSpan.FromMilliseconds(500), token);
 
-                await dbContext.SaveChangesAsync(token);
-            }
-            
+            await dbContext.SaveChangesAsync(token);
+
             logger.LogInformation("Assigned user {UserId} to department {DepartmentId}",
                 user.Id, command.DepartmentId?.ToString() ?? "null");
+
             return Result.Success();
         }
     }

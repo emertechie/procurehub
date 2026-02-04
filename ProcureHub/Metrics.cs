@@ -9,8 +9,8 @@ public class Metrics : IDisposable
 
     public Metrics(IMeterFactory meterFactory)
     {
-        _meter = meterFactory.Create("ProcureHubMetrics.Domain");
-        _departmentChangedCounter = _meter.CreateCounter<int>("procurehub.domain.department-changed");
+        _meter = meterFactory.Create("ProcureHub");
+        _departmentChangedCounter = _meter.CreateCounter<int>("department-changed");
     }
 
     public void DepartmentChanged(Guid? oldDepartmentId, Guid? newDepartmentId)

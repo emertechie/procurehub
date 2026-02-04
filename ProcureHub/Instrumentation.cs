@@ -4,12 +4,12 @@ namespace ProcureHub;
 
 internal sealed class Instrumentation : IDisposable
 {
-    private readonly string _activitySourceName = typeof(Instrumentation).Assembly.GetName().Name ?? "ProcureHub";
-    private readonly string _activitySourceVersion = (typeof(Instrumentation).Assembly.GetName().Version ?? new Version("0.0.1")).ToString();
+    private const string ActivitySourceName = "ProcureHub";
+    private const string ActivitySourceVersion = "0.0.1";
 
     public Instrumentation()
     {
-        ActivitySource = new ActivitySource(_activitySourceName, _activitySourceVersion);
+        ActivitySource = new ActivitySource(ActivitySourceName, ActivitySourceVersion);
     }
 
     public ActivitySource ActivitySource { get; }

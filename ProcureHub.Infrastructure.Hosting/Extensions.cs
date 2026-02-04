@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Npgsql;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace ProcureHub.Infrastructure.Hosting;
@@ -42,11 +43,13 @@ public static class Extensions
             {
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation();
+                    .AddRuntimeInstrumentation()
+                    .AddMeter("ProcureHub"); // Custom Meter from ProcureHub.Metrics
             })
             .WithTracing(tracing =>
             {
                 tracing.AddSource(builder.Environment.ApplicationName)
+                    .AddSource("ProcureHub") // Custom ActivitySource from ProcureHub.Instrumentation
                     .AddAspNetCoreInstrumentation(aspNetTracing =>
                         // Exclude health check requests from tracing
                         aspNetTracing.Filter = context =>
@@ -55,6 +58,10 @@ public static class Extensions
                     )
                     .AddHttpClientInstrumentation()
                     .AddNpgsql();
+            })
+            .ConfigureResource(resource =>
+            {
+                resource.AddService("ProcureHubService");
             });
 
         builder.AddOpenTelemetryExporters();
