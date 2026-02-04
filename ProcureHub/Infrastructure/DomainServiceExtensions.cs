@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ProcureHub.Infrastructure;
 
-public static class RequestHandlerExtensions
+public static class DomainServiceExtensions
 {
     // PurchaseRequestNumberGenerator
     public static IServiceCollection AddDomainServices(this IServiceCollection services)
@@ -24,7 +24,7 @@ public static class RequestHandlerExtensions
     /// <returns>The same <see cref="IServiceCollection"/> instance, for chaining.</returns>
     private static IServiceCollection AddRequestHandlers(this IServiceCollection services)
     {
-        var assembly = typeof(RequestHandlerExtensions).Assembly;
+        var assembly = typeof(DomainServiceExtensions).Assembly;
         var types = assembly.GetTypes()
             .Where(t => t.IsClass && !t.IsAbstract && !t.IsGenericTypeDefinition);
 
