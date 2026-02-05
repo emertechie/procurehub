@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Npgsql;
 using ProcureHub.Data;
 using ProcureHub.Models;
+using Microsoft.AspNetCore.Identity;
 using Respawn;
 
 namespace ProcureHub.WebApi.Tests.Infrastructure;
@@ -16,13 +16,13 @@ public static class DatabaseResetter
     public static async Task ResetDatabaseAsync()
     {
         var connectionString = Configuration.GetConnectionString();
-        await using var connection = new NpgsqlConnection(connectionString);
+        await using var connection = new SqlConnection(connectionString);
         await connection.OpenAsync();
 
         _respawner ??= await Respawner.CreateAsync(connection, new RespawnerOptions
         {
-            DbAdapter = DbAdapter.Postgres,
-            SchemasToInclude = ["public"],
+            DbAdapter = DbAdapter.SqlServer,
+            SchemasToInclude = ["dbo"],
             TablesToIgnore = ["__EFMigrationsHistory"]
         });
 

@@ -40,9 +40,9 @@ public class ApiTestHost(string connectionString)
             services.RemoveAll<DbContextOptions<ApplicationDbContext>>();
             services.RemoveAll<ApplicationDbContext>();
 
-            // Add Postgres database for tests
+            // Add SQL Server database for tests
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(connectionString, options => options.MigrationsAssembly("ProcureHub"))
+                options.UseSqlServer(connectionString, options => options.MigrationsAssembly("ProcureHub"))
                     .EnableSensitiveDataLogging());
 
             // Build service provider and create database

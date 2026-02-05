@@ -52,7 +52,7 @@ builder.Services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.Authentic
 
 var connectionString = DatabaseConnectionString.GetConnectionString(builder.Configuration);
 
-builder.Services.AddPostgresDbContext<ApplicationDbContext>(connectionString);
+builder.Services.AddSqlServerDbContext<ApplicationDbContext>(connectionString);
 
 builder.Services.AddIdentityCore<User>(options =>
     {

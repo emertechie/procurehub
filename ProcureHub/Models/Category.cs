@@ -20,7 +20,7 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.ToTable("Categories");
 
         builder.Property(d => d.Id)
-            .HasDefaultValueSql("uuidv7()");
+            .HasDefaultValueSql("NEWSEQUENTIALID()");
 
         builder.Property(c => c.Name)
             .IsRequired()

@@ -121,7 +121,7 @@ public class PurchaseRequestConfiguration : IEntityTypeConfiguration<PurchaseReq
         builder.ToTable("PurchaseRequests");
 
         builder.Property(pr => pr.Id)
-            .HasDefaultValueSql("uuidv7()");
+            .HasDefaultValueSql("NEWSEQUENTIALID()");
 
         builder.Property(pr => pr.RequestNumber)
             .IsRequired()

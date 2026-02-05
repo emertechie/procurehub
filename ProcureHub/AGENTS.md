@@ -9,10 +9,10 @@
   - Incorrect: `.HasColumnName("request_number")`
   - Correct: Omit `HasColumnName()` entirely; EF will use property name `RequestNumber` as column name
 - **Do NOT use `HasKey()`** - EF Core convention automatically detects `Id` property as primary key
-- Entity IDs should use UUID v7, generated on server. Follow `Department.Id` mapping example:
+- Entity IDs should use sequential GUIDs, generated on SQL Server. Follow `Department.Id` mapping example:
 ```cs
 builder.Property(d => d.Id)
-    .HasDefaultValueSql("uuidv7()");
+    .HasDefaultValueSql("NEWSEQUENTIALID()");
 ```
 - **Do NOT use `ValueGeneratedOnAdd()` or `ValueGeneratedOnAddOrUpdate()`** for timestamps
 - For non-nullable value type props like `public DateTime CreatedAt { get; set; }`, don't bother creating an explicit `.IsRequired()` mapping unless semantically important

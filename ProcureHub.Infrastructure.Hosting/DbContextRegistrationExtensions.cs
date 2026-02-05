@@ -5,7 +5,7 @@ namespace ProcureHub.Infrastructure.Hosting;
 
 public static class DbContextRegistrationExtensions
 {
-    public static IServiceCollection AddPostgresDbContext<TContext>(
+    public static IServiceCollection AddSqlServerDbContext<TContext>(
         this IServiceCollection services,
         string connectionString,
         string? migrationsAssembly = null)
@@ -13,7 +13,7 @@ public static class DbContextRegistrationExtensions
     {
         services.AddDbContext<TContext>(options =>
         {
-            options.UseNpgsql(connectionString, dbOptions =>
+            options.UseSqlServer(connectionString, dbOptions =>
             {
                 if (!string.IsNullOrWhiteSpace(migrationsAssembly))
                 {

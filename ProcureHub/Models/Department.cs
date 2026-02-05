@@ -25,7 +25,7 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
         builder.ToTable("Departments");
 
         builder.Property(d => d.Id)
-            .HasDefaultValueSql("uuidv7()");
+            .HasDefaultValueSql("NEWSEQUENTIALID()");
 
         builder.Property(d => d.Name)
             .IsRequired()

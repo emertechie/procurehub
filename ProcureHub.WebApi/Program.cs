@@ -83,7 +83,7 @@ void RegisterServices(WebApplicationBuilder appBuilder)
 
     var connectionString = DatabaseConnectionString.GetConnectionString(appBuilder.Configuration);
 
-    appBuilder.Services.AddPostgresDbContext<ApplicationDbContext>(
+    appBuilder.Services.AddSqlServerDbContext<ApplicationDbContext>(
         connectionString,
         migrationsAssembly: "ProcureHub");
 
