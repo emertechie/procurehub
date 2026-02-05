@@ -2,8 +2,8 @@
 # Shared resources - always deployed regardless of hosting variant
 
 locals {
-  # Increment this version to rotate the postgres admin password
-  postgres_password_version = 2
+  # Increment this version to rotate the SQL Server admin password
+  sql_password_version = 1
 }
 
 module "rg" {
@@ -14,23 +14,23 @@ module "rg" {
 }
 
 module "key_vault" {
-  source                    = "../../modules/key_vault"
-  name_prefix               = var.name_prefix
-  env                       = var.env
-  resource_group_name       = module.rg.name
-  location                  = var.location
-  postgres_password_version = local.postgres_password_version
-  tags                      = var.tags
+  source               = "../../modules/key_vault"
+  name_prefix          = var.name_prefix
+  env                  = var.env
+  resource_group_name  = module.rg.name
+  location             = var.location
+  sql_password_version = local.sql_password_version
+  tags                 = var.tags
 }
 
-module "postgres" {
-  source                 = "../../modules/postgres_flexible"
+module "sql_server" {
+  source                 = "../../modules/sql_server"
   name_prefix            = var.name_prefix
   env                    = var.env
   resource_group_name    = module.rg.name
-  location               = var.location
-  administrator_password = module.key_vault.postgres_admin_password
-  password_version       = module.key_vault.postgres_password_version
+  location               = var.location2
+  administrator_password = module.key_vault.sql_admin_password
+  password_version       = module.key_vault.sql_password_version
   tags                   = var.tags
 }
 

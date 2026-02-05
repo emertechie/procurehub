@@ -14,14 +14,14 @@ output "key_vault_uri" {
   value       = module.key_vault.vault_uri
 }
 
-output "postgres_server_fqdn" {
-  description = "PostgreSQL server FQDN"
-  value       = module.postgres.server_fqdn
+output "sql_server_fqdn" {
+  description = "SQL Server FQDN"
+  value       = module.sql_server.server_fqdn
 }
 
-output "postgres_database_name" {
-  description = "PostgreSQL database name"
-  value       = module.postgres.database_name
+output "sql_database_name" {
+  description = "SQL Server database name"
+  value       = module.sql_server.database_name
 }
 
 output "github_actions_client_id" {

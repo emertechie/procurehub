@@ -36,8 +36,8 @@ resource "azurerm_linux_web_app" "this" {
     "MIGRATE_DB_ON_STARTUP"                = tostring(var.migrate_db_on_startup)
     "SEED_DATA"                            = tostring(var.seed_data)
     "ENABLE_DEMO_MODE"                     = tostring(var.enable_demo_mode)
-    "ConnectionStrings__DefaultConnection" = "Host=${var.postgres_server_fqdn};Database=${var.postgres_database_name};Port=5432;Username=${var.postgres_admin_login};Ssl Mode=Require"
-    "DatabasePassword"                     = "@Microsoft.KeyVault(SecretUri=${var.postgres_admin_password_secret_uri_with_version})"
+    "ConnectionStrings__DefaultConnection" = "Server=tcp:${var.sql_server_fqdn},1433;Database=${var.sql_database_name};User Id=${var.sql_admin_login};Encrypt=True;TrustServerCertificate=False;"
+    "DatabasePassword"                     = "@Microsoft.KeyVault(SecretUri=${var.sql_admin_password_secret_uri_with_version})"
   }
 
   tags = var.tags

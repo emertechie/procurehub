@@ -18,8 +18,8 @@ variable "location" {
   type        = string
 }
 
-variable "postgres_password_version" {
-  description = "Version number for postgres admin password. Increment to rotate password."
+variable "sql_password_version" {
+  description = "Version number for SQL Server admin password. Increment to rotate password."
   type        = number
   default     = 1
 }

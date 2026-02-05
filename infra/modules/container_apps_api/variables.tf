@@ -64,20 +64,20 @@ variable "memory" {
   default     = "1Gi"
 }
 
-variable "postgres_server_fqdn" {
-  description = "PostgreSQL server FQDN"
+variable "sql_server_fqdn" {
+  description = "SQL Server FQDN"
   type        = string
 }
 
-variable "postgres_database_name" {
-  description = "PostgreSQL database name"
+variable "sql_database_name" {
+  description = "SQL Server database name"
   type        = string
 }
 
-variable "postgres_admin_login" {
-  description = "PostgreSQL admin username"
+variable "sql_admin_login" {
+  description = "SQL Server admin username"
   type        = string
-  default     = "pgadmin"
+  default     = "sqladmin"
 }
 
 variable "tags" {

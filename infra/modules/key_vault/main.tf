@@ -25,18 +25,18 @@ resource "azurerm_role_assignment" "kv_admin" {
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
-# Generate ephemeral random password for postgres
-ephemeral "random_password" "postgres_admin" {
+# Generate ephemeral random password for SQL Server
+ephemeral "random_password" "sql_admin" {
   length           = 32
   special          = false
   override_special = "!#$%&*()-_=+[]{}<>:?"
 }
 
 # Store password in Key Vault using write-only argument
-resource "azurerm_key_vault_secret" "postgres_admin_password" {
-  name             = "postgres-admin-password"
-  value_wo         = ephemeral.random_password.postgres_admin.result
-  value_wo_version = var.postgres_password_version
+resource "azurerm_key_vault_secret" "sql_admin_password" {
+  name             = "sql-admin-password"
+  value_wo         = ephemeral.random_password.sql_admin.result
+  value_wo_version = var.sql_password_version
   key_vault_id     = azurerm_key_vault.this.id
 
   depends_on = [azurerm_role_assignment.kv_admin]

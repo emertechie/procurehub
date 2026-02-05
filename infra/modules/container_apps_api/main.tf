@@ -43,12 +43,12 @@ resource "azurerm_container_app" "this" {
 
       env {
         name  = "ConnectionStrings__DefaultConnection"
-        value = "Host=${var.postgres_server_fqdn};Database=${var.postgres_database_name};Port=5432;Username=${var.postgres_admin_login};Ssl Mode=Require"
+        value = "Server=tcp:${var.sql_server_fqdn},1433;Database=${var.sql_database_name};User Id=${var.sql_admin_login};Encrypt=True;TrustServerCertificate=False;"
       }
 
       env {
         name        = "DatabasePassword"
-        secret_name = "postgres-password"
+        secret_name = "sql-password"
       }
 
       env {
@@ -82,10 +82,9 @@ resource "azurerm_container_app" "this" {
     }
   }
 
-  # Secret reference commented out until deploying actual API
   secret {
-    name                = "postgres-password"
-    key_vault_secret_id = "${var.key_vault_uri}secrets/postgres-admin-password"
+    name                = "sql-password"
+    key_vault_secret_id = "${var.key_vault_uri}secrets/sql-admin-password"
     identity            = "System"
   }
 
