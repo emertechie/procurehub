@@ -2,14 +2,15 @@ name: API Deploy Staging
 
 on:
   workflow_dispatch:
-  push:
-    branches: [staging]
-    paths:
-      - 'ProcureHub/**'
-      - 'ProcureHub.WebApi/**'
-      - 'ProcureHub.WebApi.Tests/**'
-      - '.github/workflows/api-build.yml'
-      - '.github/workflows/api-deploy-staging.yml'
+# Commented out for now as not using Azure Container Apps currently    
+#  push:
+#    branches: [staging]
+#    paths:
+#      - 'ProcureHub/**'
+#      - 'ProcureHub.WebApi/**'
+#      - 'ProcureHub.WebApi.Tests/**'
+#      - '.github/workflows/api-build.yml'
+#      - '.github/workflows/api-deploy-staging.yml'
 
 env:
   REGISTRY: ghcr.io
