@@ -19,6 +19,10 @@ resource "azurerm_mssql_database" "this" {
   collation = "SQL_Latin1_General_CP1_CI_AS"
   sku_name  = var.sku_name
 
+  # Serverless configuration (only applies when using GP_S_* SKUs)
+  auto_pause_delay_in_minutes = var.auto_pause_delay_in_minutes
+  min_capacity                = var.min_capacity
+
   short_term_retention_policy {
     retention_days = var.backup_retention_days
   }

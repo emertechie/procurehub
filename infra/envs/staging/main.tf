@@ -24,14 +24,17 @@ module "key_vault" {
 }
 
 module "sql_server" {
-  source                 = "../../modules/sql_server"
-  name_prefix            = var.name_prefix
-  env                    = var.env
-  resource_group_name    = module.rg.name
-  location               = var.location2
-  administrator_password = module.key_vault.sql_admin_password
-  password_version       = module.key_vault.sql_password_version
-  tags                   = var.tags
+  source                      = "../../modules/sql_server"
+  name_prefix                 = var.name_prefix
+  env                         = var.env
+  resource_group_name         = module.rg.name
+  location                    = var.location2
+  administrator_password      = module.key_vault.sql_admin_password
+  password_version            = module.key_vault.sql_password_version
+  sku_name                    = "GP_S_Gen5_1"
+  auto_pause_delay_in_minutes = 60
+  min_capacity                = 1
+  tags                        = var.tags
 }
 
 module "github_oidc" {

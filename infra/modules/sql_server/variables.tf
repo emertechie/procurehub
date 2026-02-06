@@ -47,6 +47,18 @@ variable "sku_name" {
   default     = "Basic"
 }
 
+variable "auto_pause_delay_in_minutes" {
+  description = "Time in minutes before database auto-pauses. -1 to disable. Only applies to serverless SKUs."
+  type        = number
+  default     = -1
+}
+
+variable "min_capacity" {
+  description = "Minimum vCore capacity when active. Only applies to serverless SKUs."
+  type        = number
+  default     = null
+}
+
 variable "backup_retention_days" {
   description = "Short-term backup retention in days (1-35)"
   type        = number
