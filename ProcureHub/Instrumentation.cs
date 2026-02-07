@@ -15,7 +15,7 @@ internal sealed class Instrumentation : IDisposable
         ActivitySource = new ActivitySource(ActivitySourceName, ActivitySourceVersion);
 
         _meter = meterFactory.Create("ProcureHub");
-        DepartmentChangedCounter = _meter.CreateCounter<int>("department_changed");
+        DepartmentChangedCounter = _meter.CreateCounter<int>("procurehub.department_changed");
     }
 
     public ActivitySource ActivitySource { get; }
