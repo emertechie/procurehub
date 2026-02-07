@@ -15,10 +15,11 @@
 <PageTitle>Departments</PageTitle>
 
 <RadzenStack Gap="1rem">
-    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-        <RadzenText TextStyle="TextStyle.H4">Departments</RadzenText>
-        <RadzenButton Text="Add Department" Icon="add" Click="@OpenCreateDialog" ButtonStyle="ButtonStyle.Primary" />
-    </RadzenStack>
+    <PageHeader Title="Departments">
+        <ActionButton>
+            <RadzenButton Text="Add Department" Icon="add" Click="@OpenCreateDialog" ButtonStyle="ButtonStyle.Primary" />
+        </ActionButton>
+    </PageHeader>
 
     <RadzenDataGrid TItem="QueryDepartments.Response"
                     Data="@_departments"

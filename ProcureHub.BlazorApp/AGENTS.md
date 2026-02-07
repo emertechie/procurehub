@@ -4,6 +4,11 @@ This is a .Net Blazor client for the ProcureHub application.
 
 It does not call the `ProcureHub.WebApi`. Instead, command / query handlers from the `ProcureHub` project are injected into Razor components and used directly. Example: `ProcureHub.BlazorApp/Components/Pages/Admin/Users/Index.razor`.
 
+# Blazor Guidelines
+
+- Favor small, single-responsibility components (one clear purpose); break down large UIs into multiple nested components instead of one monolithic file.
+- When a component grows beyond a clear responsibility, extract subcomponents and compose them rather than extending the file.
+
 ## UI Framework
 
 - This app uses **Radzen Blazor Components** for the UI

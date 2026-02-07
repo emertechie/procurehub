@@ -1,0 +1,25 @@
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+    <RadzenStack Gap="0">
+        <RadzenText TextStyle="TextStyle.H5" Style="font-weight: 600;">@Title</RadzenText>
+        @if (!string.IsNullOrWhiteSpace(Subtitle))
+        {
+            <RadzenText TextStyle="TextStyle.Body2" Style="color: var(--rz-text-secondary-color);">@Subtitle</RadzenText>
+        }
+    </RadzenStack>
+    @if (ActionButton != null)
+    {
+        @ActionButton
+    }
+</RadzenStack>
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter]
+    public string? Subtitle { get; set; }
+
+    [Parameter]
+    public RenderFragment? ActionButton { get; set; }
+}
+
