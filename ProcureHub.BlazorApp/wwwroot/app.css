@@ -1,5 +1,20 @@
 :root {
     --background: oklch(0.985 0 0);
+    
+    /* Custom primary color for buttons */
+    --rz-primary: #0f7b5f;
+    --rz-primary-light: rgba(15, 123, 95, 0.08);
+    --rz-primary-lighter: #129970;
+    --rz-primary-dark: #0c6650;
+    --rz-primary-darker: #0a5542;
+    
+    /* Text colors on primary buttons */
+    --rz-on-primary: #ffffff;
+    --rz-on-primary-light: var(--rz-primary);
+    --rz-on-primary-lighter: #ffffff;
+    --rz-on-primary-dark: #ffffff;
+    --rz-on-primary-darker: #ffffff;
+    
     --rz-sidebar-background-color: #edeff3;
     --rz-header-background-color: var(--background);
     --rz-layout-background-color: var(--background);
@@ -9,10 +24,8 @@
     --rz-panel-menu-item-3rd-level-background-color: inherit;
     
     --rz-panel-menu-item-2nd-level-hover-background-color: var(--rz-base-100);
-    --rz-panel-menu-item-2nd-level-active-color: var(--rz-on-primary-lighter);
     --rz-panel-menu-item-2nd-level-active-background-color: inherit;
     --rz-panel-menu-item-3rd-level-active-background-color: inherit;
-    --rz-panel-menu-item-3rd-level-active-color: var(--rz-on-primary-lighter);
     --rz-panel-menu-item-2nd-level-active-font-weight: 500;
 
 }
