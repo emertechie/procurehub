@@ -92,6 +92,22 @@ Icon reference: https://fonts.google.com/icons?icon.set=Material+Symbols
   - `app.css` - Custom styles and theme overrides
 - `Program.cs` - App configuration and DI setup
 
+## DbContext / EF Core
+
+- **Never run multiple handler calls concurrently** (e.g. `Task.WhenAll` or starting tasks before awaiting). Handlers share a scoped `DbContext`, which does not support parallel operations. Always `await` each call sequentially.
+
+```csharp
+// BAD - concurrent calls cause DbContext threading error
+var catTask = QueryCategoriesHandler.HandleAsync(req1, token);
+var deptTask = QueryDepartmentsHandler.HandleAsync(req2, token);
+_categories = await catTask;
+_departments = await deptTask;
+
+// GOOD - sequential calls
+_categories = await QueryCategoriesHandler.HandleAsync(req1, token);
+_departments = await QueryDepartmentsHandler.HandleAsync(req2, token);
+```
+
 ## General
 
 - After any significant change, make sure there are no build errors

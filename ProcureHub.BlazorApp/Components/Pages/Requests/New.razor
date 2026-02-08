@@ -140,11 +140,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var categoriesTask = QueryCategoriesHandler.HandleAsync(new QueryCategories.Request(), CancellationToken.None);
-        var departmentsTask = QueryDepartmentsHandler.HandleAsync(new QueryDepartments.Request(), CancellationToken.None);
-
-        _categories = await categoriesTask;
-        _departments = await departmentsTask;
+        _categories = await QueryCategoriesHandler.HandleAsync(new QueryCategories.Request(), CancellationToken.None);
+        _departments = await QueryDepartmentsHandler.HandleAsync(new QueryDepartments.Request(), CancellationToken.None);
     }
 
     private async Task SaveAsDraft()
