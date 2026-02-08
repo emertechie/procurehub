@@ -1,7 +1,254 @@
 @page "/requests/new"
 @attribute [Authorize(Roles = "Requester")]
+@layout AuthenticatedLayout
+
+@using ProcureHub.BlazorApp.Helpers
+@using ProcureHub.Features.Categories
+@using ProcureHub.Features.Departments
+@using ProcureHub.Features.PurchaseRequests
+@using ProcureHub.Infrastructure
+@using ProcureHub.Infrastructure.Authentication
+
+@inject IQueryHandler<QueryCategories.Request, QueryCategories.Response[]> QueryCategoriesHandler
+@inject IQueryHandler<QueryDepartments.Request, QueryDepartments.Response[]> QueryDepartmentsHandler
+@inject ICommandHandler<CreatePurchaseRequest.Command, Result<Guid>> CreateHandler
+@inject ICommandHandler<SubmitPurchaseRequest.Command, Result> SubmitHandler
+@inject ICurrentUserProvider CurrentUserProvider
+@inject NotificationService NotificationService
+@inject NavigationManager Navigation
+@inject ILogger<New> Logger
 
 <PageTitle>New Request</PageTitle>
 
-<PageHeader Title="New Request" Subtitle="Create a new purchase request" />
-@* TODO: Implement new request form *@
+<RadzenStack Gap="1rem">
+    <PageHeader Title="New Purchase Request" Subtitle="Create a new purchase request for goods or services" />
+
+    <RadzenRow Gap="1rem">
+        @* Left column: Request Details form *@
+        <RadzenColumn Size="12" SizeMD="8">
+            <RadzenCard>
+                <RadzenStack Gap="1.5rem">
+                    <RadzenStack Gap="0">
+                        <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Request Details</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body2" Style="color: var(--rz-text-secondary-color);">
+                            Provide information about your purchase request
+                        </RadzenText>
+                    </RadzenStack>
+
+                    @if (_errorMessage != null)
+                    {
+                        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">
+                            @_errorMessage
+                        </RadzenAlert>
+                    }
+
+                    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                        <RadzenLabel Text="Title *" Component="TitleInput" />
+                        <RadzenTextBox Name="TitleInput" @bind-Value="@_model.Title"
+                                       Placeholder="e.g., MacBook Pro for Development Team"
+                                       Style="width: 100%;" />
+                    </RadzenStack>
+
+                    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                        <RadzenLabel Text="Description" Component="DescriptionInput" />
+                        <RadzenTextArea Name="DescriptionInput" @bind-Value="@_model.Description"
+                                        Placeholder="Describe what you need to purchase and why..."
+                                        Rows="4" Style="width: 100%;" />
+                    </RadzenStack>
+
+                    <RadzenRow Gap="1rem">
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                                <RadzenLabel Text="Category *" Component="CategoryInput" />
+                                <RadzenDropDown Name="CategoryInput" TValue="Guid?" @bind-Value="@_model.CategoryId"
+                                                Data="@_categories" TextProperty="Name" ValueProperty="Id"
+                                                Placeholder="Select category" Style="width: 100%;"
+                                                AllowClear="true" />
+                            </RadzenStack>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                                <RadzenLabel Text="Department *" Component="DepartmentInput" />
+                                <RadzenDropDown Name="DepartmentInput" TValue="Guid?" @bind-Value="@_model.DepartmentId"
+                                                Data="@_departments" TextProperty="Name" ValueProperty="Id"
+                                                Placeholder="Select department" Style="width: 100%;"
+                                                AllowClear="true" />
+                            </RadzenStack>
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                        <RadzenLabel Text="Estimated Amount (EUR) *" Component="AmountInput" />
+                        <RadzenNumeric Name="AmountInput" TValue="decimal" @bind-Value="@_model.EstimatedAmount"
+                                       Format="c" Min="0" Style="width: 100%;" />
+                    </RadzenStack>
+
+                    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                        <RadzenLabel Text="Business Justification" Component="JustificationInput" />
+                        <RadzenTextArea Name="JustificationInput" @bind-Value="@_model.BusinessJustification"
+                                        Placeholder="Explain why this purchase is necessary and how it benefits the organization..."
+                                        Rows="4" Style="width: 100%;" />
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenCard>
+        </RadzenColumn>
+
+        @* Right column: Actions *@
+        <RadzenColumn Size="12" SizeMD="4">
+            <RadzenCard>
+                <RadzenStack Gap="1rem">
+                    <RadzenStack Gap="0">
+                        <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Actions</RadzenText>
+                        <RadzenText TextStyle="TextStyle.Body2" Style="color: var(--rz-text-secondary-color);">
+                            Save as draft or submit for approval
+                        </RadzenText>
+                    </RadzenStack>
+
+                    <RadzenButton Text="Submit for Approval" Icon="send"
+                                  Click="@SubmitForApproval"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Style="width: 100%;"
+                                  Disabled="@_isSaving" />
+
+                    <RadzenButton Text="Save as Draft" Icon="save"
+                                  Click="@SaveAsDraft"
+                                  ButtonStyle="ButtonStyle.Light"
+                                  Style="width: 100%;"
+                                  Disabled="@_isSaving" />
+                </RadzenStack>
+            </RadzenCard>
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenStack>
+
+@code {
+    private PurchaseRequestFormModel _model = new();
+    private QueryCategories.Response[] _categories = [];
+    private QueryDepartments.Response[] _departments = [];
+    private bool _isSaving;
+    private string? _errorMessage;
+
+    private class PurchaseRequestFormModel
+    {
+        public string Title { get; set; } = "";
+        public string? Description { get; set; }
+        public decimal EstimatedAmount { get; set; }
+        public string? BusinessJustification { get; set; }
+        public Guid? CategoryId { get; set; }
+        public Guid? DepartmentId { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _categories = await QueryCategoriesHandler.HandleAsync(new QueryCategories.Request(), CancellationToken.None);
+        _departments = await QueryDepartmentsHandler.HandleAsync(new QueryDepartments.Request(), CancellationToken.None);
+    }
+
+    private async Task SaveAsDraft()
+    {
+        await CreateRequest(submitAfterCreate: false);
+    }
+
+    private async Task SubmitForApproval()
+    {
+        await CreateRequest(submitAfterCreate: true);
+    }
+
+    private async Task CreateRequest(bool submitAfterCreate)
+    {
+        _errorMessage = null;
+
+        if (!ValidateForm())
+        {
+            return;
+        }
+
+        _isSaving = true;
+
+        try
+        {
+            var currentUser = await CurrentUserProvider.GetCurrentUserAsync();
+            if (currentUser.UserId is null)
+            {
+                Logger.LogError("UserId is null for authenticated user on create purchase request page. This indicates an authentication configuration issue.");
+                _errorMessage = "Authentication error. Please sign out and sign in again.";
+                return;
+            }
+
+            var command = new CreatePurchaseRequest.Command(
+                _model.Title,
+                _model.Description,
+                _model.EstimatedAmount,
+                _model.BusinessJustification,
+                _model.CategoryId!.Value,
+                _model.DepartmentId!.Value,
+                currentUser.UserId.Value.ToString()
+            );
+
+            var createResult = await CreateHandler.HandleAsync(command, CancellationToken.None);
+            if (createResult.IsFailure)
+            {
+                _errorMessage = createResult.Error.Message;
+                return;
+            }
+
+            if (submitAfterCreate)
+            {
+                var submitResult = await SubmitHandler.HandleAsync(
+                    new SubmitPurchaseRequest.Command(createResult.Value), CancellationToken.None);
+
+                if (submitResult.IsFailure)
+                {
+                    NotificationService.Notify(NotificationSeverity.Warning, "Saved as Draft", 
+                        $"Request created but could not be submitted: {submitResult.Error.Message}");
+
+                    // Navigate away immediately after successful creation to prevent duplicate requests
+                    // if user retries after a submit failure
+                    Navigation.NavigateTo("/requests");
+                    return;
+                }
+
+                NotificationService.Notify(NotificationSeverity.Success, "Submitted", "Purchase request submitted for approval");
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Saved", "Purchase request saved as draft");
+            }
+
+            Navigation.NavigateTo("/requests");
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private bool ValidateForm()
+    {
+        if (string.IsNullOrWhiteSpace(_model.Title))
+        {
+            _errorMessage = "Title is required.";
+            return false;
+        }
+
+        if (_model.CategoryId is null)
+        {
+            _errorMessage = "Category is required.";
+            return false;
+        }
+
+        if (_model.DepartmentId is null)
+        {
+            _errorMessage = "Department is required.";
+            return false;
+        }
+
+        if (_model.EstimatedAmount <= 0)
+        {
+            _errorMessage = "Estimated amount must be greater than zero.";
+            return false;
+        }
+
+        return true;
+    }
+}
