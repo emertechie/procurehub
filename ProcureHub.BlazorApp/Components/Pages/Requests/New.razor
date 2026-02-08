@@ -16,6 +16,7 @@
 @inject ICurrentUserProvider CurrentUserProvider
 @inject NotificationService NotificationService
 @inject NavigationManager Navigation
+@inject ILogger<New> Logger
 
 <PageTitle>New Request</PageTitle>
 
@@ -172,7 +173,8 @@
             var currentUser = await CurrentUserProvider.GetCurrentUserAsync();
             if (currentUser.UserId is null)
             {
-                _errorMessage = "Unable to determine current user.";
+                Logger.LogError("UserId is null for authenticated user on create purchase request page. This indicates an authentication configuration issue.");
+                _errorMessage = "Authentication error. Please sign out and sign in again.";
                 return;
             }
 
