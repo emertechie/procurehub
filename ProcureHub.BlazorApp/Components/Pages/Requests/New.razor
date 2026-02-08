@@ -193,14 +193,22 @@
                 return;
             }
 
+            // Navigate away immediately after successful creation to prevent duplicate requests
+            // if user retries after a submit failure
+            var requestId = createResult.Value;
+
             if (submitAfterCreate)
             {
                 var submitResult = await SubmitHandler.HandleAsync(
-                    new SubmitPurchaseRequest.Command(createResult.Value), CancellationToken.None);
+                    new SubmitPurchaseRequest.Command(requestId), CancellationToken.None);
 
                 if (submitResult.IsFailure)
                 {
-                    _errorMessage = submitResult.Error.Message;
+                    // Request was created successfully but submit failed
+                    // Navigate to requests page where they can submit it manually
+                    NotificationService.Notify(NotificationSeverity.Warning, "Saved as Draft", 
+                        $"Request created but could not be submitted: {submitResult.Error.Message}");
+                    Navigation.NavigateTo("/requests");
                     return;
                 }
 
