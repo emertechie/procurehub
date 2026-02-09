@@ -97,6 +97,3 @@ app.MapRazorComponents<App>()
 app.MapAdditionalIdentityEndpoints();
 
 app.Run();
-
-// Required for WebApplicationFactory<Program> in test projects
-public partial class Program;
