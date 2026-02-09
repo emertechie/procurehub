@@ -9,8 +9,7 @@ namespace ProcureHub.BlazorApp.E2ETests.Infrastructure;
 /// Starts a real Kestrel host, resets/seeds DB, and provides a Playwright Page.
 /// Inherits from BrowserTest which manages Playwright browser lifecycle.
 /// </summary>
-public abstract class BlazorPageTest<TProgram> : BrowserTest
-    where TProgram : class
+public abstract class BlazorPageTest : BrowserTest
 {
     public const string AdminEmail = "test-admin@example.com";
     public const string RequesterEmail = "test-requester@example.com";

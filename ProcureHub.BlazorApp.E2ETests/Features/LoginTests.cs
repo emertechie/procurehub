@@ -3,7 +3,7 @@ using ProcureHub.BlazorApp.E2ETests.Infrastructure;
 
 namespace ProcureHub.BlazorApp.E2ETests.Features;
 
-public class LoginTests : BlazorPageTest<Program>
+public class LoginTests : BlazorPageTest
 {
     [Fact]
     public async Task Unauthenticated_user_is_redirected_to_login()

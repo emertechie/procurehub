@@ -3,7 +3,7 @@ using ProcureHub.BlazorApp.E2ETests.Infrastructure;
 
 namespace ProcureHub.BlazorApp.E2ETests.Features;
 
-public class AccessControlTests : BlazorPageTest<Program>
+public class AccessControlTests : BlazorPageTest
 {
     [Fact]
     public async Task Requester_cannot_access_admin_users_page()

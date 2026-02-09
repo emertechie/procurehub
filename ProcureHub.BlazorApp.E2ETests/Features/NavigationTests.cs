@@ -3,7 +3,7 @@ using ProcureHub.BlazorApp.E2ETests.Infrastructure;
 
 namespace ProcureHub.BlazorApp.E2ETests.Features;
 
-public class NavigationTests : BlazorPageTest<Program>
+public class NavigationTests : BlazorPageTest
 {
     [Fact]
     public async Task Admin_sees_all_sidebar_sections()
