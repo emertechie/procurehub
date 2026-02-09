@@ -58,6 +58,7 @@
 ## Blazor App
 
 - See guidance here: `ProcureHub.BlazorApp/AGENTS.md`
+- For Playwright E2E tests: `ProcureHub.BlazorApp.E2ETests/AGENTS.md`
 
 # Testing
 
