@@ -66,7 +66,9 @@ public sealed class BlazorApplicationFactory(
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("Test");
+        // Must use "Development" so MapStaticAssets() can find the
+        // staticwebassets.development.json manifest and serve JS/CSS correctly.
+        builder.UseEnvironment("Development");
 
         // Load test appsettings.json to override BlazorApp appsettings
         builder.ConfigureAppConfiguration((context, config) =>
