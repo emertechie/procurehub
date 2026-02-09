@@ -3,6 +3,7 @@ using ProcureHub.BlazorApp.E2ETests.Infrastructure;
 
 namespace ProcureHub.BlazorApp.E2ETests.Features;
 
+[Collection(BlazorE2ETestCollection.Name)]
 public class LoginTests : BlazorPageTest
 {
     [Fact]
@@ -12,7 +13,7 @@ public class LoginTests : BlazorPageTest
 
         await Page.WaitForURLAsync(url => url.Contains("/Account/Login"), new()
         {
-            Timeout = 10000
+            Timeout = DefaultNavigationTimeoutMs
         });
 
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Log in" })).ToBeVisibleAsync();

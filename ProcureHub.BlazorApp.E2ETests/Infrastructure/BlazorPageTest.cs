@@ -15,6 +15,7 @@ public abstract class BlazorPageTest : BrowserTest
     public const string RequesterEmail = "test-requester@example.com";
     public const string ApproverEmail = "test-approver@example.com";
     public const string DefaultPassword = "Password1!";
+    public const int DefaultNavigationTimeoutMs = 10_000;
 
     private BlazorApplicationFactory? _host;
     private IPage? _page;
@@ -42,8 +43,8 @@ public abstract class BlazorPageTest : BrowserTest
         var connectionString = Configuration.GetConnectionString();
         _host = new BlazorApplicationFactory(connectionString, ConfigureWebHost);
         await _host.StartAsync();
-
-        // Reset and seed DB before each test (serialized to prevent parallel races)
+        
+        // Reset and seed DB before each test
         await DatabaseResetter.ResetAndSeedAsync(_host.Services);
 
         // Initialize Playwright browser via BrowserTest
@@ -89,7 +90,7 @@ public abstract class BlazorPageTest : BrowserTest
         // Wait for navigation away from login page
         await Page.WaitForURLAsync(
             url => !url.Contains("/Account/Login"),
-            new PageWaitForURLOptions { Timeout = 10000 });
+            new PageWaitForURLOptions { Timeout = DefaultNavigationTimeoutMs });
     }
 
     /// <summary>Login as the seeded admin user.</summary>

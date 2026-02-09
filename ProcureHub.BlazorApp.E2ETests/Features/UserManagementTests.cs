@@ -3,6 +3,7 @@ using ProcureHub.BlazorApp.E2ETests.Infrastructure;
 
 namespace ProcureHub.BlazorApp.E2ETests.Features;
 
+[Collection(BlazorE2ETestCollection.Name)]
 public class UserManagementTests : BlazorPageTest
 {
     private async Task NavigateToUsersPage()

@@ -3,6 +3,7 @@ using ProcureHub.BlazorApp.E2ETests.Infrastructure;
 
 namespace ProcureHub.BlazorApp.E2ETests.Features;
 
+[Collection(BlazorE2ETestCollection.Name)]
 public class AccessControlTests : BlazorPageTest
 {
     [Fact]
@@ -14,7 +15,7 @@ public class AccessControlTests : BlazorPageTest
 
         await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"), new()
         {
-            Timeout = 10000
+            Timeout = DefaultNavigationTimeoutMs
         });
     }
 
@@ -27,7 +28,7 @@ public class AccessControlTests : BlazorPageTest
 
         await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"), new()
         {
-            Timeout = 10000
+            Timeout = DefaultNavigationTimeoutMs
         });
     }
 
@@ -40,7 +41,7 @@ public class AccessControlTests : BlazorPageTest
 
         await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"), new()
         {
-            Timeout = 10000
+            Timeout = DefaultNavigationTimeoutMs
         });
     }
 
@@ -53,7 +54,7 @@ public class AccessControlTests : BlazorPageTest
 
         await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"), new()
         {
-            Timeout = 10000
+            Timeout = DefaultNavigationTimeoutMs
         });
     }
 
@@ -66,7 +67,7 @@ public class AccessControlTests : BlazorPageTest
 
         await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"), new()
         {
-            Timeout = 10000
+            Timeout = DefaultNavigationTimeoutMs
         });
     }
 

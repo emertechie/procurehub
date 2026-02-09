@@ -3,6 +3,7 @@ using ProcureHub.BlazorApp.E2ETests.Infrastructure;
 
 namespace ProcureHub.BlazorApp.E2ETests.Features;
 
+[Collection(BlazorE2ETestCollection.Name)]
 public class NavigationTests : BlazorPageTest
 {
     [Fact]
@@ -61,7 +62,7 @@ public class NavigationTests : BlazorPageTest
 
         await Page.WaitForURLAsync(url => url.Contains("/admin/users"), new()
         {
-            Timeout = 10000
+            Timeout = DefaultNavigationTimeoutMs
         });
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Users" })).ToBeVisibleAsync();
     }
@@ -75,7 +76,7 @@ public class NavigationTests : BlazorPageTest
 
         await Page.WaitForURLAsync(url => url.Contains("/admin/departments"), new()
         {
-            Timeout = 10000
+            Timeout = DefaultNavigationTimeoutMs
         });
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Departments" })).ToBeVisibleAsync();
     }
@@ -103,7 +104,7 @@ public class NavigationTests : BlazorPageTest
 
         await Page.WaitForURLAsync(url => url.Contains("/Account/Login"), new()
         {
-            Timeout = 10000
+            Timeout = DefaultNavigationTimeoutMs
         });
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Log in" })).ToBeVisibleAsync();
     }
