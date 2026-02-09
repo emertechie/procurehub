@@ -72,7 +72,7 @@
   - Always add a new entry in the appropriate `GetAll{FeatureName}Endpoints` method to enforce testing of cross cutting concerns
 - Aim for 100% code coverage, but be pragmatic. If a code path is not easy to test, call it out in response or add a TODO
 
-# Commons Commands
+# Common Commands
 
 - To start the web app (e.g. for Chrome MCP tool):
   - *You must be in the `ProcureHub.WebApp` directory first*
@@ -83,3 +83,7 @@
 - Update EF Core migrations: `dotnet ef migrations add ExampleMigration -p ../ProcureHub`
   - NOTE: Run all migration commands in the `ProcureHub.WebApi` dir, and add the `-p` flag for project reference as shown above
 - Update the strongly typed `openapi-react-query` client after a change to OpenAPI spec: In the `/ProcureHub.WebApp` folder, run `npm run generate:api-schema`
+
+## Command Not To Use
+
+- Never use the `jetbrains_execute_terminal_command` MCP tool — always use regular bash tool
