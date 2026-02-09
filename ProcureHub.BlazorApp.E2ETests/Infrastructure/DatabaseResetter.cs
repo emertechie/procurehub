@@ -12,25 +12,11 @@ namespace ProcureHub.BlazorApp.E2ETests.Infrastructure;
 public static class DatabaseResetter
 {
     private static Respawner? _respawner;
-    private static readonly SemaphoreSlim Semaphore = new(1, 1);
 
-    /// <summary>
-    /// Resets the database and seeds data atomically.
-    /// Serialized via semaphore to prevent parallel test classes from
-    /// racing on seed operations (duplicate key conflicts).
-    /// </summary>
     public static async Task ResetAndSeedAsync(IServiceProvider factoryServices)
     {
-        await Semaphore.WaitAsync();
-        try
-        {
-            await ResetDatabaseAsync();
-            await SeedDataAsync(factoryServices);
-        }
-        finally
-        {
-            Semaphore.Release();
-        }
+        await ResetDatabaseAsync();
+        await SeedDataAsync(factoryServices);
     }
 
     private static async Task ResetDatabaseAsync()
