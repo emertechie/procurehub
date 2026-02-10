@@ -49,3 +49,8 @@
 .rz-panel-menu > .rz-navigation-item:not(:first-child) {
     padding-bottom: 0.75em;
 }
+
+.validation-message {
+    color: var(--rz-danger);
+    font-size: var(--rz-body2-font-size);
+}

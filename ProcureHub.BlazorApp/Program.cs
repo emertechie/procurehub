@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -5,6 +6,7 @@ using Microsoft.Identity.Web;
 using ProcureHub;
 using ProcureHub.BlazorApp.Components;
 using ProcureHub.BlazorApp.Components.Account;
+using ProcureHub.BlazorApp.Components.Pages.Requests;
 using ProcureHub.BlazorApp.Infrastructure.Authentication;
 using ProcureHub.Infrastructure;
 using ProcureHub.Infrastructure.Authentication;
@@ -20,6 +22,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddRadzenComponents();
 builder.Services.AddDomainServices();
+builder.Services.AddValidatorsFromAssemblyContaining<PurchaseRequestFormModelValidator>(ServiceLifetime.Singleton);
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityRedirectManager>();
