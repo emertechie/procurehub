@@ -47,3 +47,43 @@ Each test:
 | `test-admin@example.com` | `Password1!` | Admin, Requester, Approver |
 | `test-requester@example.com` | `Password1!` | Requester |
 | `test-approver@example.com` | `Password1!` | Approver |
+
+## Best Practices
+
+### Avoid hard-coded timeouts
+
+Do not use `await Page.WaitForTimeoutAsync(1000);` to wait for elements or page state. This approach is brittle (arbitrary wait times) and slows down tests unnecessarily. Instead, prefer deterministic waiting methods:
+
+- Use `await Expect(locator).ToBeVisibleAsync()` or `await Expect(locator).ToBeHiddenAsync()`
+- Use `await Page.WaitForURLAsync()` for navigation
+- Use `await Page.WaitForLoadStateAsync()` for page load events
+
+### Prefer semantic selectors with GetByRole
+
+Always prefer `GetByRole` to locate elements using standard ARIA attributes. This makes tests more resilient to DOM changes and enforces accessibility best practices.
+
+```csharp
+// Good
+await Expect(sidebar.GetByRole(AriaRole.Link, new() { Name = "Users" })).ToBeVisibleAsync();
+
+// Avoid
+await Expect(sidebar.GetByText("Users")).ToBeVisibleAsync();
+```
+
+If an element in the source code lacks an appropriate ARIA attribute that would enable `GetByRole` selection, update the source file to add the missing attribute (e.g., `aria-label`, `role`, etc.).
+
+### Verify page structure with ARIA snapshots
+
+For validating overall page structure or complex component hierarchies, use `ToMatchAriaSnapshotAsync`. This creates a readable, maintainable snapshot of the accessible tree.
+
+```csharp
+await page.GotoAsync("https://example.com/");
+await Expect(page.Locator("banner")).ToMatchAriaSnapshotAsync(@"
+  - banner:
+    - heading \"Welcome to ProcureHub\" [level=1]
+    - link \"Get Started\"
+    - link \"Documentation\"
+");
+```
+
+ARIA snapshots are particularly useful for verifying navigation menus, form structures, and page layouts without relying on fragile CSS selectors.
