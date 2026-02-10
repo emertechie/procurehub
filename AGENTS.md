@@ -10,7 +10,7 @@
 
 # Plans
 
-- Store plans in the `./plans` folder in the root of the repo.
+- Store plans in the `.plans` folder in the root of the repo.
 
 # Tech Stack
 
@@ -59,6 +59,7 @@
 
 - See guidance here: `ProcureHub.BlazorApp/AGENTS.md`
 - For Playwright E2E tests: `ProcureHub.BlazorApp.E2ETests/AGENTS.md`
+- Blazor unit tests are in `ProcureHub.BlazorApp.Tests` 
 
 # Testing
 
