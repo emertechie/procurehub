@@ -39,7 +39,9 @@
                     PageSize="@PageSize"
                     IsLoading="@_loading"
                     PagerHorizontalAlign="HorizontalAlign.Center"
-                    AllowAlternatingRows="false">
+                    AllowAlternatingRows="false"
+                    role="grid"
+                    aria-label="Users">
         <Columns>
             <RadzenDataGridColumn TItem="QueryUsers.Response" Title="User" Width="300px">
                 <Template Context="user">
@@ -98,28 +100,33 @@
                         <RadzenButton Icon="edit" Size="ButtonSize.Small"
                                       Click="@(() => OpenEditUserDialog(Guid.Parse(user.Id)))"
                                       MouseEnter="@((element) => ShowTooltip(element, "Edit user profile"))"
-                                      ButtonStyle="ButtonStyle.Light" />
+                                      ButtonStyle="ButtonStyle.Light"
+                                      aria-label="Edit user profile" />
                         <RadzenButton Icon="group" Size="ButtonSize.Small"
                                       Click="@(() => OpenManageRolesDialog(Guid.Parse(user.Id)))"
                                       MouseEnter="@((element) => ShowTooltip(element, "Manage roles"))"
-                                      ButtonStyle="ButtonStyle.Light" />
+                                      ButtonStyle="ButtonStyle.Light"
+                                      aria-label="Manage roles" />
                         <RadzenButton Icon="business" Size="ButtonSize.Small"
                                       Click="@(() => OpenAssignDepartmentDialog(Guid.Parse(user.Id)))"
                                       MouseEnter="@((element) => ShowTooltip(element, "Change department"))"
-                                      ButtonStyle="ButtonStyle.Light" />
+                                      ButtonStyle="ButtonStyle.Light"
+                                      aria-label="Change department" />
                         @if (user.EnabledAt.HasValue)
                         {
                             <RadzenButton Icon="block" Size="ButtonSize.Small"
                                           Click="@(() => DisableUserAsync(Guid.Parse(user.Id)))"
                                           MouseEnter="@((element) => ShowTooltip(element, "Disable user"))"
-                                          ButtonStyle="ButtonStyle.Danger" />
+                                          ButtonStyle="ButtonStyle.Danger"
+                                          aria-label="Disable user" />
                         }
                         else
                         {
                             <RadzenButton Icon="check_circle" Size="ButtonSize.Small"
                                           Click="@(() => EnableUserAsync(Guid.Parse(user.Id)))"
                                           MouseEnter="@((element) => ShowTooltip(element, "Enable user"))"
-                                          ButtonStyle="ButtonStyle.Success" />
+                                          ButtonStyle="ButtonStyle.Success"
+                                          aria-label="Enable user" />
                         }
                     </RadzenStack>
                 </Template>
