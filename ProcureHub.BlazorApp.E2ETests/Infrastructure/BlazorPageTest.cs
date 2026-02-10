@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Playwright;
 using Microsoft.Playwright.Xunit.v3;
@@ -40,6 +41,14 @@ public abstract class BlazorPageTest : BrowserTest
 
     public override async ValueTask InitializeAsync()
     {
+        // Auto-enable Playwright Inspector when a debugger is attached.
+        // Must be set before base.InitializeAsync() launches the browser.
+        if (Debugger.IsAttached)
+        {
+            Environment.SetEnvironmentVariable("PWDEBUG", "1");
+            
+        }
+
         var connectionString = Configuration.GetConnectionString();
         _host = new BlazorApplicationFactory(connectionString, ConfigureWebHost);
         await _host.StartAsync();

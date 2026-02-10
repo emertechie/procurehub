@@ -5,8 +5,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-    <!-- Use custom runsettings for debugging with Playwright -->
-    <RunSettingsFilePath>$(MSBuildProjectDirectory)\e2e.runsettings</RunSettingsFilePath>
   </PropertyGroup>
 
   <ItemGroup>
