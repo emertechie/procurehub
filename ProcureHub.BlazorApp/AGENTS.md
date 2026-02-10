@@ -8,6 +8,13 @@ It does not call the `ProcureHub.WebApi`. Instead, command / query handlers from
 
 - Favor small, single-responsibility components (one clear purpose); break down large UIs into multiple nested components instead of one monolithic file.
 - When a component grows beyond a clear responsibility, extract subcomponents and compose them rather than extending the file.
+- Prefer to use the `BusyScope` type to manage `_loading` type flags. Example:
+```cs
+  using (new BusyScope(b => _loading = b))
+  {
+      _pagedUsers = await QueryUsersHandler.HandleAsync(request, CancellationToken.None);
+} 
+```
 
 ## UI Framework
 
@@ -81,6 +88,7 @@ Icon reference: https://fonts.google.com/icons?icon.set=Material+Symbols
         <RadzenTextBox Name="FirstNameInput" @bind-Value="@_model.FirstName" Placeholder="Enter your first name" />
     </RadzenStack>
 ```
+- Use `Blazilla` to validate Blazor form models with FluentValidation validators. See `ProcureHub.BlazorApp/Components/Pages/Requests/New.razor` for example. 
 
 ## Project Structure
 
@@ -108,8 +116,9 @@ _categories = await QueryCategoriesHandler.HandleAsync(req1, token);
 _departments = await QueryDepartmentsHandler.HandleAsync(req2, token);
 ```
 
-## General
+# General
 
 - After any significant change, make sure there are no build errors
+- Log an error for any unexpected conditions
 - Private fields in a Razor code block must use correct naming style (leading underscore)
   - Correct: `@code { int _totalCount; }`
