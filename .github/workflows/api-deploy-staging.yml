@@ -26,6 +26,7 @@ permissions:
 jobs:
   build-and-test:
     uses: ./.github/workflows/api-build-and-test.yml
+    secrets: inherit
 
   push-image:
     needs: build-and-test

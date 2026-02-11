@@ -6,7 +6,7 @@ services:
       - "1433:1433"
     environment:
       ACCEPT_EULA: Y
-      MSSQL_SA_PASSWORD: 2#r4U@8GO1Kv@xNFi3k
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
     volumes:
       - sqldata:/var/opt/mssql
     restart: unless-stopped
