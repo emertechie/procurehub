@@ -3,6 +3,7 @@ name: steps
 description: Use this skill when implementing a number of steps from a steps markdown file.
 ---
 
+- Skip over any steps that are already done (Indicated with a completed checkbox: `[x]`).
 - If steps are broken down into multiple phases, ask the user if they want you to work on all remaining phases, or just the next one.
 - Begin implementing the steps one by one.
 - After completing each step, mark its checkbox as done (`[x]`) in the steps file (if there is one).

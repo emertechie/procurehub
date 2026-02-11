@@ -2,14 +2,14 @@
 
 ## Phase 0: Fix DataSeeder
 
-- [ ] 0.1 In `SeedPurchaseRequestsAsync`, replace hardcoded `FindByEmailAsync("requester@example.com")` / `FindByEmailAsync("approver@example.com")` with lookup from `SeedUsers` config section (find emails containing "requester" / "approver")
-- [ ] 0.2 Build & run existing tests to verify no regression
+- [x] 0.1 In `SeedPurchaseRequestsAsync`, replace hardcoded `FindByEmailAsync("requester@example.com")` / `FindByEmailAsync("approver@example.com")` with lookup from `SeedUsers` config section (find emails containing "requester" / "approver")
+- [x] 0.2 Build & run existing tests to verify no regression
 
 ## Phase 1: Backend
 
-- [ ] 1.1 Add `DepartmentId` (Guid?) to `QueryPurchaseRequests.Request`, add filter logic in `Handler`, wire through API endpoint
-- [ ] 1.2 Add `Can_filter_purchase_requests_by_department` test in `PurchaseRequestTests`, add endpoint to `GetAllPurchaseRequestEndpoints`
-- [ ] 1.3 Build & run tests, fix any failures
+- [x] 1.1 Add `DepartmentId` (Guid?) to `QueryPurchaseRequests.Request`, add filter logic in `Handler`, wire through API endpoint
+- [x] 1.2 Add `Can_filter_purchase_requests_by_department` test in `PurchaseRequestTests`, add endpoint to `GetAllPurchaseRequestEndpoints`
+- [x] 1.3 Build & run tests, fix any failures
 
 ## Phase 2: Blazor UI
 
