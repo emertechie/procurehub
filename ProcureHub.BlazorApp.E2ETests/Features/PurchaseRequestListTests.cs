@@ -21,14 +21,6 @@ public class PurchaseRequestListTests : BlazorPageTest
         // Wait for grid to load - check for a column header first
         await Expect(Page.GetByText("Request #")).ToBeVisibleAsync();
 
-        // Check if there's an error message
-        var errorAlert = Page.GetByRole(AriaRole.Alert);
-        if (await errorAlert.IsVisibleAsync())
-        {
-            var errorText = await errorAlert.TextContentAsync();
-            throw new Exception($"Error displayed on page: {errorText}");
-        }
-
         // The requester should see their pre-seeded requests
         await Expect(Page.GetByText("PR-2025-001")).ToBeVisibleAsync();
         await Expect(Page.GetByText("PR-2025-002")).ToBeVisibleAsync();

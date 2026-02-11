@@ -46,7 +46,6 @@ public abstract class BlazorPageTest : BrowserTest
         if (Debugger.IsAttached)
         {
             Environment.SetEnvironmentVariable("PWDEBUG", "1");
-            
         }
 
         var connectionString = Configuration.GetConnectionString();
