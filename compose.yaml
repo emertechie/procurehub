@@ -1,30 +1,15 @@
 services:
   appdb:
-    image: postgres:18
-    container_name: postgres_appdb
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    container_name: sqlserver_appdb
     ports:
-      - "5432:5432"
+      - "1433:1433"
     environment:
-      POSTGRES_USER: dbuser
-      POSTGRES_PASSWORD: dbpassword
-      POSTGRES_DB: procurehub
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: 2#r4U@8GO1Kv@xNFi3k
     volumes:
-      - pgdata:/var/lib/postgresql
-    restart: unless-stopped
-
-  appdb_tests:
-    image: postgres:18
-    container_name: postgres_appdb_tests
-    ports:
-      - "5433:5432"
-    environment:
-      POSTGRES_USER: dbuser
-      POSTGRES_PASSWORD: dbpassword
-      POSTGRES_DB: procurehub_tests
-    volumes:
-      - pgdata_tests:/var/lib/postgresql
+      - sqldata:/var/opt/mssql
     restart: unless-stopped
 
 volumes:
-  pgdata:
-  pgdata_tests:
+  sqldata:
