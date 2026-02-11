@@ -8,16 +8,15 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      postgres:
-        image: postgres:18
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2025-latest
         env:
-          POSTGRES_USER: dbuser
-          POSTGRES_PASSWORD: dbpassword
-          POSTGRES_DB: procurehub_tests
+          ACCEPT_EULA: Y
+          MSSQL_SA_PASSWORD: 2#r4U@8GO1Kv@xNFi3k
         ports:
-          - 5432:5432
+          - 1433:1433
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '2#r4U@8GO1Kv@xNFi3k' -C -Q 'SELECT 1' || exit 1"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -40,7 +39,7 @@ jobs:
       - name: Test
         run: dotnet test ProcureHub.sln --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=ProcureHubTests.trx"  --results-directory ./TestResults
         env:
-          ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=procurehub_tests;Username=dbuser;Password=dbpassword"
+          ConnectionStrings__DefaultConnection: "Server=localhost;Database=procurehub_tests;User Id=sa;Password=2#r4U@8GO1Kv@xNFi3k;TrustServerCertificate=true"
 
       - name: Test Report
         uses: dorny/test-reporter@v2
