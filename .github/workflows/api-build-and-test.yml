@@ -39,10 +39,18 @@ jobs:
       - name: Install Playwright browsers
         run: pwsh ProcureHub.BlazorApp.E2ETests/bin/Release/net10.0/playwright.ps1 install --with-deps
 
-      - name: Test
-        run: dotnet test ProcureHub.sln --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=ProcureHubTests.trx"  --results-directory ./TestResults
+      - name: Test WebApi
+        run: dotnet test ProcureHub.WebApi.Tests/ProcureHub.WebApi.Tests.csproj --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=ProcureHub.WebApi.Tests.trx" --results-directory ./TestResults
         env:
           ConnectionStrings__DefaultConnection: "Server=localhost;Database=procurehub_tests;User Id=sa;Password=2#r4U@8GO1Kv@xNFi3k;TrustServerCertificate=true"
+
+      - name: Test Blazor unit
+        run: dotnet test ProcureHub.BlazorApp.Tests/ProcureHub.BlazorApp.Tests.csproj --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=ProcureHub.BlazorApp.Tests.trx" --results-directory ./TestResults
+
+      - name: Test Blazor E2E
+        run: dotnet test ProcureHub.BlazorApp.E2ETests/ProcureHub.BlazorApp.E2ETests.csproj --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=ProcureHub.BlazorApp.E2ETests.trx" --results-directory ./TestResults
+        env:
+          ConnectionStrings__DefaultConnection: "Server=localhost;Database=procurehub_blazor_e2e_tests;User Id=sa;Password=2#r4U@8GO1Kv@xNFi3k;TrustServerCertificate=true"
 
       - name: Test Report
         uses: dorny/test-reporter@v2
