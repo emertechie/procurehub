@@ -39,6 +39,7 @@ Each test:
 - Use `Page.GotoBlazorServerPageAsync("/route")` instead of raw `GotoAsync` (waits for Blazor circuit)
 - Use `DefaultNavigationTimeoutMs` const for all `WaitForURLAsync` timeouts
 - The app uses Radzen UI components — selectors may need Radzen-specific CSS classes (e.g. `.rz-sidebar`, `.rz-profile-menu`)
+- If it's particularly difficult to get a test to pass, consider using MCP tools like Chrome DevTools to inspect the dom structure or app behaviour in the real app.
 
 ## Test Users
 
@@ -52,7 +53,7 @@ Each test:
 
 ### Avoid hard-coded timeouts
 
-Do not use `await Page.WaitForTimeoutAsync(1000);` to wait for elements or page state. This approach is brittle (arbitrary wait times) and slows down tests unnecessarily. Instead, prefer deterministic waiting methods:
+IMPORTANT: DO NOT use `Page.WaitForTimeoutAsync` to wait for elements or page state. This approach is brittle (arbitrary wait times) and slows down tests unnecessarily. Instead, prefer deterministic waiting methods:
 
 - Use `await Expect(locator).ToBeVisibleAsync()` or `await Expect(locator).ToBeHiddenAsync()`
 - Use `await Page.WaitForURLAsync()` for navigation
