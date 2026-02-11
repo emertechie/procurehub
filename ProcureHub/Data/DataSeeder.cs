@@ -214,9 +214,21 @@ public sealed class DataSeeder
             return;
         }
 
-        // Hardcoded demo users for purchase request seeding
-        var requester = await _userManager.FindByEmailAsync("requester@example.com");
-        var approver = await _userManager.FindByEmailAsync("approver@example.com");
+        // Lookup requester and approver emails from SeedUsers config
+        var seedUsersSection = _configuration.GetSection("SeedUsers");
+        var userEmails = seedUsersSection.GetChildren().Select(c => c.Key).ToList();
+
+        var requesterEmail = userEmails.FirstOrDefault(e => e.Contains("requester", StringComparison.OrdinalIgnoreCase));
+        var approverEmail = userEmails.FirstOrDefault(e => e.Contains("approver", StringComparison.OrdinalIgnoreCase));
+
+        if (requesterEmail == null || approverEmail == null)
+        {
+            _logger.LogWarning("Cannot seed purchase requests - requester or approver email not found in SeedUsers config");
+            return;
+        }
+
+        var requester = await _userManager.FindByEmailAsync(requesterEmail);
+        var approver = await _userManager.FindByEmailAsync(approverEmail);
 
         if (requester == null || approver == null)
         {
