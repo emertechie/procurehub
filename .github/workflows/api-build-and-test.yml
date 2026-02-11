@@ -2,9 +2,6 @@ name: API Build & Test
 
 on:
   workflow_call:
-    secrets:
-      MSSQL_SA_PASSWORD:
-        required: true
 
 jobs:
   build-and-test:
@@ -15,9 +12,14 @@ jobs:
         image: mcr.microsoft.com/mssql/server:2025-latest
         env:
           ACCEPT_EULA: Y
-          MSSQL_SA_PASSWORD: ${{ secrets.MSSQL_SA_PASSWORD }}
+          MSSQL_SA_PASSWORD: 2#r4U@8GO1Kv@xNFi3k
         ports:
           - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '2#r4U@8GO1Kv@xNFi3k' -C -Q 'SELECT 1' || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout
@@ -34,21 +36,10 @@ jobs:
       - name: Build
         run: dotnet build ProcureHub.sln --no-restore --configuration Release
 
-      - name: Wait for SQL Server
-        env:
-          MSSQL_SA_PASSWORD: ${{ secrets.MSSQL_SA_PASSWORD }}
-        run: |
-          for i in {1..30}; do
-            /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -Q "SELECT 1" && exit 0
-            sleep 2
-          done
-          echo "SQL Server did not become ready in time"
-          exit 1
-
       - name: Test
         run: dotnet test ProcureHub.sln --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=ProcureHubTests.trx"  --results-directory ./TestResults
         env:
-          ConnectionStrings__DefaultConnection: "Server=localhost;Database=procurehub_tests;User Id=sa;Password=${{ secrets.MSSQL_SA_PASSWORD }};TrustServerCertificate=true"
+          ConnectionStrings__DefaultConnection: "Server=localhost;Database=procurehub_tests;User Id=sa;Password=2#r4U@8GO1Kv@xNFi3k;TrustServerCertificate=true"
 
       - name: Test Report
         uses: dorny/test-reporter@v2
