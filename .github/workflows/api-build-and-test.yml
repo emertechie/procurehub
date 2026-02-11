@@ -36,6 +36,9 @@ jobs:
       - name: Build
         run: dotnet build ProcureHub.sln --no-restore --configuration Release
 
+      - name: Install Playwright browsers
+        run: pwsh ProcureHub.BlazorApp.E2ETests/bin/Release/net10.0/playwright.ps1 install --with-deps
+
       - name: Test
         run: dotnet test ProcureHub.sln --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=ProcureHubTests.trx"  --results-directory ./TestResults
         env:
