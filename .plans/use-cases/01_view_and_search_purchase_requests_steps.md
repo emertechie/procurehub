@@ -18,5 +18,5 @@
 
 ## Phase 3: E2E Test
 
-- [ ] 3.1 Add `PurchaseRequestListTests.cs` — `Requester_can_see_own_request_in_grid` (login, navigate to `/requests`, assert grid shows pre-seeded data)
-- [ ] 3.2 Run E2E test, fix any failures
+- [x] 3.1 Add `PurchaseRequestListTests.cs` — `Requester_can_see_own_request_in_grid`, `Search_filters_requests_by_title`, `Clear_filters_shows_all_requests`
+- [x] 3.2 Run E2E tests, fix config merge issue via `GetTestSeedUsers()` filtering

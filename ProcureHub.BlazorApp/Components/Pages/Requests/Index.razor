@@ -26,6 +26,13 @@
         </ActionButton>
     </PageHeader>
 
+    @if (!string.IsNullOrEmpty(_errorMessage))
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">
+            @_errorMessage
+        </RadzenAlert>
+    }
+
     @* Filter bar *@
     <RadzenCard>
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" Gap="0.75rem" Wrap="FlexWrap.Wrap">
@@ -181,11 +188,15 @@
         await LoadRequests();
     }
 
+    string? _errorMessage;
+
     async Task LoadRequests()
     {
+        _errorMessage = null;
         var currentUser = await CurrentUserProvider.GetCurrentUserAsync();
         if (currentUser.UserId is null)
         {
+            _errorMessage = "Authentication error: User not found";
             return;
         }
 
@@ -205,6 +216,10 @@
             if (result.IsSuccess)
             {
                 _pagedRequests = result.Value;
+            }
+            else
+            {
+                _errorMessage = result.Error.Message;
             }
         }
     }

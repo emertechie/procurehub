@@ -102,11 +102,28 @@ public sealed class DataSeeder
 
     private async Task SeedUsersAsync()
     {
-        var seedUsersSection = _configuration.GetSection("SeedUsers");
-        foreach (var userSection in seedUsersSection.GetChildren())
+        var testUsers = GetTestSeedUsers();
+        foreach (var userSection in testUsers)
         {
             await SeedUserAsync(userSection.Key);
         }
+    }
+
+    /// <summary>
+    /// Gets SeedUsers configuration entries that start with "test-".
+    /// In test environments, this filters to only test users (e.g., test-requester@example.com)
+    /// and excludes app users (e.g., requester@example.com) that may be merged from base config.
+    /// In production, if no test- users exist, returns all SeedUsers.
+    /// </summary>
+    private IEnumerable<IConfigurationSection> GetTestSeedUsers()
+    {
+        var seedUsersSection = _configuration.GetSection("SeedUsers");
+        var allUsers = seedUsersSection.GetChildren().ToList();
+
+        var testUsers = allUsers.Where(u => u.Key.StartsWith("test-", StringComparison.OrdinalIgnoreCase)).ToList();
+
+        // If test users exist, use them exclusively. Otherwise fall back to all users (production case).
+        return testUsers.Any() ? testUsers : allUsers;
     }
 
     private async Task SeedUserAsync(string email)
@@ -215,8 +232,7 @@ public sealed class DataSeeder
         }
 
         // Lookup requester and approver emails from SeedUsers config
-        var seedUsersSection = _configuration.GetSection("SeedUsers");
-        var userEmails = seedUsersSection.GetChildren().Select(c => c.Key).ToList();
+        var userEmails = GetTestSeedUsers().Select(c => c.Key).ToList();
 
         var requesterEmail = userEmails.FirstOrDefault(e => e.Contains("requester", StringComparison.OrdinalIgnoreCase));
         var approverEmail = userEmails.FirstOrDefault(e => e.Contains("approver", StringComparison.OrdinalIgnoreCase));
