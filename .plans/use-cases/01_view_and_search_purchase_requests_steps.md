@@ -13,8 +13,8 @@
 
 ## Phase 2: Blazor UI
 
-- [ ] 2.1 Implement `/requests` page (`Index.razor`) with `RadzenDataGrid`, search bar, status dropdown, department dropdown, server-side paging via `LoadData`
-- [ ] 2.2 Build, manually verify page loads (if app is running)
+- [x] 2.1 Implement `/requests` page (`Index.razor`) with `RadzenDataGrid`, search bar, status dropdown, department dropdown, server-side paging via `LoadData`
+- [x] 2.2 Build, manually verify page loads (if app is running)
 
 ## Phase 3: E2E Test
 
