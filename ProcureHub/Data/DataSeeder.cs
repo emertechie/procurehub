@@ -110,10 +110,10 @@ public sealed class DataSeeder
     }
 
     /// <summary>
-    /// Gets SeedUsers configuration entries that start with "test-".
-    /// In test environments, this filters to only test users (e.g., test-requester@example.com)
-    /// and excludes app users (e.g., requester@example.com) that may be merged from base config.
-    /// In production, if no test- users exist, returns all SeedUsers.
+    /// Gets SeedUsers configuration entries, preferring those whose keys start with "test-".
+    /// If any test users exist (e.g., keys like "test-requester@example.com"), only those are returned,
+    /// which allows test-specific users to override app users that may be merged from base config.
+    /// If no test-* users exist, all SeedUsers entries are returned.
     /// </summary>
     private IEnumerable<IConfigurationSection> GetTestSeedUsers()
     {
