@@ -53,11 +53,14 @@ Each test:
 
 ### Avoid hard-coded timeouts
 
-IMPORTANT: DO NOT use `Page.WaitForTimeoutAsync` to wait for elements or page state. This approach is brittle (arbitrary wait times) and slows down tests unnecessarily. Instead, prefer deterministic waiting methods:
+IMPORTANT: DO NOT use `Page.WaitForTimeoutAsync` to wait for elements or page state. This approach is brittle (arbitrary wait times) and slows down tests unnecessarily. Playwright includes auto-retrying assertions (such as `ToBeVisibleAsync()`) that remove flakiness by waiting until the condition is met - prefer to use those. Examples:
 
 - Use `await Expect(locator).ToBeVisibleAsync()` or `await Expect(locator).ToBeHiddenAsync()`
 - Use `await Page.WaitForURLAsync()` for navigation
-- Use `await Page.WaitForLoadStateAsync()` for page load events
+
+Playwright also performs a range of actionability checks on the elements before making actions (such as `Locator.ClickAsync()`) to ensure these actions behave as expected.
+
+For more on Playwright actionability checks and auto-retrying assertions, see: https://playwright.dev/dotnet/docs/actionability.
 
 ### Prefer semantic selectors with GetByRole
 
