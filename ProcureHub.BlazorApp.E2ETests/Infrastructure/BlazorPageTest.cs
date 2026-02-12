@@ -63,6 +63,10 @@ public abstract class BlazorPageTest : BrowserTest
 
         _context = await NewContext(options);
         _page = await Context.NewPageAsync();
+        
+        // Make things fail faster:
+        _page.SetDefaultNavigationTimeout(3000);
+        _page.SetDefaultTimeout(3000);
     }
 
     public override async ValueTask DisposeAsync()
