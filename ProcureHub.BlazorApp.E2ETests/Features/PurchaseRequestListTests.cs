@@ -73,7 +73,7 @@ public class PurchaseRequestListTests : BlazorPageTest
 
         // Select "Draft" from Status dropdown to filter
         await Page.GetByRole(AriaRole.Combobox, new() { Name = "Status" }).ClickAsync();
-        await Page.GetByText("Draft").ClickAsync();
+        await Page.GetByRole(AriaRole.Option, new() { Name = "Draft" }).ClickAsync();
 
         // Should only show draft requests
         await Expect(Page.GetByText("PR-2025-001")).ToBeVisibleAsync();
