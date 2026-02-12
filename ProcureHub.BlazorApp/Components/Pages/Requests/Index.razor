@@ -47,8 +47,8 @@
                 <RadzenLabel Text="Status" Component="StatusInput" />
                 <RadzenDropDown role="combobox" aria-label="Status"
                                 Name="StatusInput" TValue="PurchaseRequestStatus?" Value="@_selectedStatus"
-                                Change="@(async v => { _selectedStatus = (PurchaseRequestStatus?)v; await ApplyFilters(); })"
-                                Data="@_statuses" TextProperty="Name" ValueProperty="Value"
+                                Change="@OnStatusChanged"
+                                Data="@_statuses"
                                 Placeholder="All statuses" Style="width: 100%;" AllowClear="true" />
             </RadzenStack>
 
@@ -56,7 +56,7 @@
                 <RadzenLabel Text="Department" Component="DepartmentInput" />
                 <RadzenDropDown role="combobox" aria-label="Department"
                                 Name="DepartmentInput" TValue="Guid?" Value="@_selectedDepartmentId"
-                                Change="@(async v => { _selectedDepartmentId = (Guid?)v; await ApplyFilters(); })"
+                                Change="@OnDepartmentChanged"
                                 Data="@_departments" TextProperty="Name" ValueProperty="Id"
                                 Placeholder="All departments" Style="width: 100%;" AllowClear="true" />
             </RadzenStack>
@@ -108,21 +108,7 @@
 
             <RadzenDataGridColumn TItem="QueryPurchaseRequests.Response" Property="Status" Title="Status" Width="120px">
                 <Template Context="pr">
-                    @switch (pr.Status)
-                    {
-                        case PurchaseRequestStatus.Draft:
-                            <RadzenBadge Text="Draft" BadgeStyle="BadgeStyle.Secondary" Shade="Shade.Lighter" />
-                            break;
-                        case PurchaseRequestStatus.Pending:
-                            <RadzenBadge Text="Pending" BadgeStyle="BadgeStyle.Warning" Shade="Shade.Lighter" />
-                            break;
-                        case PurchaseRequestStatus.Approved:
-                            <RadzenBadge Text="Approved" BadgeStyle="BadgeStyle.Success" Shade="Shade.Lighter" />
-                            break;
-                        case PurchaseRequestStatus.Rejected:
-                            <RadzenBadge Text="Rejected" BadgeStyle="BadgeStyle.Danger" Shade="Shade.Lighter" />
-                            break;
-                    }
+                    <PurchaseRequestStatusBadge Status="@pr.Status" />
                 </Template>
             </RadzenDataGridColumn>
 
@@ -155,15 +141,7 @@
 
     QueryDepartments.Response[] _departments = [];
 
-    readonly List<StatusOption> _statuses =
-    [
-        new StatusOption("Draft", PurchaseRequestStatus.Draft),
-        new StatusOption("Pending", PurchaseRequestStatus.Pending),
-        new StatusOption("Approved", PurchaseRequestStatus.Approved),
-        new StatusOption("Rejected", PurchaseRequestStatus.Rejected)
-    ];
-
-    record StatusOption(string Name, PurchaseRequestStatus Value);
+    readonly PurchaseRequestStatus[] _statuses = Enum.GetValues<PurchaseRequestStatus>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -173,6 +151,20 @@
     async Task OnLoadData(LoadDataArgs args)
     {
         _currentPage = (args.Skip ?? 0) / (args.Top ?? PageSize) + 1;
+        await LoadRequests();
+    }
+
+    async Task OnStatusChanged(object? value)
+    {
+        _selectedStatus = (PurchaseRequestStatus?)value;
+        _currentPage = 1;
+        await LoadRequests();
+    }
+
+    async Task OnDepartmentChanged(object? value)
+    {
+        _selectedDepartmentId = (Guid?)value;
+        _currentPage = 1;
         await LoadRequests();
     }
 

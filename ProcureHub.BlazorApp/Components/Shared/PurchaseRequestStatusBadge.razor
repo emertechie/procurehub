@@ -1,0 +1,22 @@
+@using ProcureHub.Models
+
+@switch (Status)
+{
+    case PurchaseRequestStatus.Draft:
+        <RadzenBadge Text="Draft" BadgeStyle="BadgeStyle.Secondary" Shade="Shade.Lighter" />
+        break;
+    case PurchaseRequestStatus.Pending:
+        <RadzenBadge Text="Pending" BadgeStyle="BadgeStyle.Warning" Shade="Shade.Lighter" />
+        break;
+    case PurchaseRequestStatus.Approved:
+        <RadzenBadge Text="Approved" BadgeStyle="BadgeStyle.Success" Shade="Shade.Lighter" />
+        break;
+    case PurchaseRequestStatus.Rejected:
+        <RadzenBadge Text="Rejected" BadgeStyle="BadgeStyle.Danger" Shade="Shade.Lighter" />
+        break;
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public PurchaseRequestStatus Status { get; set; }
+}

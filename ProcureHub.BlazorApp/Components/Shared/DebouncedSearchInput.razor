@@ -34,35 +34,48 @@
 
     void OnInput(ChangeEventArgs e)
     {
-        var newValue = e.Value?.ToString() ?? "";
+        UpdateValue(e.Value?.ToString() ?? "");
+        RestartDebounceTimer();
+    }
+
+    void UpdateValue(string newValue)
+    {
         Value = newValue;
         ValueChanged.InvokeAsync(newValue);
+    }
 
-        _debounceTimer?.Stop();
-        _debounceTimer?.Dispose();
+    void RestartDebounceTimer()
+    {
+        StopAndDisposeTimer();
 
         _debounceTimer = new Timer(DebounceMs);
         _debounceTimer.Elapsed += async (_, _) =>
         {
-            _debounceTimer?.Stop();
+            StopAndDisposeTimer();
             await InvokeAsync(() => SearchTriggered.InvokeAsync());
         };
         _debounceTimer.AutoReset = false;
         _debounceTimer.Start();
     }
 
+    void StopAndDisposeTimer()
+    {
+        _debounceTimer?.Stop();
+        _debounceTimer?.Dispose();
+        _debounceTimer = null;
+    }
+
     async Task OnKeyDown(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
         {
-            _debounceTimer?.Stop();
+            StopAndDisposeTimer();
             await SearchTriggered.InvokeAsync();
         }
     }
 
     public void Dispose()
     {
-        _debounceTimer?.Stop();
-        _debounceTimer?.Dispose();
+        StopAndDisposeTimer();
     }
 }
