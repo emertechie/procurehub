@@ -41,11 +41,10 @@ public class PurchaseRequestListTests : BlazorPageTest
         await Expect(Page.GetByRole(AriaRole.Grid, new() { Name = "Purchase Requests" })).ToBeVisibleAsync();
         await Expect(Page.GetByText("PR-2025-001")).ToBeVisibleAsync();
 
-        // Type "Laptops" in search box
-        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Search" }).FillAsync("Laptops");
-
-        // Click Apply button
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Apply" }).ClickAsync();
+        // Type "Laptops" in search box and press Enter to search immediately
+        var searchBox = Page.GetByRole(AriaRole.Textbox, new() { Name = "Search" });
+        await searchBox.FillAsync("Laptops");
+        await searchBox.PressAsync("Enter");
 
         // Should only show PR-2025-001 ("New Development Laptops")
         await Expect(Page.GetByText("PR-2025-001")).ToBeVisibleAsync();
@@ -72,11 +71,10 @@ public class PurchaseRequestListTests : BlazorPageTest
         await Expect(Page.GetByText("PR-2025-003")).ToBeVisibleAsync();
         await Expect(Page.GetByText("PR-2025-004")).ToBeVisibleAsync();
 
-        // Type "Laptops" in search box to filter
-        await Page.GetByRole(AriaRole.Textbox, new() { Name = "Search" }).FillAsync("Laptops");
-
-        // Click Apply button
-        await Page.GetByRole(AriaRole.Button, new() { Name = "Apply" }).ClickAsync();
+        // Type "Laptops" in search box to filter and press Enter to search immediately
+        var searchBox = Page.GetByRole(AriaRole.Textbox, new() { Name = "Search" });
+        await searchBox.FillAsync("Laptops");
+        await searchBox.PressAsync("Enter");
 
         // Should only show PR-2025-001
         await Expect(Page.GetByText("PR-2025-001")).ToBeVisibleAsync();
