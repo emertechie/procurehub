@@ -71,12 +71,11 @@ public class PurchaseRequestListTests : BlazorPageTest
         await Expect(Page.GetByText("PR-2025-003")).ToBeVisibleAsync();
         await Expect(Page.GetByText("PR-2025-004")).ToBeVisibleAsync();
 
-        // Type "Laptops" in search box to filter and press Enter to search immediately
-        var searchBox = Page.GetByRole(AriaRole.Textbox, new() { Name = "Search" });
-        await searchBox.FillAsync("Laptops");
-        await searchBox.PressAsync("Enter");
+        // Select "Draft" from Status dropdown to filter
+        await Page.GetByRole(AriaRole.Combobox, new() { Name = "Status" }).ClickAsync();
+        await Page.GetByText("Draft").ClickAsync();
 
-        // Should only show PR-2025-001
+        // Should only show draft requests
         await Expect(Page.GetByText("PR-2025-001")).ToBeVisibleAsync();
         await Expect(Page.GetByText("PR-2025-002")).Not.ToBeVisibleAsync();
 
