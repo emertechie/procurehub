@@ -78,18 +78,12 @@ public class PurchaseRequestListTests : BlazorPageTest
         // Click Apply button
         await Page.GetByRole(AriaRole.Button, new() { Name = "Apply" }).ClickAsync();
 
-        // Wait for grid to reload
-        await Page.WaitForTimeoutAsync(500);
-
         // Should only show PR-2025-001
         await Expect(Page.GetByText("PR-2025-001")).ToBeVisibleAsync();
         await Expect(Page.GetByText("PR-2025-002")).Not.ToBeVisibleAsync();
 
         // Click Clear button
         await Page.GetByRole(AriaRole.Button, new() { Name = "Clear" }).ClickAsync();
-
-        // Wait for grid to reload
-        await Page.WaitForTimeoutAsync(500);
 
         // All requests should be visible again
         await Expect(Page.GetByText("PR-2025-001")).ToBeVisibleAsync();
