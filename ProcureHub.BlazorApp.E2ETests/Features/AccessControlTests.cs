@@ -11,7 +11,7 @@ public class AccessControlTests : BlazorPageTest
     {
         await LoginAsRequesterAsync();
 
-        await Page.GotoBlazorServerPageAsync("/admin/users");
+        await Page.GotoAsync("/admin/users");
 
         await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"), new()
         {
@@ -24,7 +24,7 @@ public class AccessControlTests : BlazorPageTest
     {
         await LoginAsRequesterAsync();
 
-        await Page.GotoBlazorServerPageAsync("/admin/departments");
+        await Page.GotoAsync("/admin/departments");
 
         await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"), new()
         {
@@ -37,7 +37,7 @@ public class AccessControlTests : BlazorPageTest
     {
         await LoginAsApproverAsync();
 
-        await Page.GotoBlazorServerPageAsync("/admin/users");
+        await Page.GotoAsync("/admin/users");
 
         await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"), new()
         {
@@ -50,7 +50,7 @@ public class AccessControlTests : BlazorPageTest
     {
         await LoginAsApproverAsync();
 
-        await Page.GotoBlazorServerPageAsync("/requests/new");
+        await Page.GotoAsync("/requests/new");
 
         await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"), new()
         {
@@ -63,7 +63,7 @@ public class AccessControlTests : BlazorPageTest
     {
         await LoginAsRequesterAsync();
 
-        await Page.GotoBlazorServerPageAsync("/approvals");
+        await Page.GotoAsync("/approvals");
 
         await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"), new()
         {
@@ -76,7 +76,7 @@ public class AccessControlTests : BlazorPageTest
     {
         await LoginAsAdminAsync();
 
-        await Page.GotoBlazorServerPageAsync("/admin/users");
+        await Page.GotoAsync("/admin/users");
 
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Users" })).ToBeVisibleAsync();
     }
@@ -86,7 +86,7 @@ public class AccessControlTests : BlazorPageTest
     {
         await LoginAsAdminAsync();
 
-        await Page.GotoBlazorServerPageAsync("/admin/departments");
+        await Page.GotoAsync("/admin/departments");
 
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Departments" })).ToBeVisibleAsync();
     }

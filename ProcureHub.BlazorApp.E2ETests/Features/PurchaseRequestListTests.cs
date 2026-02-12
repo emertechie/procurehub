@@ -13,7 +13,7 @@ public class PurchaseRequestListTests : BlazorPageTest
         await LoginAsRequesterAsync();
 
         // Navigate to requests page
-        await Page.GotoBlazorServerPageAsync("/requests");
+        await Page.GotoAsync("/requests");
 
         // Verify page loaded with heading
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Requests" })).ToBeVisibleAsync();
@@ -35,19 +35,17 @@ public class PurchaseRequestListTests : BlazorPageTest
         await LoginAsRequesterAsync();
 
         // Navigate to requests page
-        await Page.GotoBlazorServerPageAsync("/requests");
+        await Page.GotoAsync("/requests");
 
-        // Wait for grid to load
+        // Wait for grid and initial data to load
         await Expect(Page.GetByRole(AriaRole.Grid, new() { Name = "Purchase Requests" })).ToBeVisibleAsync();
+        await Expect(Page.GetByText("PR-2025-001")).ToBeVisibleAsync();
 
         // Type "Laptops" in search box
         await Page.GetByRole(AriaRole.Textbox, new() { Name = "Search" }).FillAsync("Laptops");
 
         // Click Apply button
         await Page.GetByRole(AriaRole.Button, new() { Name = "Apply" }).ClickAsync();
-
-        // Wait for grid to reload
-        await Page.WaitForTimeoutAsync(500);
 
         // Should only show PR-2025-001 ("New Development Laptops")
         await Expect(Page.GetByText("PR-2025-001")).ToBeVisibleAsync();
@@ -63,7 +61,7 @@ public class PurchaseRequestListTests : BlazorPageTest
         await LoginAsRequesterAsync();
 
         // Navigate to requests page
-        await Page.GotoBlazorServerPageAsync("/requests");
+        await Page.GotoAsync("/requests");
 
         // Wait for grid to load
         await Expect(Page.GetByRole(AriaRole.Grid, new() { Name = "Purchase Requests" })).ToBeVisibleAsync();
