@@ -1,0 +1,68 @@
+@using System.Timers
+@implements IDisposable
+
+<RadzenTextBox Value="@Value"
+               Placeholder="@Placeholder"
+               Style="@Style"
+               Name="@Name"
+               @oninput="OnInput"
+               @onkeydown="OnKeyDown" />
+
+@code {
+    [Parameter]
+    public string Value { get; set; } = "";
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    [Parameter]
+    public EventCallback SearchTriggered { get; set; }
+
+    [Parameter]
+    public string Placeholder { get; set; } = "Search...";
+
+    [Parameter]
+    public string? Style { get; set; }
+
+    [Parameter]
+    public string? Name { get; set; }
+
+    [Parameter]
+    public int DebounceMs { get; set; } = 350;
+
+    Timer? _debounceTimer;
+
+    void OnInput(ChangeEventArgs e)
+    {
+        var newValue = e.Value?.ToString() ?? "";
+        Value = newValue;
+        ValueChanged.InvokeAsync(newValue);
+
+        _debounceTimer?.Stop();
+        _debounceTimer?.Dispose();
+
+        _debounceTimer = new Timer(DebounceMs);
+        _debounceTimer.Elapsed += async (_, _) =>
+        {
+            _debounceTimer?.Stop();
+            await InvokeAsync(() => SearchTriggered.InvokeAsync());
+        };
+        _debounceTimer.AutoReset = false;
+        _debounceTimer.Start();
+    }
+
+    async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            _debounceTimer?.Stop();
+            await SearchTriggered.InvokeAsync();
+        }
+    }
+
+    public void Dispose()
+    {
+        _debounceTimer?.Stop();
+        _debounceTimer?.Dispose();
+    }
+}

@@ -38,25 +38,26 @@
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" Gap="0.75rem" Wrap="FlexWrap.Wrap">
             <RadzenStack Orientation="Orientation.Vertical" Gap="0.25rem" Style="flex: 2; min-width: 200px;">
                 <RadzenLabel Text="Search" Component="SearchInput" />
-                <RadzenTextBox Name="SearchInput" Placeholder="Search by title or request number..."
-                               @bind-Value="@_searchTerm" Style="width: 100%;" />
+                <DebouncedSearchInput Name="SearchInput" Placeholder="Search by title or request number..."
+                                      @bind-Value="@_searchTerm" SearchTriggered="@ApplyFilters"
+                                      Style="width: 100%;" />
             </RadzenStack>
 
             <RadzenStack Orientation="Orientation.Vertical" Gap="0.25rem" Style="flex: 1; min-width: 150px;">
                 <RadzenLabel Text="Status" Component="StatusInput" />
-                <RadzenDropDown Name="StatusInput" TValue="PurchaseRequestStatus?" @bind-Value="@_selectedStatus"
+                <RadzenDropDown Name="StatusInput" TValue="PurchaseRequestStatus?" Value="@_selectedStatus"
+                                Change="@(async v => { _selectedStatus = (PurchaseRequestStatus?)v; await ApplyFilters(); })"
                                 Data="@_statuses" TextProperty="Name" ValueProperty="Value"
                                 Placeholder="All statuses" Style="width: 100%;" AllowClear="true" />
             </RadzenStack>
 
             <RadzenStack Orientation="Orientation.Vertical" Gap="0.25rem" Style="flex: 1; min-width: 150px;">
                 <RadzenLabel Text="Department" Component="DepartmentInput" />
-                <RadzenDropDown Name="DepartmentInput" TValue="Guid?" @bind-Value="@_selectedDepartmentId"
+                <RadzenDropDown Name="DepartmentInput" TValue="Guid?" Value="@_selectedDepartmentId"
+                                Change="@(async v => { _selectedDepartmentId = (Guid?)v; await ApplyFilters(); })"
                                 Data="@_departments" TextProperty="Name" ValueProperty="Id"
                                 Placeholder="All departments" Style="width: 100%;" AllowClear="true" />
             </RadzenStack>
-
-            <RadzenButton Text="Apply" Click="@ApplyFilters" ButtonStyle="ButtonStyle.Primary" />
             <RadzenButton Text="Clear" Click="@ClearFilters" ButtonStyle="ButtonStyle.Light" />
         </RadzenStack>
     </RadzenCard>
