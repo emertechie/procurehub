@@ -15,6 +15,7 @@ public static class QueryPurchaseRequests
     public record Request(
         PurchaseRequestStatus? Status,
         string? Search,
+        Guid? DepartmentId,
         int? Page,
         int? PageSize,
         string UserId
@@ -89,6 +90,11 @@ public static class QueryPurchaseRequests
                 query = query.Where(pr =>
                     pr.Title.ToLower().Contains(search) ||
                     pr.RequestNumber.ToLower().Contains(search));
+            }
+
+            if (request.DepartmentId.HasValue)
+            {
+                query = query.Where(pr => pr.DepartmentId == request.DepartmentId.Value);
             }
 
             var pagedResult = await query

@@ -9,7 +9,7 @@ public class UserManagementTests : BlazorPageTest
     private async Task NavigateToUsersPage()
     {
         await LoginAsAdminAsync();
-        await Page.GotoBlazorServerPageAsync("/admin/users");
+        await Page.GotoAsync("/admin/users");
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Users" })).ToBeVisibleAsync();
     }
     
@@ -28,6 +28,10 @@ public class UserManagementTests : BlazorPageTest
     public async Task Search_filters_users_by_email()
     {
         await NavigateToUsersPage();
+
+        // Wait for grid and data to load
+        await Expect(Page.GetByRole(AriaRole.Grid, new() { Name = "Users" })).ToBeVisibleAsync();
+        await Expect(Page.GetByText("test-requester@example.com")).ToBeVisibleAsync();
 
         // Search for requester — press Tab after fill to blur the input and trigger Change
         var searchBox = Page.GetByPlaceholder("Search users...");

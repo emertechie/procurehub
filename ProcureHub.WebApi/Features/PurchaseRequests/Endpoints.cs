@@ -50,6 +50,7 @@ public static class Endpoints
                 CancellationToken token,
                 [FromQuery] Models.PurchaseRequestStatus? status,
                 [FromQuery] string? search,
+                [FromQuery] Guid? departmentId,
                 [FromQuery] int? page,
                 [FromQuery] int? pageSize
             ) =>
@@ -60,7 +61,7 @@ public static class Endpoints
                     return Results.Unauthorized();
                 }
 
-                var request = new QueryPurchaseRequests.Request(status, search, page, pageSize, userId);
+                var request = new QueryPurchaseRequests.Request(status, search, departmentId, page, pageSize, userId);
                 var result = await handler.HandleAsync(request, token);
                 return result.Match(
                     pagedResult => Results.Ok(PagedResponse.From(pagedResult)),

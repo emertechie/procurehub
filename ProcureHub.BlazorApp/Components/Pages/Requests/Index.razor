@@ -1,7 +1,221 @@
 @page "/requests"
 @attribute [Authorize]
+@layout AuthenticatedLayout
+
+@using ProcureHub.BlazorApp.Helpers
+@using ProcureHub.Features.PurchaseRequests
+@using ProcureHub.Features.Departments
+@using ProcureHub.Common.Pagination
+@using ProcureHub.Infrastructure
+@using ProcureHub.Infrastructure.Authentication
+@using ProcureHub.Models
+
+@inject IQueryHandler<QueryPurchaseRequests.Request, Result<PagedResult<QueryPurchaseRequests.Response>>> QueryPurchaseRequestsHandler
+@inject IQueryHandler<QueryDepartments.Request, QueryDepartments.Response[]> QueryDepartmentsHandler
+@inject ICurrentUserProvider CurrentUserProvider
+@inject NavigationManager Navigation
 
 <PageTitle>Requests</PageTitle>
 
-<PageHeader Title="Requests" Subtitle="View and manage purchase requests" />
-@* TODO: Implement requests listing *@
+<RadzenStack Gap="1rem">
+    <PageHeader Title="Requests" Subtitle="View and manage purchase requests">
+        <ActionButton>
+            <RadzenButton Text="New Request" Icon="add"
+                          Click="@(() => Navigation.NavigateTo("/requests/new"))"
+                          ButtonStyle="ButtonStyle.Primary" />
+        </ActionButton>
+    </PageHeader>
+
+    @if (!string.IsNullOrEmpty(_errorMessage))
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">
+            @_errorMessage
+        </RadzenAlert>
+    }
+
+    @* Filter bar *@
+    <RadzenCard>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.End" Gap="0.75rem" Wrap="FlexWrap.Wrap">
+            <RadzenStack Orientation="Orientation.Vertical" Gap="0.25rem" Style="flex: 2; min-width: 200px;">
+                <RadzenLabel Text="Search" Component="SearchInput" />
+                <DebouncedSearchInput Name="SearchInput" Placeholder="Search by title or request number..."
+                                      @bind-Value="@_searchTerm" SearchTriggered="@ApplyFilters"
+                                      Style="width: 100%;" />
+            </RadzenStack>
+
+            <RadzenStack Orientation="Orientation.Vertical" Gap="0.25rem" Style="flex: 1; min-width: 150px;">
+                <RadzenLabel Text="Status" Component="StatusInput" />
+                <RadzenDropDown role="combobox" aria-label="Status"
+                                Name="StatusInput" TValue="PurchaseRequestStatus?" Value="@_selectedStatus"
+                                Change="@OnStatusChanged"
+                                Data="@_statuses"
+                                Placeholder="All statuses" Style="width: 100%;" AllowClear="true" />
+            </RadzenStack>
+
+            <RadzenStack Orientation="Orientation.Vertical" Gap="0.25rem" Style="flex: 1; min-width: 150px;">
+                <RadzenLabel Text="Department" Component="DepartmentInput" />
+                <RadzenDropDown role="combobox" aria-label="Department"
+                                Name="DepartmentInput" TValue="Guid?" Value="@_selectedDepartmentId"
+                                Change="@OnDepartmentChanged"
+                                Data="@_departments" TextProperty="Name" ValueProperty="Id"
+                                Placeholder="All departments" Style="width: 100%;" AllowClear="true" />
+            </RadzenStack>
+            <RadzenButton Text="Clear" Click="@ClearFilters" ButtonStyle="ButtonStyle.Light" />
+        </RadzenStack>
+    </RadzenCard>
+
+    <RadzenDataGrid TItem="QueryPurchaseRequests.Response"
+                    Data="@_pagedRequests?.Data"
+                    Count="@(_pagedRequests?.TotalCount ?? 0)"
+                    LoadData="@OnLoadData"
+                    AllowPaging="true"
+                    PageSize="@PageSize"
+                    IsLoading="@_loading"
+                    PagerHorizontalAlign="HorizontalAlign.Center"
+                    AllowAlternatingRows="false"
+                    role="grid"
+                    aria-label="Purchase Requests">
+        <Columns>
+            <RadzenDataGridColumn TItem="QueryPurchaseRequests.Response" Property="RequestNumber" Title="Request #" Width="140px">
+                <Template Context="pr">
+                    <RadzenText TextStyle="TextStyle.Body2" Style="font-family: monospace;">@pr.RequestNumber</RadzenText>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="QueryPurchaseRequests.Response" Property="Title" Title="Title" Width="250px">
+                <Template Context="pr">
+                    <RadzenText TextStyle="TextStyle.Body2">@pr.Title</RadzenText>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="QueryPurchaseRequests.Response" Property="Department.Name" Title="Department" Width="150px">
+                <Template Context="pr">
+                    <RadzenText TextStyle="TextStyle.Body2">@pr.Department.Name</RadzenText>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="QueryPurchaseRequests.Response" Property="Requester" Title="Requester" Width="180px">
+                <Template Context="pr">
+                    <RadzenText TextStyle="TextStyle.Body2">@pr.Requester.FirstName @pr.Requester.LastName</RadzenText>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="QueryPurchaseRequests.Response" Property="EstimatedAmount" Title="Amount" Width="120px">
+                <Template Context="pr">
+                    <RadzenText TextStyle="TextStyle.Body2">@pr.EstimatedAmount.ToString("C")</RadzenText>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="QueryPurchaseRequests.Response" Property="Status" Title="Status" Width="120px">
+                <Template Context="pr">
+                    <PurchaseRequestStatusBadge Status="@pr.Status" />
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="QueryPurchaseRequests.Response" Property="CreatedAt" Title="Created" Width="120px">
+                <Template Context="pr">
+                    <RadzenText TextStyle="TextStyle.Body2">@pr.CreatedAt.ToString("yyyy-MM-dd")</RadzenText>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="QueryPurchaseRequests.Response" Title="Actions" Width="100px">
+                <Template Context="pr">
+                    <RadzenButton Icon="visibility" Size="ButtonSize.Small"
+                                  Click="@(() => Navigation.NavigateTo($"/requests/{pr.Id}"))"
+                                  ButtonStyle="ButtonStyle.Light"
+                                  aria-label="View request" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</RadzenStack>
+
+@code {
+    const int PageSize = 10;
+    PagedResult<QueryPurchaseRequests.Response>? _pagedRequests;
+    bool _loading;
+    string _searchTerm = "";
+    PurchaseRequestStatus? _selectedStatus;
+    Guid? _selectedDepartmentId;
+    int _currentPage = 1;
+
+    QueryDepartments.Response[] _departments = [];
+
+    readonly PurchaseRequestStatus[] _statuses = Enum.GetValues<PurchaseRequestStatus>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _departments = await QueryDepartmentsHandler.HandleAsync(new QueryDepartments.Request(), CancellationToken.None);
+    }
+
+    async Task OnLoadData(LoadDataArgs args)
+    {
+        _currentPage = (args.Skip ?? 0) / (args.Top ?? PageSize) + 1;
+        await LoadRequests();
+    }
+
+    async Task OnStatusChanged(object? value)
+    {
+        _selectedStatus = (PurchaseRequestStatus?)value;
+        _currentPage = 1;
+        await LoadRequests();
+    }
+
+    async Task OnDepartmentChanged(object? value)
+    {
+        _selectedDepartmentId = (Guid?)value;
+        _currentPage = 1;
+        await LoadRequests();
+    }
+
+    async Task ApplyFilters()
+    {
+        _currentPage = 1;
+        await LoadRequests();
+    }
+
+    async Task ClearFilters()
+    {
+        _searchTerm = "";
+        _selectedStatus = null;
+        _selectedDepartmentId = null;
+        _currentPage = 1;
+        await LoadRequests();
+    }
+
+    string? _errorMessage;
+
+    async Task LoadRequests()
+    {
+        _errorMessage = null;
+        var currentUser = await CurrentUserProvider.GetCurrentUserAsync();
+        if (currentUser.UserId is null)
+        {
+            _errorMessage = "Authentication error: User not found";
+            return;
+        }
+
+        var search = string.IsNullOrWhiteSpace(_searchTerm) ? null : _searchTerm;
+        var request = new QueryPurchaseRequests.Request(
+            _selectedStatus,
+            search,
+            _selectedDepartmentId,
+            _currentPage,
+            PageSize,
+            currentUser.UserId.Value.ToString()
+        );
+
+        using (new BusyScope(b => _loading = b))
+        {
+            var result = await QueryPurchaseRequestsHandler.HandleAsync(request, CancellationToken.None);
+            if (result.IsSuccess)
+            {
+                _pagedRequests = result.Value;
+            }
+            else
+            {
+                _errorMessage = result.Error.Message;
+            }
+        }
+    }
+}

@@ -13,6 +13,7 @@ todos.md
 .notes/
 .context/ignore
 .bruno/
+.env
 Prototype/
 
 # Terraform

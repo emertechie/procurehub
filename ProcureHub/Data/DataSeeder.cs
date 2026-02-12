@@ -102,11 +102,28 @@ public sealed class DataSeeder
 
     private async Task SeedUsersAsync()
     {
-        var seedUsersSection = _configuration.GetSection("SeedUsers");
-        foreach (var userSection in seedUsersSection.GetChildren())
+        var testUsers = GetTestSeedUsers();
+        foreach (var userSection in testUsers)
         {
             await SeedUserAsync(userSection.Key);
         }
+    }
+
+    /// <summary>
+    /// Gets SeedUsers configuration entries, preferring those whose keys start with "test-".
+    /// If any test users exist (e.g., keys like "test-requester@example.com"), only those are returned,
+    /// which allows test-specific users to override app users that may be merged from base config.
+    /// If no test-* users exist, all SeedUsers entries are returned.
+    /// </summary>
+    private IEnumerable<IConfigurationSection> GetTestSeedUsers()
+    {
+        var seedUsersSection = _configuration.GetSection("SeedUsers");
+        var allUsers = seedUsersSection.GetChildren().ToList();
+
+        var testUsers = allUsers.Where(u => u.Key.StartsWith("test-", StringComparison.OrdinalIgnoreCase)).ToList();
+
+        // If test users exist, use them exclusively. Otherwise fall back to all users (production case).
+        return testUsers.Any() ? testUsers : allUsers;
     }
 
     private async Task SeedUserAsync(string email)
@@ -214,9 +231,20 @@ public sealed class DataSeeder
             return;
         }
 
-        // Hardcoded demo users for purchase request seeding
-        var requester = await _userManager.FindByEmailAsync("requester@example.com");
-        var approver = await _userManager.FindByEmailAsync("approver@example.com");
+        // Lookup requester and approver emails from SeedUsers config
+        var userEmails = GetTestSeedUsers().Select(c => c.Key).ToList();
+
+        var requesterEmail = userEmails.FirstOrDefault(e => e.Contains("requester", StringComparison.OrdinalIgnoreCase));
+        var approverEmail = userEmails.FirstOrDefault(e => e.Contains("approver", StringComparison.OrdinalIgnoreCase));
+
+        if (requesterEmail == null || approverEmail == null)
+        {
+            _logger.LogWarning("Cannot seed purchase requests - requester or approver email not found in SeedUsers config");
+            return;
+        }
+
+        var requester = await _userManager.FindByEmailAsync(requesterEmail);
+        var approver = await _userManager.FindByEmailAsync(approverEmail);
 
         if (requester == null || approver == null)
         {

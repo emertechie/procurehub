@@ -9,12 +9,9 @@ public class LoginTests : BlazorPageTest
     [Fact]
     public async Task Unauthenticated_user_is_redirected_to_login()
     {
-        await Page.GotoBlazorServerPageAsync("/");
+        await Page.GotoAsync("/");
 
-        await Page.WaitForURLAsync(url => url.Contains("/Account/Login"), new()
-        {
-            Timeout = DefaultNavigationTimeoutMs
-        });
+        await Page.WaitForURLAsync(url => url.Contains("/Account/Login"));
 
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Log in" })).ToBeVisibleAsync();
     }
@@ -31,7 +28,7 @@ public class LoginTests : BlazorPageTest
     [Fact]
     public async Task Invalid_login_shows_error()
     {
-        await Page.GotoBlazorServerPageAsync("/Account/Login");
+        await Page.GotoAsync("/Account/Login");
         await Page.FillAsync("[name='Input.Email']", "wrong@example.com");
         await Page.FillAsync("[name='Input.Password']", "WrongPassword1!");
         await Page.ClickAsync("button[type='submit']");

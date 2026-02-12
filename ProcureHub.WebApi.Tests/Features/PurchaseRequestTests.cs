@@ -851,6 +851,41 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
     }
 
     [Fact]
+    public async Task Can_filter_purchase_requests_by_department()
+    {
+        await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var dept1Id = await CreateDepartmentAsync("IT");
+        var dept2Id = await CreateDepartmentAsync("HR");
+
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], dept1Id);
+        await CreateUserAsync("requester2@example.com", ValidPassword, [RoleNames.Requester], dept2Id);
+
+        // Login as requester and create PR in IT dept
+        await LoginAsync("requester@example.com", ValidPassword);
+        var itRequestId = await CreatePurchaseRequestAsync(categoryId, dept1Id, "IT Request", 1000);
+
+        // Login as requester2 and create PR in HR dept
+        await LoginAsync("requester2@example.com", ValidPassword);
+        var hrRequestId = await CreatePurchaseRequestAsync(categoryId, dept2Id, "HR Request", 2000);
+
+        // Login as admin to query all
+        await LoginAsAdminAsync();
+
+        // Filter by IT department
+        var itFilter = await HttpClient.GetAsync($"/purchase-requests?departmentId={dept1Id}")
+            .ReadJsonAsync<PagedResponse<QueryPurchaseRequests.Response>>();
+        Assert.Contains(itFilter.Data, pr => pr.Id == itRequestId);
+        Assert.DoesNotContain(itFilter.Data, pr => pr.Id == hrRequestId);
+
+        // Filter by HR department
+        var hrFilter = await HttpClient.GetAsync($"/purchase-requests?departmentId={dept2Id}")
+            .ReadJsonAsync<PagedResponse<QueryPurchaseRequests.Response>>();
+        Assert.DoesNotContain(hrFilter.Data, pr => pr.Id == itRequestId);
+        Assert.Contains(hrFilter.Data, pr => pr.Id == hrRequestId);
+    }
+
+    [Fact]
     public async Task Update_purchase_request_returns_not_found_for_nonexistent_request()
     {
         await LoginAsAdminAsync();

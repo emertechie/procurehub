@@ -25,8 +25,8 @@
     </PageHeader>
 
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-        <RadzenTextBox Placeholder="Search users..." @bind-Value="@_searchTerm"
-                       Change="@(() => LoadUsers())" Style="width: 100%;" />
+        <DebouncedSearchInput Placeholder="Search users..." @bind-Value="@_searchTerm"
+                              SearchTriggered="@OnSearchTriggered" Style="width: 100%;" />
         <RadzenButton Text="Clear" ButtonStyle="ButtonStyle.Light" Click="@ClearSearch"
                       Disabled="@(string.IsNullOrEmpty(_searchTerm))" />
     </RadzenStack>
@@ -145,6 +145,13 @@
     async Task ClearSearch()
     {
         _searchTerm = "";
+        _currentPage = 1;
+        await LoadUsers();
+    }
+
+    async Task OnSearchTriggered()
+    {
+        _currentPage = 1;
         await LoadUsers();
     }
 

@@ -16,7 +16,6 @@ public abstract class BlazorPageTest : BrowserTest
     public const string RequesterEmail = "test-requester@example.com";
     public const string ApproverEmail = "test-approver@example.com";
     public const string DefaultPassword = "Password1!";
-    public const int DefaultNavigationTimeoutMs = 10_000;
 
     private BlazorApplicationFactory? _host;
     private IPage? _page;
@@ -46,7 +45,6 @@ public abstract class BlazorPageTest : BrowserTest
         if (Debugger.IsAttached)
         {
             Environment.SetEnvironmentVariable("PWDEBUG", "1");
-            
         }
 
         var connectionString = Configuration.GetConnectionString();
@@ -65,6 +63,10 @@ public abstract class BlazorPageTest : BrowserTest
 
         _context = await NewContext(options);
         _page = await Context.NewPageAsync();
+        
+        // Make things fail faster:
+        _page.SetDefaultNavigationTimeout(3000);
+        _page.SetDefaultTimeout(3000);
     }
 
     public override async ValueTask DisposeAsync()
@@ -97,9 +99,7 @@ public abstract class BlazorPageTest : BrowserTest
         await Page.ClickAsync("button[type='submit']");
 
         // Wait for navigation away from login page
-        await Page.WaitForURLAsync(
-            url => !url.Contains("/Account/Login"),
-            new PageWaitForURLOptions { Timeout = DefaultNavigationTimeoutMs });
+        await Page.WaitForURLAsync(url => !url.Contains("/Account/Login"));
     }
 
     /// <summary>Login as the seeded admin user.</summary>

@@ -36,9 +36,8 @@ Each test:
 
 - Extend `BlazorPageTest` (defined in `Infrastructure/BlazorPageTest.cs`)
 - Use `LoginAsAdminAsync()`, `LoginAsRequesterAsync()`, `LoginAsApproverAsync()` helpers
-- Use `Page.GotoBlazorServerPageAsync("/route")` instead of raw `GotoAsync` (waits for Blazor circuit)
-- Use `DefaultNavigationTimeoutMs` const for all `WaitForURLAsync` timeouts
 - The app uses Radzen UI components — selectors may need Radzen-specific CSS classes (e.g. `.rz-sidebar`, `.rz-profile-menu`)
+- If it's particularly difficult to get a test to pass, consider using MCP tools like Chrome DevTools to inspect the dom structure or app behaviour in the real app.
 
 ## Test Users
 
@@ -52,11 +51,14 @@ Each test:
 
 ### Avoid hard-coded timeouts
 
-Do not use `await Page.WaitForTimeoutAsync(1000);` to wait for elements or page state. This approach is brittle (arbitrary wait times) and slows down tests unnecessarily. Instead, prefer deterministic waiting methods:
+IMPORTANT: DO NOT use `Page.WaitForTimeoutAsync` to wait for elements or page state. This approach is brittle (arbitrary wait times) and slows down tests unnecessarily. Playwright includes auto-retrying assertions (such as `ToBeVisibleAsync()`) that remove flakiness by waiting until the condition is met - prefer to use those. Examples:
 
 - Use `await Expect(locator).ToBeVisibleAsync()` or `await Expect(locator).ToBeHiddenAsync()`
 - Use `await Page.WaitForURLAsync()` for navigation
-- Use `await Page.WaitForLoadStateAsync()` for page load events
+
+Playwright also performs a range of actionability checks on the elements before making actions (such as `Locator.ClickAsync()`) to ensure these actions behave as expected.
+
+For more on Playwright actionability checks and auto-retrying assertions, see: https://playwright.dev/dotnet/docs/actionability.
 
 ### Prefer semantic selectors with GetByRole
 

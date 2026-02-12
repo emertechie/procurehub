@@ -60,10 +60,7 @@ public class NavigationTests : BlazorPageTest
 
         await Page.Locator(".rz-sidebar").GetByText("Users").ClickAsync();
 
-        await Page.WaitForURLAsync(url => url.Contains("/admin/users"), new()
-        {
-            Timeout = DefaultNavigationTimeoutMs
-        });
+        await Page.WaitForURLAsync(url => url.Contains("/admin/users"));
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Users" })).ToBeVisibleAsync();
     }
 
@@ -74,10 +71,7 @@ public class NavigationTests : BlazorPageTest
 
         await Page.Locator(".rz-sidebar").GetByText("Departments").ClickAsync();
 
-        await Page.WaitForURLAsync(url => url.Contains("/admin/departments"), new()
-        {
-            Timeout = DefaultNavigationTimeoutMs
-        });
+        await Page.WaitForURLAsync(url => url.Contains("/admin/departments"));
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Departments" })).ToBeVisibleAsync();
     }
 
@@ -102,10 +96,7 @@ public class NavigationTests : BlazorPageTest
         await Page.Locator(".rz-profile-menu").ClickAsync();
         await Page.GetByText("Logout").ClickAsync();
 
-        await Page.WaitForURLAsync(url => url.Contains("/Account/Login"), new()
-        {
-            Timeout = DefaultNavigationTimeoutMs
-        });
+        await Page.WaitForURLAsync(url => url.Contains("/Account/Login"));
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Log in" })).ToBeVisibleAsync();
     }
 }
