@@ -13,10 +13,7 @@ public class AccessControlTests : BlazorPageTest
 
         await Page.GotoAsync("/admin/users");
 
-        await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"), new()
-        {
-            Timeout = DefaultNavigationTimeoutMs
-        });
+        await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"));
     }
 
     [Fact]
@@ -26,10 +23,7 @@ public class AccessControlTests : BlazorPageTest
 
         await Page.GotoAsync("/admin/departments");
 
-        await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"), new()
-        {
-            Timeout = DefaultNavigationTimeoutMs
-        });
+        await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"));
     }
 
     [Fact]
@@ -39,10 +33,7 @@ public class AccessControlTests : BlazorPageTest
 
         await Page.GotoAsync("/admin/users");
 
-        await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"), new()
-        {
-            Timeout = DefaultNavigationTimeoutMs
-        });
+        await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"));
     }
 
     [Fact]
@@ -52,10 +43,7 @@ public class AccessControlTests : BlazorPageTest
 
         await Page.GotoAsync("/requests/new");
 
-        await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"), new()
-        {
-            Timeout = DefaultNavigationTimeoutMs
-        });
+        await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"));
     }
 
     [Fact]
@@ -65,10 +53,7 @@ public class AccessControlTests : BlazorPageTest
 
         await Page.GotoAsync("/approvals");
 
-        await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"), new()
-        {
-            Timeout = DefaultNavigationTimeoutMs
-        });
+        await Page.WaitForURLAsync(url => url.Contains("/Account/AccessDenied"));
     }
 
     [Fact]

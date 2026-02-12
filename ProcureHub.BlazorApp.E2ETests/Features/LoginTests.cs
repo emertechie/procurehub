@@ -11,10 +11,7 @@ public class LoginTests : BlazorPageTest
     {
         await Page.GotoAsync("/");
 
-        await Page.WaitForURLAsync(url => url.Contains("/Account/Login"), new()
-        {
-            Timeout = DefaultNavigationTimeoutMs
-        });
+        await Page.WaitForURLAsync(url => url.Contains("/Account/Login"));
 
         await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Log in" })).ToBeVisibleAsync();
     }
