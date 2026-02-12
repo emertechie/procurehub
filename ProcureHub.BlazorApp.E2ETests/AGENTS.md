@@ -36,8 +36,6 @@ Each test:
 
 - Extend `BlazorPageTest` (defined in `Infrastructure/BlazorPageTest.cs`)
 - Use `LoginAsAdminAsync()`, `LoginAsRequesterAsync()`, `LoginAsApproverAsync()` helpers
-- Use `Page.GotoBlazorServerPageAsync("/route")` instead of raw `GotoAsync` (waits for Blazor circuit)
-- Use `DefaultNavigationTimeoutMs` const for all `WaitForURLAsync` timeouts
 - The app uses Radzen UI components — selectors may need Radzen-specific CSS classes (e.g. `.rz-sidebar`, `.rz-profile-menu`)
 - If it's particularly difficult to get a test to pass, consider using MCP tools like Chrome DevTools to inspect the dom structure or app behaviour in the real app.
 
