@@ -1,0 +1,155 @@
+@using Blazilla
+@using ProcureHub.Features.Categories
+@using ProcureHub.Features.Departments
+@using ProcureHub.Features.PurchaseRequests
+@using ProcureHub.BlazorApp.Components.Pages.Requests
+
+@if (IsReadOnly)
+{
+    <RadzenStack Gap="1.5rem">
+        <RadzenStack Gap="0.5rem">
+            <RadzenLabel Text="Title" Style="font-weight: 600;" />
+            <RadzenText TextStyle="TextStyle.Body1">@(Value?.Title ?? "-")</RadzenText>
+        </RadzenStack>
+
+        @if (!string.IsNullOrEmpty(Value?.Description))
+        {
+            <RadzenStack Gap="0.5rem">
+                <RadzenLabel Text="Description" Style="font-weight: 600;" />
+                <RadzenText TextStyle="TextStyle.Body1">@Value.Description</RadzenText>
+            </RadzenStack>
+        }
+
+        <RadzenRow Gap="1rem">
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenStack Gap="0.5rem">
+                    <RadzenLabel Text="Category" Style="font-weight: 600;" />
+                    <RadzenText TextStyle="TextStyle.Body1">@(CategoryName ?? "-")</RadzenText>
+                </RadzenStack>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenStack Gap="0.5rem">
+                    <RadzenLabel Text="Department" Style="font-weight: 600;" />
+                    <RadzenText TextStyle="TextStyle.Body1">@(DepartmentName ?? "-")</RadzenText>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenStack Gap="0.5rem">
+            <RadzenLabel Text="Estimated Amount (EUR)" Style="font-weight: 600;" />
+            <RadzenText TextStyle="TextStyle.Body1">@(Value?.EstimatedAmount.ToString("C") ?? "-")</RadzenText>
+        </RadzenStack>
+
+        @if (!string.IsNullOrEmpty(Value?.BusinessJustification))
+        {
+            <RadzenStack Gap="0.5rem">
+                <RadzenLabel Text="Business Justification" Style="font-weight: 600;" />
+                <RadzenText TextStyle="TextStyle.Body1">@Value.BusinessJustification</RadzenText>
+            </RadzenStack>
+        }
+
+        @if (ShowRequester)
+        {
+            <RadzenStack Gap="0.5rem">
+                <RadzenLabel Text="Requester" Style="font-weight: 600;" />
+                <RadzenText TextStyle="TextStyle.Body1">@RequesterName</RadzenText>
+            </RadzenStack>
+        }
+    </RadzenStack>
+}
+else
+{
+    <EditForm EditContext="@EditContext">
+        <FluentValidator />
+
+        <RadzenStack Gap="1.5rem">
+            <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                <RadzenLabel Text="Title *" Component="TitleInput" Style="font-weight: 600;" />
+                <RadzenTextBox Name="TitleInput" @bind-Value="@Value!.Title"
+                               Placeholder="e.g., MacBook Pro for Development Team"
+                               Style="width: 100%;" />
+                <ValidationMessage For="@(() => Value.Title)" />
+            </RadzenStack>
+
+            <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                <RadzenLabel Text="Description" Component="DescriptionInput" Style="font-weight: 600;" />
+                <RadzenTextArea Name="DescriptionInput" @bind-Value="@Value.Description"
+                                Placeholder="Describe what you need to purchase and why..."
+                                Rows="4" Style="width: 100%;" />
+                <ValidationMessage For="@(() => Value.Description)" />
+            </RadzenStack>
+
+            <RadzenRow Gap="1rem">
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                        <RadzenLabel Text="Category *" Component="CategoryInput" Style="font-weight: 600;" />
+                        <RadzenDropDown Name="CategoryInput" TValue="Guid?" @bind-Value="@Value.CategoryId"
+                                        Data="@Categories" TextProperty="Name" ValueProperty="Id"
+                                        Placeholder="Select category" Style="width: 100%;"
+                                        AllowClear="true" />
+                        <ValidationMessage For="@(() => Value.CategoryId)" />
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                        <RadzenLabel Text="Department *" Component="DepartmentInput" Style="font-weight: 600;" />
+                        <RadzenDropDown Name="DepartmentInput" TValue="Guid?" @bind-Value="@Value.DepartmentId"
+                                        Data="@Departments" TextProperty="Name" ValueProperty="Id"
+                                        Placeholder="Select department" Style="width: 100%;"
+                                        AllowClear="true" />
+                        <ValidationMessage For="@(() => Value.DepartmentId)" />
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                <RadzenLabel Text="Estimated Amount (EUR) *" Component="AmountInput" Style="font-weight: 600;" />
+                <RadzenNumeric Name="AmountInput" TValue="decimal" @bind-Value="@Value.EstimatedAmount"
+                               Format="c" Min="0" Style="width: 100%;" />
+                <ValidationMessage For="@(() => Value.EstimatedAmount)" />
+            </RadzenStack>
+
+            <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                <RadzenLabel Text="Business Justification" Component="JustificationInput" Style="font-weight: 600;" />
+                <RadzenTextArea Name="JustificationInput" @bind-Value="@Value.BusinessJustification"
+                                Placeholder="Explain why this purchase is necessary..."
+                                Rows="4" Style="width: 100%;" />
+                <ValidationMessage For="@(() => Value.BusinessJustification)" />
+            </RadzenStack>
+        </RadzenStack>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public PurchaseRequestFormModel? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<PurchaseRequestFormModel?> ValueChanged { get; set; }
+
+    [Parameter]
+    public bool IsReadOnly { get; set; }
+
+    [Parameter]
+    public bool ShowRequester { get; set; }
+
+    [Parameter]
+    public string? RequesterName { get; set; }
+
+    [Parameter]
+    public QueryCategories.Response[] Categories { get; set; } = [];
+
+    [Parameter]
+    public QueryDepartments.Response[] Departments { get; set; } = [];
+
+    [Parameter]
+    public EditContext? EditContext { get; set; }
+
+    private string? CategoryName => Value?.CategoryId.HasValue == true
+        ? Categories.FirstOrDefault(c => c.Id == Value.CategoryId)?.Name
+        : null;
+
+    private string? DepartmentName => Value?.DepartmentId.HasValue == true
+        ? Departments.FirstOrDefault(d => d.Id == Value.DepartmentId)?.Name
+        : null;
+}

@@ -92,119 +92,37 @@ else if (_request != null)
                         @if (_isEditing)
                         {
                             @* Editable form for Draft *@
-                            <EditForm EditContext="@_editContext">
-                                <FluentValidator />
+                            if (_saveErrorMessage != null)
+                            {
+                                <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">
+                                    @_saveErrorMessage
+                                </RadzenAlert>
+                            }
 
-                                @if (_saveErrorMessage != null)
-                                {
-                                    <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">
-                                        @_saveErrorMessage
-                                    </RadzenAlert>
-                                }
-
-                                <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
-                                    <RadzenLabel Text="Title *" Component="TitleInput" />
-                                    <RadzenTextBox Name="TitleInput" @bind-Value="@_model.Title"
-                                                   Placeholder="e.g., MacBook Pro for Development Team"
-                                                   Style="width: 100%;" />
-                                    <ValidationMessage For="@(() => _model.Title)" />
-                                </RadzenStack>
-
-                                <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
-                                    <RadzenLabel Text="Description" Component="DescriptionInput" />
-                                    <RadzenTextArea Name="DescriptionInput" @bind-Value="@_model.Description"
-                                                    Placeholder="Describe what you need to purchase and why..."
-                                                    Rows="4" Style="width: 100%;" />
-                                    <ValidationMessage For="@(() => _model.Description)" />
-                                </RadzenStack>
-
-                                <RadzenRow Gap="1rem">
-                                    <RadzenColumn Size="12" SizeMD="6">
-                                        <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
-                                            <RadzenLabel Text="Category *" Component="CategoryInput" />
-                                            <RadzenDropDown Name="CategoryInput" TValue="Guid?" @bind-Value="@_model.CategoryId"
-                                                            Data="@_categories" TextProperty="Name" ValueProperty="Id"
-                                                            Placeholder="Select category" Style="width: 100%;"
-                                                            AllowClear="true" />
-                                            <ValidationMessage For="@(() => _model.CategoryId)" />
-                                        </RadzenStack>
-                                    </RadzenColumn>
-                                    <RadzenColumn Size="12" SizeMD="6">
-                                        <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
-                                            <RadzenLabel Text="Department *" Component="DepartmentInput" />
-                                            <RadzenDropDown Name="DepartmentInput" TValue="Guid?" @bind-Value="@_model.DepartmentId"
-                                                            Data="@_departments" TextProperty="Name" ValueProperty="Id"
-                                                            Placeholder="Select department" Style="width: 100%;"
-                                                            AllowClear="true" />
-                                            <ValidationMessage For="@(() => _model.DepartmentId)" />
-                                        </RadzenStack>
-                                    </RadzenColumn>
-                                </RadzenRow>
-
-                                <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
-                                    <RadzenLabel Text="Estimated Amount (EUR) *" Component="AmountInput" />
-                                    <RadzenNumeric Name="AmountInput" TValue="decimal" @bind-Value="@_model.EstimatedAmount"
-                                                   Format="c" Min="0" Style="width: 100%;" />
-                                    <ValidationMessage For="@(() => _model.EstimatedAmount)" />
-                                </RadzenStack>
-
-                                <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
-                                    <RadzenLabel Text="Business Justification" Component="JustificationInput" />
-                                    <RadzenTextArea Name="JustificationInput" @bind-Value="@_model.BusinessJustification"
-                                                    Placeholder="Explain why this purchase is necessary..."
-                                                    Rows="4" Style="width: 100%;" />
-                                    <ValidationMessage For="@(() => _model.BusinessJustification)" />
-                                </RadzenStack>
-                            </EditForm>
+                            <PurchaseRequestForm 
+                                @bind-Value="_model" 
+                                EditContext="_editContext"
+                                Categories="_categories" 
+                                Departments="_departments" />
                         }
                         else
                         {
                             @* Readonly view for non-Draft *@
-                            <RadzenStack Gap="0">
-                                <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Title</RadzenText>
-                                <RadzenText TextStyle="TextStyle.Body1">@_request.Title</RadzenText>
-                            </RadzenStack>
-
-                            @if (!string.IsNullOrEmpty(_request.Description))
-                            {
-                                <RadzenStack Gap="0">
-                                    <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Description</RadzenText>
-                                    <RadzenText TextStyle="TextStyle.Body1">@_request.Description</RadzenText>
-                                </RadzenStack>
-                            }
-
-                            <RadzenRow Gap="1rem">
-                                <RadzenColumn Size="12" SizeMD="6">
-                                    <RadzenStack Gap="0">
-                                        <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Category</RadzenText>
-                                        <RadzenText TextStyle="TextStyle.Body1">@_request.Category.Name</RadzenText>
-                                    </RadzenStack>
-                                </RadzenColumn>
-                                <RadzenColumn Size="12" SizeMD="6">
-                                    <RadzenStack Gap="0">
-                                        <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Department</RadzenText>
-                                        <RadzenText TextStyle="TextStyle.Body1">@_request.Department.Name</RadzenText>
-                                    </RadzenStack>
-                                </RadzenColumn>
-                            </RadzenRow>
-
-                            <RadzenStack Gap="0">
-                                <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Estimated Amount</RadzenText>
-                                <RadzenText TextStyle="TextStyle.Body1">@_request.EstimatedAmount.ToString("C")</RadzenText>
-                            </RadzenStack>
-
-                            @if (!string.IsNullOrEmpty(_request.BusinessJustification))
-                            {
-                                <RadzenStack Gap="0">
-                                    <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Business Justification</RadzenText>
-                                    <RadzenText TextStyle="TextStyle.Body1">@_request.BusinessJustification</RadzenText>
-                                </RadzenStack>
-                            }
-
-                            <RadzenStack Gap="0">
-                                <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Requester</RadzenText>
-                                <RadzenText TextStyle="TextStyle.Body1">@_request.Requester.FirstName @_request.Requester.LastName (@_request.Requester.Email)</RadzenText>
-                            </RadzenStack>
+                            <PurchaseRequestForm 
+                                Value="new PurchaseRequestFormModel
+                                {
+                                    Title = _request.Title,
+                                    Description = _request.Description,
+                                    EstimatedAmount = _request.EstimatedAmount,
+                                    BusinessJustification = _request.BusinessJustification,
+                                    CategoryId = _request.Category.Id,
+                                    DepartmentId = _request.Department.Id
+                                }"
+                                IsReadOnly="true"
+                                ShowRequester="true"
+                                RequesterName="@($"{_request.Requester.FirstName} {_request.Requester.LastName} ({_request.Requester.Email})")"
+                                Categories="_categories" 
+                                Departments="_departments" />
                         }
                     </RadzenStack>
                 </RadzenCard>
