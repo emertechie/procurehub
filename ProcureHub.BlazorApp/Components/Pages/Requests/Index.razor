@@ -78,7 +78,7 @@
         <Columns>
             <RadzenDataGridColumn TItem="QueryPurchaseRequests.Response" Property="RequestNumber" Title="Request #" Width="140px">
                 <Template Context="pr">
-                    <RadzenText TextStyle="TextStyle.Body2" Style="font-family: monospace;">@pr.RequestNumber</RadzenText>
+                    <RadzenLink Path="@($"/requests/{pr.Id}")" Text="@pr.RequestNumber" Style="font-family: monospace;" />
                 </Template>
             </RadzenDataGridColumn>
 

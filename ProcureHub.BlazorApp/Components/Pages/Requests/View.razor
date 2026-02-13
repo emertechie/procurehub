@@ -1,0 +1,527 @@
+@page "/requests/{Id:guid}"
+@attribute [Authorize]
+@layout AuthenticatedLayout
+
+@using Blazilla
+@using ProcureHub.Features.Categories
+@using ProcureHub.Features.Departments
+@using ProcureHub.Features.PurchaseRequests
+@using ProcureHub.Infrastructure
+@using ProcureHub.Infrastructure.Authentication
+@using ProcureHub.Models
+
+@inject IQueryHandler<GetPurchaseRequestById.Request, Result<GetPurchaseRequestById.Response>> GetByIdHandler
+@inject IQueryHandler<QueryCategories.Request, QueryCategories.Response[]> QueryCategoriesHandler
+@inject IQueryHandler<QueryDepartments.Request, QueryDepartments.Response[]> QueryDepartmentsHandler
+@inject ICommandHandler<UpdatePurchaseRequest.Command, Result> UpdateHandler
+@inject ICommandHandler<SubmitPurchaseRequest.Command, Result> SubmitHandler
+@inject ICommandHandler<WithdrawPurchaseRequest.Command, Result> WithdrawHandler
+@inject ICommandHandler<DeletePurchaseRequest.Command, Result> DeleteHandler
+@inject ICurrentUserProvider CurrentUserProvider
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+@inject NavigationManager Navigation
+@inject ILogger<View> Logger
+
+<PageTitle>@GetPageTitle()</PageTitle>
+
+@if (_loading)
+{
+    <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 400px;">
+        <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate" />
+    </RadzenStack>
+}
+else if (_errorMessage != null)
+{
+    <RadzenStack Gap="1rem">
+        <PageHeader Title="Error" Subtitle="Unable to load purchase request" />
+        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">
+            @_errorMessage
+        </RadzenAlert>
+        <RadzenButton Text="Back to Requests" Icon="arrow_back" Click="@(() => Navigation.NavigateTo("/requests"))" />
+    </RadzenStack>
+}
+else if (_request != null)
+{
+    <RadzenStack Gap="1rem">
+        <PageHeader Title="@GetPageTitle()" Subtitle="@GetPageSubtitle()">
+            <ActionButton>
+                @if (_request.Status == PurchaseRequestStatus.Draft)
+                {
+                    <RadzenButton Text="Back to Requests" Icon="arrow_back"
+                                  Click="@(() => Navigation.NavigateTo("/requests"))"
+                                  ButtonStyle="ButtonStyle.Light" />
+                }
+            </ActionButton>
+        </PageHeader>
+
+        <RadzenRow Gap="1rem">
+            @* Left column: Request Details *@
+            <RadzenColumn Size="12" SizeMD="8">
+                <RadzenCard>
+                    <RadzenStack Gap="1.5rem">
+                        @* Status header for readonly views *@
+                        @if (_request.Status != PurchaseRequestStatus.Draft)
+                        {
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                                <RadzenText TextStyle="TextStyle.H5" Style="font-weight: 600; margin: 0;">
+                                    @_request.RequestNumber
+                                </RadzenText>
+                                <PurchaseRequestStatusBadge Status="@_request.Status" />
+                            </RadzenStack>
+
+                            @if (_request.SubmittedAt.HasValue)
+                            {
+                                <RadzenText TextStyle="TextStyle.Body2" Style="color: var(--rz-text-secondary-color);">
+                                    Submitted: @_request.SubmittedAt.Value.ToString("yyyy-MM-dd HH:mm")
+                                </RadzenText>
+                            }
+
+                            @if (_request.Status is PurchaseRequestStatus.Approved or PurchaseRequestStatus.Rejected
+                            && _request.ReviewedAt.HasValue && _request.ReviewedBy != null)
+                            {
+                                <RadzenText TextStyle="TextStyle.Body2" Style="color: var(--rz-text-secondary-color);">
+                                    @(_request.Status == PurchaseRequestStatus.Approved ? "Approved" : "Rejected"):
+                                    @_request.ReviewedAt.Value.ToString("yyyy-MM-dd HH:mm") by @_request.ReviewedBy.FirstName @_request.ReviewedBy.LastName
+                                </RadzenText>
+                            }
+
+                            <RadzenDivider />
+                        }
+
+                        @if (_isEditing)
+                        {
+                            @* Editable form for Draft *@
+                            <EditForm EditContext="@_editContext">
+                                <FluentValidator />
+
+                                @if (_saveErrorMessage != null)
+                                {
+                                    <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">
+                                        @_saveErrorMessage
+                                    </RadzenAlert>
+                                }
+
+                                <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                                    <RadzenLabel Text="Title *" Component="TitleInput" />
+                                    <RadzenTextBox Name="TitleInput" @bind-Value="@_model.Title"
+                                                   Placeholder="e.g., MacBook Pro for Development Team"
+                                                   Style="width: 100%;" />
+                                    <ValidationMessage For="@(() => _model.Title)" />
+                                </RadzenStack>
+
+                                <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                                    <RadzenLabel Text="Description" Component="DescriptionInput" />
+                                    <RadzenTextArea Name="DescriptionInput" @bind-Value="@_model.Description"
+                                                    Placeholder="Describe what you need to purchase and why..."
+                                                    Rows="4" Style="width: 100%;" />
+                                    <ValidationMessage For="@(() => _model.Description)" />
+                                </RadzenStack>
+
+                                <RadzenRow Gap="1rem">
+                                    <RadzenColumn Size="12" SizeMD="6">
+                                        <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                                            <RadzenLabel Text="Category *" Component="CategoryInput" />
+                                            <RadzenDropDown Name="CategoryInput" TValue="Guid?" @bind-Value="@_model.CategoryId"
+                                                            Data="@_categories" TextProperty="Name" ValueProperty="Id"
+                                                            Placeholder="Select category" Style="width: 100%;"
+                                                            AllowClear="true" />
+                                            <ValidationMessage For="@(() => _model.CategoryId)" />
+                                        </RadzenStack>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="12" SizeMD="6">
+                                        <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                                            <RadzenLabel Text="Department *" Component="DepartmentInput" />
+                                            <RadzenDropDown Name="DepartmentInput" TValue="Guid?" @bind-Value="@_model.DepartmentId"
+                                                            Data="@_departments" TextProperty="Name" ValueProperty="Id"
+                                                            Placeholder="Select department" Style="width: 100%;"
+                                                            AllowClear="true" />
+                                            <ValidationMessage For="@(() => _model.DepartmentId)" />
+                                        </RadzenStack>
+                                    </RadzenColumn>
+                                </RadzenRow>
+
+                                <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                                    <RadzenLabel Text="Estimated Amount (EUR) *" Component="AmountInput" />
+                                    <RadzenNumeric Name="AmountInput" TValue="decimal" @bind-Value="@_model.EstimatedAmount"
+                                                   Format="c" Min="0" Style="width: 100%;" />
+                                    <ValidationMessage For="@(() => _model.EstimatedAmount)" />
+                                </RadzenStack>
+
+                                <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                                    <RadzenLabel Text="Business Justification" Component="JustificationInput" />
+                                    <RadzenTextArea Name="JustificationInput" @bind-Value="@_model.BusinessJustification"
+                                                    Placeholder="Explain why this purchase is necessary..."
+                                                    Rows="4" Style="width: 100%;" />
+                                    <ValidationMessage For="@(() => _model.BusinessJustification)" />
+                                </RadzenStack>
+                            </EditForm>
+                        }
+                        else
+                        {
+                            @* Readonly view for non-Draft *@
+                            <RadzenStack Gap="0">
+                                <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Title</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body1">@_request.Title</RadzenText>
+                            </RadzenStack>
+
+                            @if (!string.IsNullOrEmpty(_request.Description))
+                            {
+                                <RadzenStack Gap="0">
+                                    <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Description</RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Body1">@_request.Description</RadzenText>
+                                </RadzenStack>
+                            }
+
+                            <RadzenRow Gap="1rem">
+                                <RadzenColumn Size="12" SizeMD="6">
+                                    <RadzenStack Gap="0">
+                                        <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Category</RadzenText>
+                                        <RadzenText TextStyle="TextStyle.Body1">@_request.Category.Name</RadzenText>
+                                    </RadzenStack>
+                                </RadzenColumn>
+                                <RadzenColumn Size="12" SizeMD="6">
+                                    <RadzenStack Gap="0">
+                                        <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Department</RadzenText>
+                                        <RadzenText TextStyle="TextStyle.Body1">@_request.Department.Name</RadzenText>
+                                    </RadzenStack>
+                                </RadzenColumn>
+                            </RadzenRow>
+
+                            <RadzenStack Gap="0">
+                                <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Estimated Amount</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body1">@_request.EstimatedAmount.ToString("C")</RadzenText>
+                            </RadzenStack>
+
+                            @if (!string.IsNullOrEmpty(_request.BusinessJustification))
+                            {
+                                <RadzenStack Gap="0">
+                                    <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Business Justification</RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Body1">@_request.BusinessJustification</RadzenText>
+                                </RadzenStack>
+                            }
+
+                            <RadzenStack Gap="0">
+                                <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Requester</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body1">@_request.Requester.FirstName @_request.Requester.LastName (@_request.Requester.Email)</RadzenText>
+                            </RadzenStack>
+                        }
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenColumn>
+
+            @* Right column: Actions *@
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenCard>
+                    <RadzenStack Gap="1rem">
+                        @if (_request.Status == PurchaseRequestStatus.Draft)
+                        {
+                            <RadzenStack Gap="0">
+                                <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Actions</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body2" Style="color: var(--rz-text-secondary-color);">
+                                    Save changes, submit for approval, or delete
+                                </RadzenText>
+                            </RadzenStack>
+
+                            <RadzenButton Text="Submit for Approval" Icon="send"
+                                          Click="@SubmitRequest"
+                                          ButtonStyle="ButtonStyle.Primary"
+                                          Style="width: 100%;"
+                                          Disabled="@_isProcessing" />
+
+                            <RadzenButton Text="Save Changes" Icon="save"
+                                          Click="@SaveChanges"
+                                          ButtonStyle="ButtonStyle.Secondary"
+                                          Style="width: 100%;"
+                                          Disabled="@_isProcessing" />
+
+                            <RadzenDivider />
+
+                            <RadzenButton Text="Delete Request" Icon="delete"
+                                          Click="@DeleteRequest"
+                                          ButtonStyle="ButtonStyle.Danger"
+                                          Style="width: 100%;"
+                                          Disabled="@_isProcessing"
+                                          Variant="Variant.Outlined" />
+                        }
+                        else if (_request.Status == PurchaseRequestStatus.Pending)
+                        {
+                            <RadzenStack Gap="0">
+                                <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Actions</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body2" Style="color: var(--rz-text-secondary-color);">
+                                    Withdraw to draft status if you need to make changes
+                                </RadzenText>
+                            </RadzenStack>
+
+                            <RadzenButton Text="Withdraw Request" Icon="undo"
+                                          Click="@WithdrawRequest"
+                                          ButtonStyle="ButtonStyle.Warning"
+                                          Style="width: 100%;"
+                                          Disabled="@_isProcessing" />
+                        }
+                        else
+                        {
+                            @* Approved or Rejected - no actions *@
+                            <RadzenStack Gap="0">
+                                <RadzenText TextStyle="TextStyle.H6" Style="font-weight: 600;">Status</RadzenText>
+                                <RadzenText TextStyle="TextStyle.Body2" Style="color: var(--rz-text-secondary-color);">
+                                    This request has been finalized and cannot be modified.
+                                </RadzenText>
+                            </RadzenStack>
+                        }
+
+                        <RadzenDivider />
+
+                        <RadzenButton Text="Back to Requests" Icon="arrow_back"
+                                      Click="@(() => Navigation.NavigateTo("/requests"))"
+                                      ButtonStyle="ButtonStyle.Light"
+                                      Style="width: 100%;" />
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenStack>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private GetPurchaseRequestById.Response? _request;
+    private PurchaseRequestFormModel _model = new();
+    private EditContext? _editContext;
+    private QueryCategories.Response[] _categories = [];
+    private QueryDepartments.Response[] _departments = [];
+    private bool _loading = true;
+    private bool _isProcessing;
+    private bool _isEditing;
+    private string? _errorMessage;
+    private string? _saveErrorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _categories = await QueryCategoriesHandler.HandleAsync(new QueryCategories.Request(), CancellationToken.None);
+        _departments = await QueryDepartmentsHandler.HandleAsync(new QueryDepartments.Request(), CancellationToken.None);
+        await LoadRequest();
+    }
+
+    private async Task LoadRequest()
+    {
+        _loading = true;
+        _errorMessage = null;
+
+        try
+        {
+            var currentUser = await CurrentUserProvider.GetCurrentUserAsync();
+            if (currentUser.UserId is null)
+            {
+                _errorMessage = "Authentication error. Please sign out and sign in again.";
+                return;
+            }
+
+            var result = await GetByIdHandler.HandleAsync(
+                new GetPurchaseRequestById.Request(Id, currentUser.UserId.Value.ToString()),
+                CancellationToken.None);
+
+            if (result.IsFailure)
+            {
+                _errorMessage = result.Error.Message;
+                return;
+            }
+
+            _request = result.Value;
+            _isEditing = _request.Status == PurchaseRequestStatus.Draft;
+
+            // Populate model for editing
+            if (_isEditing)
+            {
+                _model = new PurchaseRequestFormModel
+                {
+                    Title = _request.Title,
+                    Description = _request.Description,
+                    EstimatedAmount = _request.EstimatedAmount,
+                    BusinessJustification = _request.BusinessJustification,
+                    CategoryId = _request.Category.Id,
+                    DepartmentId = _request.Department.Id
+                };
+                _editContext = new EditContext(_model);
+            }
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private string GetPageTitle()
+    {
+        if (_request == null) return "Purchase Request";
+
+        return _request.Status switch
+        {
+            PurchaseRequestStatus.Draft => "Edit Draft Request",
+            PurchaseRequestStatus.Pending => $"Request {_request.RequestNumber}",
+            PurchaseRequestStatus.Approved => $"Request {_request.RequestNumber}",
+            PurchaseRequestStatus.Rejected => $"Request {_request.RequestNumber}",
+            _ => "Purchase Request"
+        };
+    }
+
+    private string GetPageSubtitle()
+    {
+        if (_request == null) return "";
+
+        return _request.Status switch
+        {
+            PurchaseRequestStatus.Draft => "Edit your draft purchase request before submitting",
+            PurchaseRequestStatus.Pending => "View your submitted request awaiting approval",
+            PurchaseRequestStatus.Approved => "View your approved purchase request",
+            PurchaseRequestStatus.Rejected => "View your rejected purchase request",
+            _ => ""
+        };
+    }
+
+    private async Task SaveChanges()
+    {
+        if (_editContext is null || !_editContext.Validate())
+        {
+            return;
+        }
+
+        _saveErrorMessage = null;
+        _isProcessing = true;
+
+        try
+        {
+            var command = new UpdatePurchaseRequest.Command(
+                Id,
+                _model.Title,
+                _model.Description,
+                _model.EstimatedAmount,
+                _model.BusinessJustification,
+                _model.CategoryId!.Value,
+                _model.DepartmentId!.Value
+            );
+
+            var result = await UpdateHandler.HandleAsync(command, CancellationToken.None);
+
+            if (result.IsFailure)
+            {
+                _saveErrorMessage = result.Error.Message;
+                return;
+            }
+
+            NotificationService.Notify(NotificationSeverity.Success, "Saved", "Changes saved successfully");
+            await LoadRequest(); // Refresh to get updated timestamps
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+
+    private async Task SubmitRequest()
+    {
+        // First save any changes
+        if (_editContext is null || !_editContext.Validate())
+        {
+            return;
+        }
+
+        _saveErrorMessage = null;
+        _isProcessing = true;
+
+        try
+        {
+            // Save first
+            var updateCommand = new UpdatePurchaseRequest.Command(
+                Id,
+                _model.Title,
+                _model.Description,
+                _model.EstimatedAmount,
+                _model.BusinessJustification,
+                _model.CategoryId!.Value,
+                _model.DepartmentId!.Value
+            );
+
+            var updateResult = await UpdateHandler.HandleAsync(updateCommand, CancellationToken.None);
+
+            if (updateResult.IsFailure)
+            {
+                _saveErrorMessage = updateResult.Error.Message;
+                return;
+            }
+
+            // Then submit
+            var submitResult = await SubmitHandler.HandleAsync(new SubmitPurchaseRequest.Command(Id), CancellationToken.None);
+
+            if (submitResult.IsFailure)
+            {
+                _saveErrorMessage = submitResult.Error.Message;
+                return;
+            }
+
+            NotificationService.Notify(NotificationSeverity.Success, "Submitted", "Purchase request submitted for approval");
+            await LoadRequest(); // Refresh to show readonly view
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+
+    private async Task WithdrawRequest()
+    {
+        _isProcessing = true;
+
+        try
+        {
+            var result = await WithdrawHandler.HandleAsync(new WithdrawPurchaseRequest.Command(Id), CancellationToken.None);
+
+            if (result.IsFailure)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", result.Error.Message);
+                return;
+            }
+
+            NotificationService.Notify(NotificationSeverity.Success, "Withdrawn", "Request returned to draft status");
+            await LoadRequest(); // Refresh to show editable view
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+
+    private async Task DeleteRequest()
+    {
+        var confirm = await DialogService.Confirm(
+            "Are you sure you want to delete this draft request? This action cannot be undone.",
+            "Delete Request",
+            new ConfirmOptions { OkButtonText = "Delete", CancelButtonText = "Cancel" });
+
+        if (confirm != true)
+        {
+            return;
+        }
+
+        _isProcessing = true;
+
+        try
+        {
+            var result = await DeleteHandler.HandleAsync(new DeletePurchaseRequest.Command(Id), CancellationToken.None);
+
+            if (result.IsFailure)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", result.Error.Message);
+                return;
+            }
+
+            NotificationService.Notify(NotificationSeverity.Success, "Deleted", "Request deleted successfully");
+            Navigation.NavigateTo("/requests");
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+}
