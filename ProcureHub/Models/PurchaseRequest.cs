@@ -99,6 +99,20 @@ public class PurchaseRequest
             ? Result.Success()
             : Result.Failure(PurchaseRequestErrors.CannotDeleteNonDraft);
     }
+
+    public Result Withdraw()
+    {
+        if (Status != PurchaseRequestStatus.Pending)
+        {
+            return Result.Failure(PurchaseRequestErrors.CannotWithdrawNonPending);
+        }
+
+        Status = PurchaseRequestStatus.Draft;
+        SubmittedAt = null;
+        UpdatedAt = DateTime.UtcNow;
+
+        return Result.Success();
+    }
 }
 
 public enum PurchaseRequestStatus

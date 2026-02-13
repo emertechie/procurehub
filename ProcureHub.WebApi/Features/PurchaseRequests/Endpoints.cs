@@ -200,5 +200,22 @@ public static class Endpoints
             .WithName(nameof(DeletePurchaseRequest))
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound);
+
+        group.MapPost("/purchase-requests/{id:guid}/withdraw", async (
+                [FromServices] ICommandHandler<WithdrawPurchaseRequest.Command, Result> handler,
+                CancellationToken token,
+                Guid id
+            ) =>
+            {
+                var result = await handler.HandleAsync(new WithdrawPurchaseRequest.Command(id), token);
+                return result.Match(
+                    Results.NoContent,
+                    error => error.ToProblemDetails()
+                );
+            })
+            .RequireAuthorization(RolePolicyNames.Requester)
+            .WithName(nameof(WithdrawPurchaseRequest))
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound);
     }
 }
