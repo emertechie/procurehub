@@ -100,19 +100,19 @@
                 </Template>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="QueryPurchaseRequests.Response" Property="EstimatedAmount" Title="Amount" Width="120px">
+            <RadzenDataGridColumn TItem="QueryPurchaseRequests.Response" Property="EstimatedAmount" Title="Amount" Width="110px">
                 <Template Context="pr">
-                    <RadzenText TextStyle="TextStyle.Body2">@pr.EstimatedAmount.ToString("C")</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Body2" TextAlign="TextAlign.Right">@pr.EstimatedAmount.ToString("C")</RadzenText>
                 </Template>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="QueryPurchaseRequests.Response" Property="Status" Title="Status" Width="120px">
+            <RadzenDataGridColumn TItem="QueryPurchaseRequests.Response" Property="Status" Title="Status" Width="110px">
                 <Template Context="pr">
                     <PurchaseRequestStatusBadge Status="@pr.Status" />
                 </Template>
             </RadzenDataGridColumn>
 
-            <RadzenDataGridColumn TItem="QueryPurchaseRequests.Response" Property="CreatedAt" Title="Created" Width="120px">
+            <RadzenDataGridColumn TItem="QueryPurchaseRequests.Response" Property="CreatedAt" Title="Created" Width="110px">
                 <Template Context="pr">
                     <RadzenText TextStyle="TextStyle.Body2">@pr.CreatedAt.ToString("yyyy-MM-dd")</RadzenText>
                 </Template>
