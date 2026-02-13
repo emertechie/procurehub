@@ -3,9 +3,9 @@
 ## Phase 1: Backend Implementation
 
 ### Step 1: Add Withdraw method to PurchaseRequest model
-- [ ] Open `ProcureHub/Models/PurchaseRequest.cs`
-- [ ] Add `Withdraw()` method after `CanDelete()` method (around line 101)
-- [ ] Method should:
+- [x] Open `ProcureHub/Models/PurchaseRequest.cs`
+- [x] Add `Withdraw()` method after `CanDelete()` method (around line 101)
+- [x] Method should:
   - Check if Status is Pending, return failure if not
   - Set Status to Draft
   - Set SubmittedAt to null
@@ -13,15 +13,15 @@
   - Return Result.Success()
 
 ### Step 2: Add CannotWithdrawNonPending error
-- [ ] Open `ProcureHub/Features/PurchaseRequests/Validation/PurchaseRequestErrors.cs`
-- [ ] Add `CannotWithdrawNonPending` error after `CannotDeleteNonDraft`
-- [ ] Use similar pattern: Error.Validation with appropriate title, detail, and Status field error
+- [x] Open `ProcureHub/Features/PurchaseRequests/Validation/PurchaseRequestErrors.cs`
+- [x] Add `CannotWithdrawNonPending` error after `CannotDeleteNonDraft`
+- [x] Use similar pattern: Error.Validation with appropriate title, detail, and Status field error
 
 ### Step 3: Create WithdrawPurchaseRequest command handler
-- [ ] Create new file `ProcureHub/Features/PurchaseRequests/WithdrawPurchaseRequest.cs`
-- [ ] Add Command record with Id property
-- [ ] Add CommandValidator with Id.NotEmpty() rule
-- [ ] Add Handler that:
+- [x] Create new file `ProcureHub/Features/PurchaseRequests/WithdrawPurchaseRequest.cs`
+- [x] Add Command record with Id property
+- [x] Add CommandValidator with Id.NotEmpty() rule
+- [x] Add Handler that:
   - Loads purchase request by Id
   - Returns NotFound if doesn't exist
   - Calls pr.Withdraw()
@@ -29,28 +29,28 @@
   - Returns result
 
 ### Step 4: Add Withdraw endpoint
-- [ ] Open `ProcureHub.WebApi/Features/PurchaseRequests/Endpoints.cs`
-- [ ] Add MapPost endpoint for `/purchase-requests/{id:guid}/withdraw` after Delete endpoint
-- [ ] Follow pattern of other command endpoints
-- [ ] Require Requester role authorization
-- [ ] Produces 204 NoContent and 404 NotFound
+- [x] Open `ProcureHub.WebApi/Features/PurchaseRequests/Endpoints.cs`
+- [x] Add MapPost endpoint for `/purchase-requests/{id:guid}/withdraw` after Delete endpoint
+- [x] Follow pattern of other command endpoints
+- [x] Require Requester role authorization
+- [x] Produces 204 NoContent and 404 NotFound
 
 ### Step 5: Add API tests for Withdraw endpoint
-- [ ] Open `ProcureHub.WebApi.Tests/Features/PurchaseRequestTests.cs`
-- [ ] Add withdraw endpoint to `GetAllPurchaseRequestEndpoints` theory data
-- [ ] Add `Test_WithdrawPurchaseRequest_validation` method
-- [ ] Add `Can_withdraw_pending_purchase_request` test
-- [ ] Add `Cannot_withdraw_draft_purchase_request` test  
-- [ ] Add `Cannot_withdraw_approved_purchase_request` test
-- [ ] Add `Cannot_withdraw_rejected_purchase_request` test
+- [x] Open `ProcureHub.WebApi.Tests/Features/PurchaseRequestTests.cs`
+- [x] Add withdraw endpoint to `GetAllPurchaseRequestEndpoints` theory data
+- [x] Add `Test_WithdrawPurchaseRequest_validation` method
+- [x] Add `Can_withdraw_pending_purchase_request` test
+- [x] Add `Cannot_withdraw_draft_purchase_request` test  
+- [x] Add `Cannot_withdraw_approved_purchase_request` test
+- [x] Add `Cannot_withdraw_rejected_purchase_request` test
 
 ## Phase 2: UI Implementation
 
 ### Step 6: Create View/Edit Request page
-- [ ] Create new file `ProcureHub.BlazorApp/Components/Pages/Requests/View.razor`
-- [ ] Add `@page "/requests/{Id:guid}"` route
-- [ ] Add `[Authorize]` attribute
-- [ ] Inject required handlers:
+- [x] Create new file `ProcureHub.BlazorApp/Components/Pages/Requests/View.razor`
+- [x] Add `@page "/requests/{Id:guid}"` route
+- [x] Add `[Authorize]` attribute
+- [x] Inject required handlers:
   - GetPurchaseRequestById handler
   - UpdatePurchaseRequest handler
   - SubmitPurchaseRequest handler
@@ -64,55 +64,55 @@
   - ILogger
 
 ### Step 7: Implement page structure
-- [ ] Add PageTitle and PageHeader
-- [ ] Create two-column layout (8/4 ratio like New.razor)
-- [ ] Left column: Request Details card
-- [ ] Right column: Actions card
+- [x] Add PageTitle and PageHeader
+- [x] Create two-column layout (8/4 ratio like New.razor)
+- [x] Left column: Request Details card
+- [x] Right column: Actions card
 
 ### Step 8: Implement loading state
-- [ ] Add `_loading` field
-- [ ] Show RadzenProgressBarCircular while loading
-- [ ] Load request data in OnInitializedAsync
-- [ ] Load categories and departments for dropdowns
+- [x] Add `_loading` field
+- [x] Show RadzenProgressBarCircular while loading
+- [x] Load request data in OnInitializedAsync
+- [x] Load categories and departments for dropdowns
 
 ### Step 9: Implement Draft view (editable)
-- [ ] When Status == Draft:
+- [x] When Status == Draft:
   - Show EditForm with FluentValidator
   - Show editable fields: Title, Description, Category, Department, Amount, Justification
   - Actions: "Save Changes", "Submit for Approval", "Delete"
 
 ### Step 10: Implement Pending view (readonly with withdraw)
-- [ ] When Status == Pending:
+- [x] When Status == Pending:
   - Show readonly display of all fields (RadzenText, not form inputs)
   - Show status badge prominently
   - Show SubmittedAt date
   - Actions: "Withdraw Request" button
 
 ### Step 11: Implement Approved/Rejected view (readonly)
-- [ ] When Status is Approved or Rejected:
+- [x] When Status is Approved or Rejected:
   - Show readonly display of all fields
   - Show status badge prominently
   - Show SubmittedAt, ReviewedAt, ReviewedBy info
   - No action buttons
 
 ### Step 12: Implement action handlers
-- [ ] SaveChanges method: calls Update handler
-- [ ] SubmitRequest method: calls Submit handler, navigates on success
-- [ ] WithdrawRequest method: calls Withdraw handler, refreshes data on success
-- [ ] DeleteRequest method: calls Delete handler, navigates on success
-- [ ] All methods show notifications on success/failure
+- [x] SaveChanges method: calls Update handler
+- [x] SubmitRequest method: calls Submit handler, navigates on success
+- [x] WithdrawRequest method: calls Withdraw handler, refreshes data on success
+- [x] DeleteRequest method: calls Delete handler, navigates on success
+- [x] All methods show notifications on success/failure
 
 ### Step 13: Update Requests list navigation
-- [ ] Open `ProcureHub.BlazorApp/Components/Pages/Requests/Index.razor`
-- [ ] Verify view button navigates to `/requests/{pr.Id}`
-- [ ] Consider making RequestNumber clickable as well
+- [x] Open `ProcureHub.BlazorApp/Components/Pages/Requests/Index.razor`
+- [x] Verify view button navigates to `/requests/{pr.Id}`
+- [x] Consider making RequestNumber clickable as well
 
 ## Phase 3: Testing and Validation
 
 ### Step 14: Build and verify
-- [ ] Run `dotnet build` to ensure no compilation errors
-- [ ] Run API tests to verify withdraw functionality
-- [ ] Verify all tests pass
+- [x] Run `dotnet build` to ensure no compilation errors
+- [x] Run API tests to verify withdraw functionality
+- [x] Verify all tests pass
 
 ### Step 15: Manual UI testing
 - [ ] Navigate to requests list
