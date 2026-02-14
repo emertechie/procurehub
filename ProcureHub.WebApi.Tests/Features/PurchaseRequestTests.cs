@@ -57,7 +57,8 @@ public class PurchaseRequestTestsWithSharedDb(
                 new EndpointTestOptions { RequiresAdmin = true }),
             new EndpointInfo("/purchase-requests/{id}/reject", "POST", "RejectPurchaseRequest",
                 new EndpointTestOptions { RequiresAdmin = true }),
-            new EndpointInfo("/purchase-requests/{id}", "DELETE", "DeletePurchaseRequest")
+            new EndpointInfo("/purchase-requests/{id}", "DELETE", "DeletePurchaseRequest"),
+            new EndpointInfo("/purchase-requests/{id}/withdraw", "POST", "WithdrawPurchaseRequest")
         };
     }
 
@@ -218,6 +219,12 @@ public class PurchaseRequestTestsWithSharedDb(
 
     [Fact]
     public async Task Test_DeletePurchaseRequest_validation()
+    {
+        // No validation - id comes from route only
+    }
+
+    [Fact]
+    public async Task Test_WithdrawPurchaseRequest_validation()
     {
         // No validation - id comes from route only
     }
@@ -775,6 +782,162 @@ public class PurchaseRequestTests(ApiTestHostFixture hostFixture, ITestOutputHel
             {
                 ["Status"] = ["Only purchase requests in Draft status can be deleted."]
             });
+    }
+
+    [Fact]
+    public async Task Can_withdraw_pending_purchase_request()
+    {
+        await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var departmentId = await CreateDepartmentAsync();
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
+
+        await LoginAsync("requester@example.com", ValidPassword);
+        var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
+
+        // Submit to make it Pending
+        var submitResp = await HttpClient.PostAsync($"/purchase-requests/{prId}/submit", null);
+        Assert.Equal(HttpStatusCode.NoContent, submitResp.StatusCode);
+
+        // Verify Pending status
+        var getPending = await HttpClient.GetAsync($"/purchase-requests/{prId}")
+            .ReadJsonAsync<DataResponse<GetPurchaseRequestById.Response>>();
+        Assert.Equal(PurchaseRequestStatus.Pending, getPending.Data.Status);
+        Assert.NotNull(getPending.Data.SubmittedAt);
+
+        // Withdraw the request
+        var withdrawResp = await HttpClient.PostAsync($"/purchase-requests/{prId}/withdraw", null);
+        Assert.Equal(HttpStatusCode.NoContent, withdrawResp.StatusCode);
+
+        // Verify back to Draft status with SubmittedAt cleared
+        var getDraft = await HttpClient.GetAsync($"/purchase-requests/{prId}")
+            .ReadJsonAsync<DataResponse<GetPurchaseRequestById.Response>>();
+        Assert.Equal(PurchaseRequestStatus.Draft, getDraft.Data.Status);
+        Assert.Null(getDraft.Data.SubmittedAt);
+    }
+
+    [Fact]
+    public async Task Cannot_withdraw_draft_purchase_request()
+    {
+        await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var departmentId = await CreateDepartmentAsync();
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
+
+        await LoginAsync("requester@example.com", ValidPassword);
+        var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
+
+        // Try to withdraw a draft request
+        var withdrawResp = await HttpClient.PostAsync($"/purchase-requests/{prId}/withdraw", null);
+
+        await withdrawResp.AssertValidationProblemAsync(
+            title: "Invalid status transition",
+            detail: "PurchaseRequest.InvalidStatusTransition",
+            errors: new Dictionary<string, string[]>
+            {
+                ["Status"] = ["Can only withdraw purchase requests in Pending status."]
+            });
+
+        // Verify still Draft
+        var getDraft = await HttpClient.GetAsync($"/purchase-requests/{prId}")
+            .ReadJsonAsync<DataResponse<GetPurchaseRequestById.Response>>();
+        Assert.Equal(PurchaseRequestStatus.Draft, getDraft.Data.Status);
+    }
+
+    [Fact]
+    public async Task Cannot_withdraw_approved_purchase_request()
+    {
+        await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var departmentId = await CreateDepartmentAsync();
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
+        await CreateUserAsync("approver@example.com", ValidPassword, [RoleNames.Approver], departmentId);
+
+        await LoginAsync("requester@example.com", ValidPassword);
+        var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
+
+        // Submit
+        await HttpClient.PostAsync($"/purchase-requests/{prId}/submit", null);
+
+        // Login as approver and approve
+        await LoginAsync("approver@example.com", ValidPassword);
+        await HttpClient.PostAsync($"/purchase-requests/{prId}/approve", null);
+
+        // Login back as requester to try withdraw
+        await LoginAsync("requester@example.com", ValidPassword);
+
+        // Try to withdraw
+        var withdrawResp = await HttpClient.PostAsync($"/purchase-requests/{prId}/withdraw", null);
+
+        await withdrawResp.AssertValidationProblemAsync(
+            title: "Invalid status transition",
+            detail: "PurchaseRequest.InvalidStatusTransition",
+            errors: new Dictionary<string, string[]>
+            {
+                ["Status"] = ["Can only withdraw purchase requests in Pending status."]
+            });
+
+        // Verify still Approved
+        var getApproved = await HttpClient.GetAsync($"/purchase-requests/{prId}")
+            .ReadJsonAsync<DataResponse<GetPurchaseRequestById.Response>>();
+        Assert.Equal(PurchaseRequestStatus.Approved, getApproved.Data.Status);
+    }
+
+    [Fact]
+    public async Task Cannot_withdraw_rejected_purchase_request()
+    {
+        await LoginAsAdminAsync();
+        var categoryId = await CreateCategoryAsync();
+        var departmentId = await CreateDepartmentAsync();
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester], departmentId);
+        await CreateUserAsync("approver@example.com", ValidPassword, [RoleNames.Approver], departmentId);
+
+        await LoginAsync("requester@example.com", ValidPassword);
+        var prId = await CreatePurchaseRequestAsync(categoryId, departmentId);
+
+        // Submit
+        await HttpClient.PostAsync($"/purchase-requests/{prId}/submit", null);
+
+        // Login as approver and reject
+        await LoginAsync("approver@example.com", ValidPassword);
+        await HttpClient.PostAsync($"/purchase-requests/{prId}/reject", null);
+
+        // Login back as requester to try withdraw
+        await LoginAsync("requester@example.com", ValidPassword);
+
+        // Try to withdraw
+        var withdrawResp = await HttpClient.PostAsync($"/purchase-requests/{prId}/withdraw", null);
+
+        await withdrawResp.AssertValidationProblemAsync(
+            title: "Invalid status transition",
+            detail: "PurchaseRequest.InvalidStatusTransition",
+            errors: new Dictionary<string, string[]>
+            {
+                ["Status"] = ["Can only withdraw purchase requests in Pending status."]
+            });
+
+        // Verify still Rejected
+        var getRejected = await HttpClient.GetAsync($"/purchase-requests/{prId}")
+            .ReadJsonAsync<DataResponse<GetPurchaseRequestById.Response>>();
+        Assert.Equal(PurchaseRequestStatus.Rejected, getRejected.Data.Status);
+    }
+
+    [Fact]
+    public async Task Cannot_withdraw_nonexistent_purchase_request()
+    {
+        await LoginAsAdminAsync();
+        await CreateUserAsync("requester@example.com", ValidPassword, [RoleNames.Requester]);
+
+        await LoginAsync("requester@example.com", ValidPassword);
+
+        var nonexistentId = Guid.NewGuid();
+        var withdrawResp = await HttpClient.PostAsync($"/purchase-requests/{nonexistentId}/withdraw", null);
+
+        await withdrawResp.AssertProblemDetailsAsync(
+            HttpStatusCode.NotFound,
+            "Purchase request not found",
+            "NotFound",
+            $"POST /purchase-requests/{nonexistentId}/withdraw");
     }
 
     [Fact]

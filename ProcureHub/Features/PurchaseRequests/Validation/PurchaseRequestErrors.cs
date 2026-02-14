@@ -30,6 +30,10 @@ public static class PurchaseRequestErrors
     {
         ["Status"] = ["Only purchase requests in Draft status can be deleted."]
     });
+    public static readonly Error CannotWithdrawNonPending = Error.Validation("PurchaseRequest.InvalidStatusTransition", "Invalid status transition", new Dictionary<string, string[]>
+    {
+        ["Status"] = ["Can only withdraw purchase requests in Pending status."]
+    });
     public static readonly Error CategoryNotFound = Error.Validation("PurchaseRequest.CategoryNotFound", "Category not found", new Dictionary<string, string[]>
     {
         ["CategoryId"] = ["The specified category does not exist."]

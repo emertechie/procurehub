@@ -14,11 +14,14 @@
 
 # Tech Stack
 
-- This is a full stack app using .Net (C#) for backend API and React (with TanStack Router) for frontend SPA
+- This is a full stack app using .Net (C#) for backend API and with two frontends:
+  - 1) Blazor Server app. This is primary frontend now. IMPORTANT: Make any UI changes in this project unless told otherwise.
+    - For further details: `ProcureHub.BlazorApp/AGENTS.md` 
+  - 2) React (with TanStack Router) for frontend SPA. Legacy frontend. Do not update unless explicity told.
+    - For further details: `ProcureHub.WebApp/AGENTS.md`
 - The API uses ASP.Net Core Minimal APIs, EF Core with Postgres DB, and modern C# code using .Net Core version 10
 - The API generates an OpenAPI spec which is converted to a strongly typed `openapi-react-query` client for the web project
   - Update the client after any API change that updates the OpenAPI spec. Use command given below.
-- Detailed guidance for the React app can be found in `ProcureHub.WebApp/AGENTS.md`
 
 ## API Notes
 

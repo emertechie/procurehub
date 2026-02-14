@@ -57,3 +57,5 @@ Find and read an existing, similar feature in the codebase as a reference implem
 # 3. Implement steps
 
 Use the `steps` skill to implement the steps.
+- If you cannot find that skill, STOP and inform user
+- Don't forget to make commits at logical boundaries.
