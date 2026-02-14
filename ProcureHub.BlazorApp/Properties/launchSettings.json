@@ -10,6 +10,7 @@
           "ASPNETCORE_ENVIRONMENT": "Development",
           "OTEL_EXPORTER_OTLP_PROTOCOL": "http/protobuf",
           "OTEL_EXPORTER_OTLP_LOGS_ENDPOINT": "http://localhost:9428/insert/opentelemetry/v1/logs",
+          "OTEL_EXPORTER_OTLP_LOGS_HEADERS": "VL-Stream-Fields=service.name",
           "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT": "http://localhost:10428/insert/opentelemetry/v1/traces",
           "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT": "http://localhost:8428/opentelemetry/v1/metrics"
         }
@@ -23,6 +24,7 @@
           "ASPNETCORE_ENVIRONMENT": "Development",
           "OTEL_EXPORTER_OTLP_PROTOCOL": "http/protobuf",
           "OTEL_EXPORTER_OTLP_LOGS_ENDPOINT": "http://localhost:9428/insert/opentelemetry/v1/logs",
+          "OTEL_EXPORTER_OTLP_LOGS_HEADERS": "VL-Stream-Fields=service.name",
           "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT": "http://localhost:10428/insert/opentelemetry/v1/traces",
           "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT": "http://localhost:8428/opentelemetry/v1/metrics"
         }
