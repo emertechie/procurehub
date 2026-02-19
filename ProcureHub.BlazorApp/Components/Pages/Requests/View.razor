@@ -86,7 +86,7 @@ else if (_request != null)
                                 </RadzenText>
                             }
 
-                            <RadzenDivider />
+                            <hr style="border: none; border-top: 1px solid var(--rz-base-300); margin: 0.5rem 0;" />
                         }
 
                         @if (_isEditing)
@@ -153,8 +153,6 @@ else if (_request != null)
                                           Style="width: 100%;"
                                           Disabled="@_isProcessing" />
 
-                            <RadzenDivider />
-
                             <RadzenButton Text="Delete Request" Icon="delete"
                                           Click="@DeleteRequest"
                                           ButtonStyle="ButtonStyle.Danger"
@@ -187,13 +185,6 @@ else if (_request != null)
                                 </RadzenText>
                             </RadzenStack>
                         }
-
-                        <RadzenDivider />
-
-                        <RadzenButton Text="Back to Requests" Icon="arrow_back"
-                                      Click="@(() => Navigation.NavigateTo("/requests"))"
-                                      ButtonStyle="ButtonStyle.Light"
-                                      Style="width: 100%;" />
                     </RadzenStack>
                 </RadzenCard>
             </RadzenColumn>
