@@ -17,7 +17,7 @@ namespace ProcureHub.BlazorApp.Components.Shared
         RoboHash,
         Blank
     }
-    
+
     public partial class Gravatar : RadzenComponent
     {
         /// <summary>
@@ -79,7 +79,7 @@ namespace ProcureHub.BlazorApp.Components.Shared
             return "rz-gravatar";
         }
 
-        private string MapGravatarStyle(GravatarStyle style)
+        private static string MapGravatarStyle(GravatarStyle style)
         {
             return style switch
             {

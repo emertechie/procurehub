@@ -1,6 +1,6 @@
 namespace ProcureHub.BlazorApp.Helpers;
 
-public class BusyScope : IDisposable
+internal sealed class BusyScope : IDisposable
 {
     private readonly Action<bool> _stateSetter;
     private readonly Action<bool>? _onStateChanged;

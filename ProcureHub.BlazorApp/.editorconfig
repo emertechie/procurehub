@@ -1,0 +1,10 @@
+[*.cs]
+
+# Code Analysis rules
+
+# CA1716 - Rename namespace X so that it no longer conflicts with the reserved language keyword 'X'
+dotnet_diagnostic.CA1716.severity = none
+
+# CA1515 - Because an application's API isn't typically referenced from outside the assembly, types can be made internal
+# TODO: revisit this
+dotnet_diagnostic.CA1515.severity = none

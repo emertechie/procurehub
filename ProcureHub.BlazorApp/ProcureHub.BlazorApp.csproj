@@ -7,6 +7,12 @@
         <UserSecretsId>aspnet-ProcureHub_BlazorApp-799a6aa8-aae6-4d08-9e51-af1052e391ac</UserSecretsId>
         <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <AnalysisLevel>latest</AnalysisLevel>
+        <AnalysisMode>All</AnalysisMode>
+<!--        TODO -->
+<!--        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>-->
+<!--        <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>-->
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     </PropertyGroup>
 
     <ItemGroup>

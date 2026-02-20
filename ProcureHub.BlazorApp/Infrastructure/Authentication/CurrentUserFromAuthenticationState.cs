@@ -3,7 +3,7 @@ using ProcureHub.Infrastructure.Authentication;
 
 namespace ProcureHub.BlazorApp.Infrastructure.Authentication;
 
-public sealed class AuthStateCurrentUserProvider(AuthenticationStateProvider authenticationStateProvider)
+internal sealed class AuthStateCurrentUserProvider(AuthenticationStateProvider authenticationStateProvider)
     : ICurrentUserProvider
 {
     public async Task<ICurrentUser> GetCurrentUserAsync()
