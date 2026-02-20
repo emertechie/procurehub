@@ -25,6 +25,7 @@ public static class UpdateDepartment
     {
         public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {
+            ArgumentNullException.ThrowIfNull(command);
             var department = await dbContext.Departments
                 .FirstOrDefaultAsync(d => d.Id == command.Id, token);
 

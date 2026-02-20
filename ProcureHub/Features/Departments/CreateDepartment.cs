@@ -24,6 +24,7 @@ public static class CreateDepartment
     {
         public async Task<Result<Guid>> HandleAsync(Command command, CancellationToken token)
         {
+            ArgumentNullException.ThrowIfNull(command);
             var department = new Department { Name = command.Name };
             await dbContext.Departments.AddAsync(department, token);
 

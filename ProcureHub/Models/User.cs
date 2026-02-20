@@ -6,7 +6,7 @@ namespace ProcureHub.Models;
 
 public class User : IdentityUser
 {
-    public virtual ICollection<UserRole> UserRoles { get; set; } = [];
+    public virtual ICollection<UserRole> UserRoles { get; init; } = [];
 
     public string FirstName { get; set; } = null!;
 
@@ -23,6 +23,13 @@ public class User : IdentityUser
     public DateTime UpdatedAt { get; set; }
 
     public DateTime? DeletedAt { get; set; }
+
+    internal static string NormalizeEmailForDisplay(string email)
+    {
+#pragma warning disable CA1308
+        return email.ToLowerInvariant();
+#pragma warning restore CA1308
+    }
 }
 
 public class UserConfiguration : IEntityTypeConfiguration<User>
@@ -32,6 +39,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
     public void Configure(EntityTypeBuilder<User> builder)
     {
+        ArgumentNullException.ThrowIfNull(builder);
+
         builder.ToTable("Users");
 
         builder.Property(u => u.FirstName)

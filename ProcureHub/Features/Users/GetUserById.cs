@@ -8,7 +8,7 @@ public static class GetUserById
 {
     public record Request(string Id);
 
-    public class RequestValidator : AbstractValidator<Request>
+    internal sealed class RequestValidator : AbstractValidator<Request>
     {
         public RequestValidator()
         {
@@ -21,7 +21,7 @@ public static class GetUserById
         string Email,
         string FirstName,
         string LastName,
-        string[] Roles,
+        IReadOnlyCollection<string> Roles,
         DateTime? EnabledAt,
         DateTime CreatedAt,
         DateTime UpdatedAt,
@@ -30,7 +30,7 @@ public static class GetUserById
 
     public record Department(Guid Id, string Name);
 
-    public class Handler(ApplicationDbContext dbContext)
+    internal sealed class Handler(ApplicationDbContext dbContext)
         : IQueryHandler<Request, Response?>
     {
         public Task<Response?> HandleAsync(Request request, CancellationToken token)

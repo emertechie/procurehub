@@ -15,9 +15,9 @@ public static class PagingExtensions
         {
             return ToPagedResultAsyncInternal(
                 query,
-                token,
                 page ?? 1,
-                pageSize ?? Paging.DefaultPageSize);
+                pageSize ?? Paging.DefaultPageSize,
+                token);
         }
 
         public async Task<PagedResult<TResult>> ToPagedResultAsync<TResult>(
@@ -30,17 +30,16 @@ public static class PagingExtensions
 
             return await ToPagedResultAsyncInternal(
                 projectedQueryable,
-                token,
                 page ?? 1,
-                pageSize ?? Paging.DefaultPageSize);
+                pageSize ?? Paging.DefaultPageSize, token);
         }
     }
 
     private static async Task<PagedResult<T>> ToPagedResultAsyncInternal<T>(
         IQueryable<T> query,
-        CancellationToken token,
         int page,
-        int pageSize)
+        int pageSize,
+        CancellationToken token)
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(page, 0);
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(pageSize, 0);

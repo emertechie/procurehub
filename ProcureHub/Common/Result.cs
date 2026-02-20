@@ -22,6 +22,8 @@ public class Result
         Func<TResult> onSuccess,
         Func<Error, TResult> onFailure)
     {
+        ArgumentNullException.ThrowIfNull(onSuccess);
+        ArgumentNullException.ThrowIfNull(onFailure);
         return IsSuccess ? onSuccess() : onFailure(_error!);
     }
 
@@ -67,6 +69,8 @@ public class Result<T> : Result
         Func<T, TResult> onSuccess,
         Func<Error, TResult> onFailure)
     {
+        ArgumentNullException.ThrowIfNull(onSuccess);
+        ArgumentNullException.ThrowIfNull(onFailure);
         return IsSuccess ? onSuccess(_value!) : onFailure(Error!);
     }
 }

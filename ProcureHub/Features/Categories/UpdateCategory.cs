@@ -24,6 +24,7 @@ public static class UpdateCategory
     {
         public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {
+            ArgumentNullException.ThrowIfNull(command);
             var category = await dbContext.Categories
                 .FirstOrDefaultAsync(c => c.Id == command.Id, token);
 

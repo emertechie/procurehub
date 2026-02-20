@@ -9,7 +9,7 @@ public class Department
 
     public required string Name { get; set; }
 
-    public ICollection<User> Users { get; set; } = new HashSet<User>();
+    public ICollection<User> Users { get; init; } = new HashSet<User>();
 
     public DateTime CreatedAt { get; set; }
 
@@ -22,6 +22,8 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
 
     public void Configure(EntityTypeBuilder<Department> builder)
     {
+        ArgumentNullException.ThrowIfNull(builder);
+
         builder.ToTable("Departments");
 
         builder.Property(d => d.Id)

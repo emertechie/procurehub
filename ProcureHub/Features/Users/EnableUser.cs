@@ -10,7 +10,7 @@ public static class EnableUser
 {
     public record Command(string Id);
 
-    public class CommandValidator : AbstractValidator<Command>
+    internal sealed class CommandValidator : AbstractValidator<Command>
     {
         public CommandValidator()
         {
@@ -18,13 +18,14 @@ public static class EnableUser
         }
     }
 
-    public class Handler(
+    internal sealed class Handler(
         ApplicationDbContext dbContext,
         ILogger<Handler> logger)
         : ICommandHandler<Command, Result>
     {
         public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {
+            ArgumentNullException.ThrowIfNull(command);
             var user = await dbContext.Users
                 .FirstOrDefaultAsync(u => u.Id == command.Id, token);
 

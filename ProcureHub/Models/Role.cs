@@ -14,13 +14,15 @@ public class Role : IdentityRole
     {
     }
 
-    public virtual ICollection<UserRole>? UserRoles { get; set; }
+    public virtual ICollection<UserRole>? UserRoles { get; init; }
 }
 
 public class RoleEntityTypeConfiguration : IEntityTypeConfiguration<Role>
 {
     public void Configure(EntityTypeBuilder<Role> builder)
     {
+        ArgumentNullException.ThrowIfNull(builder);
+
         // Each Role can have many entries in the UserRole join table
         builder.HasMany(e => e.UserRoles)
             .WithOne(e => e.Role)

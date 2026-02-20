@@ -1,6 +1,6 @@
-
 using Microsoft.EntityFrameworkCore;
-using ProcureHub;
+
+namespace ProcureHub.Features.PurchaseRequests.Services;
 
 public class PurchaseRequestNumberGenerator(ApplicationDbContext dbContext)
 {

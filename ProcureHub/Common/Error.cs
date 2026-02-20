@@ -1,6 +1,8 @@
 namespace ProcureHub.Common;
 
+#pragma warning disable CA1716
 public record Error
+#pragma warning restore CA1716
 {
     public string Code { get; init; }
     public string Message { get; init; }

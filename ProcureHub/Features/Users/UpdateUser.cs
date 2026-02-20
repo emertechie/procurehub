@@ -12,7 +12,7 @@ public static class UpdateUser
 {
     public record Command(string Id, string Email, string FirstName, string LastName);
 
-    public class CommandValidator : AbstractValidator<Command>
+    internal sealed class CommandValidator : AbstractValidator<Command>
     {
         public CommandValidator()
         {
@@ -23,7 +23,7 @@ public static class UpdateUser
         }
     }
 
-    public class Handler(
+    internal sealed class Handler(
         ApplicationDbContext dbContext,
         UserManager<User> userManager,
         ILogger<Handler> logger)
@@ -31,6 +31,7 @@ public static class UpdateUser
     {
         public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {
+            ArgumentNullException.ThrowIfNull(command);
             var user = await dbContext.Users
                 .FirstOrDefaultAsync(u => u.Id == command.Id, token);
 
@@ -42,7 +43,7 @@ public static class UpdateUser
             }
 
             // Update basic profile fields
-            user.Email = command.Email.ToLowerInvariant();
+            user.Email = User.NormalizeEmailForDisplay(command.Email);
             user.NormalizedEmail = userManager.NormalizeEmail(command.Email);
             user.UserName = command.Email;
             user.NormalizedUserName = userManager.NormalizeName(command.Email);

@@ -132,6 +132,8 @@ public class PurchaseRequestConfiguration : IEntityTypeConfiguration<PurchaseReq
 
     public void Configure(EntityTypeBuilder<PurchaseRequest> builder)
     {
+        ArgumentNullException.ThrowIfNull(builder);
+
         builder.ToTable("PurchaseRequests");
 
         builder.Property(pr => pr.Id)

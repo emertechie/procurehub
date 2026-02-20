@@ -28,6 +28,7 @@ public static class AssignRole
     {
         public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {
+            ArgumentNullException.ThrowIfNull(command);
             var user = await userManager.FindByIdAsync(command.UserId);
             if (user is null)
             {

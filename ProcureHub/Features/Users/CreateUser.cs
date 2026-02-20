@@ -12,7 +12,7 @@ public static class CreateUser
 {
     public record Command(string Email, string Password, string FirstName, string LastName);
 
-    public class CommandValidator : AbstractValidator<Command>
+    internal sealed class CommandValidator : AbstractValidator<Command>
     {
         public CommandValidator()
         {
@@ -23,13 +23,14 @@ public static class CreateUser
         }
     }
 
-    public class Handler(
+    internal sealed class Handler(
         UserManager<User> userManager,
         ILogger<Handler> logger)
         : ICommandHandler<Command, Result<string>>
     {
         public async Task<Result<string>> HandleAsync(Command command, CancellationToken token)
         {
+            ArgumentNullException.ThrowIfNull(command);
             var now = DateTime.UtcNow;
 
             // Create the ASP.NET Identity user
@@ -37,7 +38,7 @@ public static class CreateUser
             {
                 UserName = command.Email,
                 // Ensure email always stored in lowercase to enable case-insensitive search
-                Email = command.Email.ToLowerInvariant(),
+                Email = User.NormalizeEmailForDisplay(command.Email),
                 FirstName = command.FirstName,
                 LastName = command.LastName,
                 CreatedAt = now,

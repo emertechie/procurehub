@@ -24,6 +24,7 @@ public static class RejectPurchaseRequest
     {
         public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {
+            ArgumentNullException.ThrowIfNull(command);
             var purchaseRequest = await dbContext.PurchaseRequests
                 .FirstOrDefaultAsync(pr => pr.Id == command.Id, token);
 

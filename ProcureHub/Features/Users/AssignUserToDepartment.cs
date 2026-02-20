@@ -11,7 +11,7 @@ public static class AssignUserToDepartment
 {
     public record Command(string Id, Guid? DepartmentId);
 
-    internal class CommandValidator : AbstractValidator<Command>
+    internal sealed class CommandValidator : AbstractValidator<Command>
     {
         public CommandValidator()
         {
@@ -19,7 +19,7 @@ public static class AssignUserToDepartment
         }
     }
 
-    internal class Handler(
+    internal sealed class Handler(
         ApplicationDbContext dbContext,
         ILogger<Handler> logger,
         Instrumentation instrumentation)

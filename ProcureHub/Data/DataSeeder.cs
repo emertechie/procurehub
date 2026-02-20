@@ -115,7 +115,7 @@ public sealed class DataSeeder
     /// which allows test-specific users to override app users that may be merged from base config.
     /// If no test-* users exist, all SeedUsers entries are returned.
     /// </summary>
-    private IEnumerable<IConfigurationSection> GetTestSeedUsers()
+    private List<IConfigurationSection> GetTestSeedUsers()
     {
         var seedUsersSection = _configuration.GetSection("SeedUsers");
         var allUsers = seedUsersSection.GetChildren().ToList();
@@ -123,7 +123,7 @@ public sealed class DataSeeder
         var testUsers = allUsers.Where(u => u.Key.StartsWith("test-", StringComparison.OrdinalIgnoreCase)).ToList();
 
         // If test users exist, use them exclusively. Otherwise fall back to all users (production case).
-        return testUsers.Any() ? testUsers : allUsers;
+        return testUsers.Count > 0 ? testUsers : allUsers;
     }
 
     private async Task SeedUserAsync(string email)
@@ -177,8 +177,10 @@ public sealed class DataSeeder
         var result = await _userManager.CreateAsync(user, password);
         if (!result.Succeeded)
         {
+#pragma warning disable CA2201
             throw new Exception(
                 $"Failed to create user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+#pragma warning restore CA2201
         }
 
         foreach (var roleName in roles)

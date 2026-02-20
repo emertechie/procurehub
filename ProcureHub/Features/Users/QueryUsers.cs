@@ -11,7 +11,7 @@ public static class QueryUsers
 {
     public record Request(string? Email, int? Page, int? PageSize);
 
-    public class RequestValidator : AbstractValidator<Request>
+    internal sealed class RequestValidator : AbstractValidator<Request>
     {
         public RequestValidator()
         {
@@ -25,7 +25,7 @@ public static class QueryUsers
         string Email,
         string FirstName,
         string LastName,
-        string[] Roles,
+        IReadOnlyCollection<string> Roles,
         DateTime? EnabledAt,
         DateTime CreatedAt,
         DateTime UpdatedAt,
@@ -34,11 +34,12 @@ public static class QueryUsers
 
     public record Department(Guid Id, string Name);
 
-    public class Handler(ApplicationDbContext dbContext, UserManager<User> userManager)
+    internal sealed class Handler(ApplicationDbContext dbContext, UserManager<User> userManager)
         : IQueryHandler<Request, PagedResult<Response>>
     {
         public async Task<PagedResult<Response>> HandleAsync(Request request, CancellationToken token)
         {
+            ArgumentNullException.ThrowIfNull(request);
             var normalizedEmail = userManager.NormalizeEmail(request.Email);
 
             var query = dbContext.Users

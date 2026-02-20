@@ -24,6 +24,7 @@ public static class CreateCategory
     {
         public async Task<Result<Guid>> HandleAsync(Command command, CancellationToken token)
         {
+            ArgumentNullException.ThrowIfNull(command);
             var now = DateTime.UtcNow;
             var category = new Category
             {

@@ -38,6 +38,20 @@ tab_width = 4
 # New line preferences
 insert_final_newline = true
 
+# Code Analysis rules
+
+# Allow nested public types (For `CreateCategory.Command` etc)
+dotnet_diagnostic.CA1034.severity = suggestion
+
+# CA2007 : Consider calling ConfigureAwait on the awaited task -> Not application for application code, esp web
+dotnet_diagnostic.CA2007.severity = none
+
+# Warning CA1848 : For improved performance, use the LoggerMessage delegates... -> Ignoring
+dotnet_diagnostic.CA1848.severity = none
+
+# Warning CA1812 : '...' is an internal class that is apparently never instantiated. -> Types are registered in DI container
+dotnet_diagnostic.CA1812.severity = none
+
 # Tests
 [*Tests/**/*.cs]
 max_line_length = 140

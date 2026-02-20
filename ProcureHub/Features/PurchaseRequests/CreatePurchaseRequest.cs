@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Common;
+using ProcureHub.Features.PurchaseRequests.Services;
 using ProcureHub.Features.PurchaseRequests.Validation;
 using ProcureHub.Infrastructure;
 using ProcureHub.Models;
@@ -38,6 +39,7 @@ public static class CreatePurchaseRequest
     {
         public async Task<Result<Guid>> HandleAsync(Command command, CancellationToken token)
         {
+            ArgumentNullException.ThrowIfNull(command);
             var requestNumber = await purchaseRequestNumberGenerator.GenerateAsync(token);
 
             var now = DateTime.UtcNow;

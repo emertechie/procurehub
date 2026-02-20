@@ -17,6 +17,8 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
     public void Configure(EntityTypeBuilder<Category> builder)
     {
+        ArgumentNullException.ThrowIfNull(builder);
+
         builder.ToTable("Categories");
 
         builder.Property(d => d.Id)

@@ -58,6 +58,7 @@ public static class QueryPurchaseRequests
     {
         public async Task<Result<PagedResult<Response>>> HandleAsync(Request request, CancellationToken token)
         {
+            ArgumentNullException.ThrowIfNull(request);
             var currentUser = await currentUserProvider.GetCurrentUserAsync();
 
             if (!currentUser.UserId.HasValue)
@@ -86,10 +87,10 @@ public static class QueryPurchaseRequests
 
             if (!string.IsNullOrWhiteSpace(request.Search))
             {
-                var search = request.Search.ToLower();
                 query = query.Where(pr =>
-                    pr.Title.ToLower().Contains(search) ||
-                    pr.RequestNumber.ToLower().Contains(search));
+                    pr.Title.Contains(request.Search) ||
+                    pr.RequestNumber.Contains(request.Search)
+                );
             }
 
             if (request.DepartmentId.HasValue)
