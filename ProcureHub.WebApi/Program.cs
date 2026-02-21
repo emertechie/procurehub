@@ -67,7 +67,9 @@ void RegisterServices(WebApplicationBuilder appBuilder)
 
             // Handle nullable enums (e.g., PurchaseRequestStatus?)
             var underlyingType = Nullable.GetUnderlyingType(type);
-            var enumType = underlyingType?.IsEnum == true ? underlyingType : (type.IsEnum ? type : null);
+            var enumType = underlyingType?.IsEnum == true
+                ? underlyingType
+                : (type.IsEnum ? type : null);
 
             if (enumType != null)
             {

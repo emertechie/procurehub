@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ProcureHub.WebApi.Infrastructure;
 
-public class CustomResults
+public static class CustomResults
 {
     public static ProblemHttpResult RouteIdMismatch()
     {

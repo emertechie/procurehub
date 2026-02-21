@@ -13,7 +13,7 @@ public class ApplicationSigninManager : SignInManager<Models.User>
         UserManager<Models.User> userManager,
         IHttpContextAccessor contextAccessor, IUserClaimsPrincipalFactory<Models.User> claimsFactory,
         IOptions<IdentityOptions> optionsAccessor,
-        ILogger<SignInManager<Models.User>> logger,
+        ILogger<ApplicationSigninManager> logger,
         IAuthenticationSchemeProvider schemes,
         IUserConfirmation<Models.User> confirmation,
         // Inject application-specific user validator:
