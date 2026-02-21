@@ -178,8 +178,10 @@ public sealed class DataSeeder
         if (!result.Succeeded)
         {
 #pragma warning disable CA2201
+#pragma warning disable S112
             throw new Exception(
                 $"Failed to create user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+#pragma warning restore S112
 #pragma warning restore CA2201
         }
 

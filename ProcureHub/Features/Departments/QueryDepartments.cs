@@ -6,7 +6,9 @@ namespace ProcureHub.Features.Departments;
 
 public static class QueryDepartments
 {
+#pragma warning disable S2094
     public record Request();
+#pragma warning restore S2094
 
     public record Response(Guid Id, string Name);
 

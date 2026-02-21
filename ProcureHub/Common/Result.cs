@@ -32,14 +32,14 @@ public class Result
         return new Result(true);
     }
 
-    public static Result Failure(Error error)
-    {
-        return new Result(false, error);
-    }
-
     public static Result<T> Success<T>(T value)
     {
         return new Result<T>(value);
+    }
+
+    public static Result Failure(Error error)
+    {
+        return new Result(false, error);
     }
 
     public static Result<T> Failure<T>(Error error)

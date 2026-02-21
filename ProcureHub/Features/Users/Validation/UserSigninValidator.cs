@@ -5,18 +5,12 @@ namespace ProcureHub.Features.Users.Validation;
 public class UserSigninValidator
 {
 #pragma warning disable CA1822
+#pragma warning disable S2325
     public Task<bool> CanSignInAsync(User user)
+#pragma warning restore S2325
 #pragma warning restore CA1822
     {
         ArgumentNullException.ThrowIfNull(user);
-        if (!user.EnabledAt.HasValue)
-        {
-            // TODO: set up EventId and log
-            // Logger.LogDebug(EventIds.DisabledUserCannotSignIn, "Disabled user cannot sign in.");
-
-            return Task.FromResult(false);
-        }
-
-        return Task.FromResult(true);
+        return Task.FromResult(user.EnabledAt.HasValue);
     }
 }

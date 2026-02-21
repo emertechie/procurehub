@@ -39,8 +39,6 @@ public static class AssignUserToDepartment
                     $"User with ID '{command.Id}' not found"));
             }
 
-            logger.LogInformation("Found user {UserId}", user.Id);
-
             // If a department is specified, verify it exists
             if (command.DepartmentId.HasValue)
             {
@@ -55,8 +53,6 @@ public static class AssignUserToDepartment
                 }
             }
 
-            logger.LogInformation("Found department {DepartmentId}", command.DepartmentId);
-
             var oldDepartmentId = user.DepartmentId;
 
             instrumentation.DepartmentChangedCounter.Add(1, new TagList
@@ -70,9 +66,9 @@ public static class AssignUserToDepartment
             
             if (activity?.IsAllDataRequested == true)
             {
-                activity?.SetTag("user.id", user.Id);
-                activity?.SetTag("old_department_id", oldDepartmentId);
-                activity?.SetTag("new_department_id", command.DepartmentId);
+                activity.SetTag("user.id", user.Id);
+                activity.SetTag("old_department_id", oldDepartmentId);
+                activity.SetTag("new_department_id", command.DepartmentId);
             }
 
             // Simulate some work

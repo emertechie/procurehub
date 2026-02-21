@@ -52,6 +52,12 @@ dotnet_diagnostic.CA1848.severity = none
 # Warning CA1812 : '...' is an internal class that is apparently never instantiated. -> Types are registered in DI container
 dotnet_diagnostic.CA1812.severity = none
 
+# S2094 : Remove this empty record, write its code or make it an "interface" -> Allowing empty `Request` records for handler type resolution
+dotnet_diagnostic.S2094.severity = none
+
+# S1144 : Remove the unused internal class 'CommandValidator' -> For FluentValidation validators
+dotnet_diagnostic.S1144.severity = none
+
 # Tests
 [*Tests/**/*.cs]
 max_line_length = 140

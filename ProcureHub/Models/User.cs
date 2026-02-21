@@ -63,6 +63,5 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .WithMany(d => d.Users)
             .HasForeignKey(s => s.DepartmentId)
             .OnDelete(DeleteBehavior.Restrict);
-        ;
     }
 }
