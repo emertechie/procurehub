@@ -4,6 +4,9 @@ namespace ProcureHub.Domain.Entities;
 
 public class User : IdentityUser
 {
+    public const int FirstNameMaxLength = 200;
+    public const int LastNameMaxLength = 200;
+
     public virtual ICollection<UserRole> UserRoles { get; init; } = [];
 
     public string FirstName { get; set; } = null!;
@@ -22,7 +25,7 @@ public class User : IdentityUser
 
     public DateTime? DeletedAt { get; set; }
 
-    internal static string NormalizeEmailForDisplay(string email)
+    public static string NormalizeEmailForDisplay(string email)
     {
 #pragma warning disable CA1308
         return email.ToLowerInvariant();

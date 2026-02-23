@@ -6,9 +6,6 @@ namespace ProcureHub.Infrastructure.Database.Configurations;
 
 internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 {
-    public const int FirstNameMaxLength = 200;
-    public const int LastNameMaxLength = 200;
-
     public void Configure(EntityTypeBuilder<User> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -17,11 +14,11 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.FirstName)
             .IsRequired()
-            .HasMaxLength(FirstNameMaxLength);
+            .HasMaxLength(User.FirstNameMaxLength);
 
         builder.Property(u => u.LastName)
             .IsRequired()
-            .HasMaxLength(LastNameMaxLength);
+            .HasMaxLength(User.LastNameMaxLength);
 
         builder.HasMany(e => e.UserRoles)
             .WithOne(e => e.User)
