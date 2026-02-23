@@ -46,7 +46,7 @@ public class PurchaseRequest
     {
         if (Status != PurchaseRequestStatus.Draft)
         {
-            return Result.Failure(PurchaseRequestDomainErrors.CannotSubmitNonDraft);
+            return Result.Failure(PurchaseRequestErrors.CannotSubmitNonDraft);
         }
 
         Status = PurchaseRequestStatus.Pending;
@@ -62,12 +62,12 @@ public class PurchaseRequest
     {
         if (Status != PurchaseRequestStatus.Pending)
         {
-            return Result.Failure(PurchaseRequestDomainErrors.CannotApproveNonPending);
+            return Result.Failure(PurchaseRequestErrors.CannotApproveNonPending);
         }
 
         if (reviewerUserId == RequesterId)
         {
-            return Result.Failure(PurchaseRequestDomainErrors.CannotApproveOwnRequest);
+            return Result.Failure(PurchaseRequestErrors.CannotApproveOwnRequest);
         }
 
         Status = PurchaseRequestStatus.Approved;
@@ -84,7 +84,7 @@ public class PurchaseRequest
     {
         if (Status != PurchaseRequestStatus.Pending)
         {
-            return Result.Failure(PurchaseRequestDomainErrors.CannotRejectNonPending);
+            return Result.Failure(PurchaseRequestErrors.CannotRejectNonPending);
         }
 
         Status = PurchaseRequestStatus.Rejected;
@@ -101,21 +101,21 @@ public class PurchaseRequest
     {
         return Status == PurchaseRequestStatus.Draft
             ? Result.Success()
-            : Result.Failure(PurchaseRequestDomainErrors.CannotUpdateNonDraft);
+            : Result.Failure(PurchaseRequestErrors.CannotUpdateNonDraft);
     }
 
     public Result CanDelete()
     {
         return Status == PurchaseRequestStatus.Draft
             ? Result.Success()
-            : Result.Failure(PurchaseRequestDomainErrors.CannotDeleteNonDraft);
+            : Result.Failure(PurchaseRequestErrors.CannotDeleteNonDraft);
     }
 
     public Result Withdraw()
     {
         if (Status != PurchaseRequestStatus.Pending)
         {
-            return Result.Failure(PurchaseRequestDomainErrors.CannotWithdrawNonPending);
+            return Result.Failure(PurchaseRequestErrors.CannotWithdrawNonPending);
         }
 
         Status = PurchaseRequestStatus.Draft;

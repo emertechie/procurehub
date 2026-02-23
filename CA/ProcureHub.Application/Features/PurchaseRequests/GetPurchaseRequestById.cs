@@ -104,7 +104,7 @@ public static class GetPurchaseRequestById
                 .FirstOrDefaultAsync(token);
 
             return response is null
-                ? Result.Failure<Response>(PurchaseRequestAppErrors.NotFound)
+                ? Result.Failure<Response>(PurchaseRequestErrors.NotFound)
                 : Result.Success(response);
         }
     }

@@ -45,7 +45,7 @@ public static class UpdatePurchaseRequest
 
             if (purchaseRequest is null)
             {
-                return Result.Failure(PurchaseRequestAppErrors.NotFound);
+                return Result.Failure(PurchaseRequestErrors.NotFound);
             }
 
             var result = purchaseRequest.CanUpdate();
@@ -69,12 +69,12 @@ public static class UpdatePurchaseRequest
             catch (DbUpdateException ex) when (
                 dbConstraints.IsForeignKeyViolation(ex, nameof(PurchaseRequest), nameof(Category), nameof(Category.Id)))
             {
-                return Result.Failure<Guid>(PurchaseRequestAppErrors.CategoryNotFound);
+                return Result.Failure<Guid>(PurchaseRequestErrors.CategoryNotFound);
             }
             catch (DbUpdateException ex) when (
                 dbConstraints.IsForeignKeyViolation(ex, nameof(PurchaseRequest), nameof(PurchaseRequest.Department), nameof(Department.Id)))
             {
-                return Result.Failure<Guid>(PurchaseRequestAppErrors.DepartmentNotFound);
+                return Result.Failure<Guid>(PurchaseRequestErrors.DepartmentNotFound);
             }
 
             return Result.Success();

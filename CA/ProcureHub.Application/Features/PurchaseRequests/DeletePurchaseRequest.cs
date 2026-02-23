@@ -28,7 +28,7 @@ public static class DeletePurchaseRequest
 
             if (purchaseRequest is null)
             {
-                return Result.Failure(PurchaseRequestAppErrors.NotFound);
+                return Result.Failure(PurchaseRequestErrors.NotFound);
             }
 
             var result = purchaseRequest.CanDelete();

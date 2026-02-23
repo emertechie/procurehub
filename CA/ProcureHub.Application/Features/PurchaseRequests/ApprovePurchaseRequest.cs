@@ -31,7 +31,7 @@ public static class ApprovePurchaseRequest
 
             if (purchaseRequest is null)
             {
-                return Result.Failure(PurchaseRequestAppErrors.NotFound);
+                return Result.Failure(PurchaseRequestErrors.NotFound);
             }
 
             var result = purchaseRequest.Approve(command.ReviewerUserId);

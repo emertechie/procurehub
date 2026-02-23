@@ -2,7 +2,7 @@ using ProcureHub.Domain.Common;
 
 namespace ProcureHub.Application.Features.PurchaseRequests.Errors;
 
-public static class PurchaseRequestAppErrors
+public static class PurchaseRequestErrors
 {
     public static readonly Error NotFound = Error.NotFound("Purchase request not found");
     public static readonly Error CategoryNotFound = Error.Validation("PurchaseRequest.CategoryNotFound", "Category not found", new Dictionary<string, string[]>

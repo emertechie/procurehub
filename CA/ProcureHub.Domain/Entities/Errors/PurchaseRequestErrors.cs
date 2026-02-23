@@ -2,7 +2,7 @@ using ProcureHub.Domain.Common;
 
 namespace ProcureHub.Domain.Entities.Errors;
 
-public static class PurchaseRequestDomainErrors
+public static class PurchaseRequestErrors
 {
     public static readonly Error CannotSubmitNonDraft = Error.Validation("PurchaseRequest.InvalidStatusTransition", "Invalid status transition", new Dictionary<string, string[]>
     {

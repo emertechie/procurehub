@@ -71,12 +71,12 @@ public static class CreatePurchaseRequest
             catch (DbUpdateException ex) when (
                 dbConstraints.IsForeignKeyViolation(ex, nameof(PurchaseRequest), nameof(Category), nameof(Category.Id)))
             {
-                return Result.Failure<Guid>(PurchaseRequestAppErrors.CategoryNotFound);
+                return Result.Failure<Guid>(PurchaseRequestErrors.CategoryNotFound);
             }
             catch (DbUpdateException ex) when (
                 dbConstraints.IsForeignKeyViolation(ex, nameof(PurchaseRequest), nameof(PurchaseRequest.Department), nameof(Department.Id)))
             {
-                return Result.Failure<Guid>(PurchaseRequestAppErrors.DepartmentNotFound);
+                return Result.Failure<Guid>(PurchaseRequestErrors.DepartmentNotFound);
             }
 
             return Result.Success(purchaseRequest.Id);

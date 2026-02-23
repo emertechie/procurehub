@@ -32,7 +32,7 @@ public static class RejectPurchaseRequest
 
             if (purchaseRequest is null)
             {
-                return Result.Failure(PurchaseRequestAppErrors.NotFound);
+                return Result.Failure(PurchaseRequestErrors.NotFound);
             }
 
             var result = purchaseRequest.Reject(command.ReviewerUserId);
