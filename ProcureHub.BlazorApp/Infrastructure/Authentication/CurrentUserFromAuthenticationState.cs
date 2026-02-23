@@ -9,6 +9,6 @@ internal sealed class AuthStateCurrentUserProvider(AuthenticationStateProvider a
     public async Task<ICurrentUser> GetCurrentUserAsync()
     {
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
-        return new ClaimsPrincipalCurrentUser(authState.User);
+        return new ClaimsPrincipalCurrentUserAdapter(authState.User);
     }
 }

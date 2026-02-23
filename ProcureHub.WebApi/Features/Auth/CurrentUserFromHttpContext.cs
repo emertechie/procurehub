@@ -9,6 +9,6 @@ public sealed class HttpContextCurrentUserProvider(IHttpContextAccessor httpCont
     public Task<ICurrentUser> GetCurrentUserAsync()
     {
         var principal = httpContextAccessor.HttpContext?.User ?? new ClaimsPrincipal(new ClaimsIdentity());
-        return Task.FromResult<ICurrentUser>(new ClaimsPrincipalCurrentUser(principal));
+        return Task.FromResult<ICurrentUser>(new ClaimsPrincipalCurrentUserAdapter(principal));
     }
 }

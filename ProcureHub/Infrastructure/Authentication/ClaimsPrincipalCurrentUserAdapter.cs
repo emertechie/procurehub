@@ -2,7 +2,7 @@ using System.Security.Claims;
 
 namespace ProcureHub.Infrastructure.Authentication;
 
-public sealed class ClaimsPrincipalCurrentUser(ClaimsPrincipal principal)
+public sealed class ClaimsPrincipalCurrentUserAdapter(ClaimsPrincipal principal)
     : ICurrentUser
 {
     public Guid? UserId
