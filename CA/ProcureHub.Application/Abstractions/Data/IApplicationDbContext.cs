@@ -5,11 +5,13 @@ namespace ProcureHub.Application.Abstractions.Data;
 
 public interface IApplicationDbContext
 {
-    public DbSet<Department> Departments { get; set; } 
+    DbSet<User> Users { get; }
     
-    public DbSet<Category> Categories { get; set; }
+    DbSet<Department> Departments { get; } 
     
-    public DbSet<PurchaseRequest> PurchaseRequests { get; set; }
+    DbSet<Category> Categories { get; }
+    
+    DbSet<PurchaseRequest> PurchaseRequests { get; }
     
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

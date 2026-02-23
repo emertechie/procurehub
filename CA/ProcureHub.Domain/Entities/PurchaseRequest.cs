@@ -1,4 +1,5 @@
 using ProcureHub.Domain.Common;
+using ProcureHub.Domain.Entities.Errors;
 
 namespace ProcureHub.Domain.Entities;
 
@@ -12,6 +13,11 @@ public enum PurchaseRequestStatus
 
 public class PurchaseRequest
 {
+    public const int RequestNumberMaxLength = 50;
+    public const int TitleMaxLength = 200;
+    public const int DescriptionMaxLength = 2000;
+    public const int BusinessJustificationMaxLength = 1000;
+
     public Guid Id { get; init; }
     public string RequestNumber { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
@@ -40,7 +46,7 @@ public class PurchaseRequest
     {
         if (Status != PurchaseRequestStatus.Draft)
         {
-            return Result.Failure(PurchaseRequestErrors.CannotSubmitNonDraft);
+            return Result.Failure(PurchaseRequestDomainErrors.CannotSubmitNonDraft);
         }
 
         Status = PurchaseRequestStatus.Pending;
@@ -56,12 +62,12 @@ public class PurchaseRequest
     {
         if (Status != PurchaseRequestStatus.Pending)
         {
-            return Result.Failure(PurchaseRequestErrors.CannotApproveNonPending);
+            return Result.Failure(PurchaseRequestDomainErrors.CannotApproveNonPending);
         }
 
         if (reviewerUserId == RequesterId)
         {
-            return Result.Failure(PurchaseRequestErrors.CannotApproveOwnRequest);
+            return Result.Failure(PurchaseRequestDomainErrors.CannotApproveOwnRequest);
         }
 
         Status = PurchaseRequestStatus.Approved;
@@ -78,7 +84,7 @@ public class PurchaseRequest
     {
         if (Status != PurchaseRequestStatus.Pending)
         {
-            return Result.Failure(PurchaseRequestErrors.CannotRejectNonPending);
+            return Result.Failure(PurchaseRequestDomainErrors.CannotRejectNonPending);
         }
 
         Status = PurchaseRequestStatus.Rejected;
@@ -95,21 +101,21 @@ public class PurchaseRequest
     {
         return Status == PurchaseRequestStatus.Draft
             ? Result.Success()
-            : Result.Failure(PurchaseRequestErrors.CannotUpdateNonDraft);
+            : Result.Failure(PurchaseRequestDomainErrors.CannotUpdateNonDraft);
     }
 
     public Result CanDelete()
     {
         return Status == PurchaseRequestStatus.Draft
             ? Result.Success()
-            : Result.Failure(PurchaseRequestErrors.CannotDeleteNonDraft);
+            : Result.Failure(PurchaseRequestDomainErrors.CannotDeleteNonDraft);
     }
 
     public Result Withdraw()
     {
         if (Status != PurchaseRequestStatus.Pending)
         {
-            return Result.Failure(PurchaseRequestErrors.CannotWithdrawNonPending);
+            return Result.Failure(PurchaseRequestDomainErrors.CannotWithdrawNonPending);
         }
 
         Status = PurchaseRequestStatus.Draft;

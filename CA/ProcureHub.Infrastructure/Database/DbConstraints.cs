@@ -17,6 +17,16 @@ public class DbConstraints : IDbConstraints
         return ex.IsForeignKeyViolation(constraintName);
     }
 
+    public bool IsForeignKeyViolation(
+        DbUpdateException ex,
+        string entityName,
+        string relatedEntityName,
+        string relatedEntityPropertyName)
+    {
+        var constraintName = $"FK_{entityName}_{entityName}_{relatedEntityPropertyName}";
+        return ex.IsForeignKeyViolation(constraintName);
+    }
+
     public bool IsForeignKeyRestrictViolation(DbUpdateException ex, string entityName, string propertyName)
     {
         var constraintName = $"FK_{entityName}_{propertyName}";

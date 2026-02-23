@@ -6,8 +6,6 @@ namespace ProcureHub.Infrastructure.Database.Configurations;
 
 internal sealed class CategoryConfiguration : IEntityTypeConfiguration<Category>
 {
-    public const int NameMaxLength = 100;
-
     public void Configure(EntityTypeBuilder<Category> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -19,7 +17,7 @@ internal sealed class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
         builder.Property(c => c.Name)
             .IsRequired()
-            .HasMaxLength(NameMaxLength);
+            .HasMaxLength(Category.NameMaxLength);
 
         builder.HasIndex(c => c.Name)
             .IsUnique();

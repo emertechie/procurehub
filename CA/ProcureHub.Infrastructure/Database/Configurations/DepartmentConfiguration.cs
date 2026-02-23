@@ -6,8 +6,6 @@ namespace ProcureHub.Infrastructure.Database.Configurations;
 
 public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
 {
-    public const int NameMaxLength = 200;
-
     public void Configure(EntityTypeBuilder<Department> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -19,7 +17,7 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
 
         builder.Property(d => d.Name)
             .IsRequired()
-            .HasMaxLength(NameMaxLength);
+            .HasMaxLength(Department.NameMaxLength);
 
         builder.HasIndex(d => d.Name)
             .IsUnique();

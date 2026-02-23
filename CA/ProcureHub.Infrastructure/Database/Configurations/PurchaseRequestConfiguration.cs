@@ -6,11 +6,6 @@ namespace ProcureHub.Infrastructure.Database.Configurations;
 
 internal sealed class PurchaseRequestConfiguration : IEntityTypeConfiguration<PurchaseRequest>
 {
-    public const int RequestNumberMaxLength = 50;
-    public const int TitleMaxLength = 200;
-    public const int DescriptionMaxLength = 2000;
-    public const int BusinessJustificationMaxLength = 1000;
-
     public void Configure(EntityTypeBuilder<PurchaseRequest> builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
@@ -22,23 +17,23 @@ internal sealed class PurchaseRequestConfiguration : IEntityTypeConfiguration<Pu
 
         builder.Property(pr => pr.RequestNumber)
             .IsRequired()
-            .HasMaxLength(RequestNumberMaxLength);
+            .HasMaxLength(PurchaseRequest.RequestNumberMaxLength);
 
         builder.HasIndex(pr => pr.RequestNumber)
             .IsUnique();
 
         builder.Property(pr => pr.Title)
             .IsRequired()
-            .HasMaxLength(TitleMaxLength);
+            .HasMaxLength(PurchaseRequest.TitleMaxLength);
 
         builder.Property(pr => pr.Description)
-            .HasMaxLength(DescriptionMaxLength);
+            .HasMaxLength(PurchaseRequest.DescriptionMaxLength);
 
         builder.Property(pr => pr.EstimatedAmount)
             .HasPrecision(18, 2);
 
         builder.Property(pr => pr.BusinessJustification)
-            .HasMaxLength(BusinessJustificationMaxLength);
+            .HasMaxLength(PurchaseRequest.BusinessJustificationMaxLength);
 
         builder.Property(pr => pr.Status)
             .IsRequired()
