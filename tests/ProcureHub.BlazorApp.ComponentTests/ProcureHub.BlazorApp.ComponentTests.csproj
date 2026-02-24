@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ProcureHub.BlazorApp\ProcureHub.BlazorApp.csproj" />
+    <ProjectReference Include="..\..\src\ProcureHub.BlazorApp\ProcureHub.BlazorApp.csproj" />
   </ItemGroup>
 
 </Project>
