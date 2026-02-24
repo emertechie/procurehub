@@ -1,10 +1,9 @@
 using Bunit;
 using NSubstitute;
+using ProcureHub.Application.Common.Pagination;
+using ProcureHub.Application.Features.Users;
 using ProcureHub.BlazorApp.Tests.Infrastructure;
-using ProcureHub.Common;
-using ProcureHub.Common.Pagination;
-using ProcureHub.Features.Users;
-using ProcureHub.Infrastructure;
+using ProcureHub.Domain.Common;
 using Radzen;
 
 namespace ProcureHub.BlazorApp.Tests.Features.Users;
@@ -25,7 +24,7 @@ public class UsersIndexTests : BlazorTestContext
             CreatedAt: DateTime.UtcNow,
             UpdatedAt: DateTime.UtcNow,
             DeletedAt: null,
-            Department: new QueryUsers.Department(Guid.NewGuid(), "Engineering")),
+            Department: new QueryUsers.DepartmentInfo(Guid.NewGuid(), "Engineering")),
         new(
             Id: Guid.NewGuid().ToString(),
             Email: "bob@example.com",

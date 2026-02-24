@@ -2,8 +2,7 @@ using Bunit;
 using Bunit.TestDoubles;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
-using ProcureHub.Common.Pagination;
-using ProcureHub.Infrastructure;
+using ProcureHub.Application.Common;
 using Radzen;
 
 namespace ProcureHub.BlazorApp.Tests.Infrastructure;
