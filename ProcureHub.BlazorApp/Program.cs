@@ -12,6 +12,7 @@ using ProcureHub.BlazorApp.Components.Pages.Requests;
 using ProcureHub.BlazorApp.Infrastructure;
 using ProcureHub.BlazorApp.Infrastructure.Authentication;
 using ProcureHub.Domain.Entities;
+using ProcureHub.Infrastructure;
 using ProcureHub.Infrastructure.Database;
 using ProcureHub.Infrastructure.Hosting;
 using Radzen;
@@ -56,10 +57,7 @@ builder.Services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.Authentic
 });
 
 var connectionString = DatabaseConnectionString.GetConnectionString(builder.Configuration);
-
-builder.Services.AddSqlServerDbContext<ApplicationDbContext>(connectionString);
-builder.Services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
-builder.Services.AddScoped<IDbConstraints, DbConstraints>();
+builder.Services.AddInfrastructureServices(connectionString);
 
 builder.Services.AddIdentityCore<User>(options =>
     {
