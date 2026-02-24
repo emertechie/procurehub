@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Identity.Web;
 using ProcureHub.Application;
+using ProcureHub.Application.Abstractions.Data;
 using ProcureHub.Application.Abstractions.Identity;
 using ProcureHub.BlazorApp.Components;
 using ProcureHub.BlazorApp.Components.Account;
@@ -57,6 +58,8 @@ builder.Services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.Authentic
 var connectionString = DatabaseConnectionString.GetConnectionString(builder.Configuration);
 
 builder.Services.AddSqlServerDbContext<ApplicationDbContext>(connectionString);
+builder.Services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
+builder.Services.AddScoped<IDbConstraints, DbConstraints>();
 
 builder.Services.AddIdentityCore<User>(options =>
     {

@@ -11,7 +11,7 @@ public static class DependencyInjection
     {
         services.AddScoped<PurchaseRequestNumberGenerator>();
         services.AddRequestHandlers();
-        // services.AddSingleton<Instrumentation>();
+        services.AddSingleton<Instrumentation>();
 
         return services;
     }

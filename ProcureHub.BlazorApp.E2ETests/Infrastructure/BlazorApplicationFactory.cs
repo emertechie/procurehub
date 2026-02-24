@@ -88,12 +88,11 @@ public sealed class BlazorApplicationFactory(
             services.RemoveAll<DbContextOptions<ApplicationDbContext>>();
             services.RemoveAll<ApplicationDbContext>();
 
-            // TODO:
-            const migrationsAssembly = typeof()
+            var migrationsAssembly = typeof(ProcureHub.Infrastructure.Migrations.Initial).Assembly.GetName().Name;
 
             // Add SQL Server database for tests
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString, sqlOpts => sqlOpts.MigrationsAssembly("ProcureHub"))
+                options.UseSqlServer(connectionString, sqlOpts => sqlOpts.MigrationsAssembly(migrationsAssembly))
                     .EnableSensitiveDataLogging());
 
             // Build service provider and run migrations once

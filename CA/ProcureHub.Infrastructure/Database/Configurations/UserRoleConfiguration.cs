@@ -10,7 +10,7 @@ internal sealed class UserRoleConfiguration : IEntityTypeConfiguration<UserRole>
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        builder.ToTable("UserRoles");
+        builder.ToTable("AspNetUserRoles");
 
         builder.HasKey(ur => new { ur.UserId, ur.RoleId });
     }
