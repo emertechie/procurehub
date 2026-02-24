@@ -1,6 +1,4 @@
-using Microsoft.Extensions.Configuration;
-
-namespace ProcureHub.Infrastructure.Hosting;
+namespace ProcureHub.BlazorApp.Infrastructure;
 
 public static class DatabaseConnectionString
 {
@@ -9,6 +7,8 @@ public static class DatabaseConnectionString
         string name = "DefaultConnection",
         string passwordKey = "DatabasePassword")
     {
+        ArgumentNullException.ThrowIfNull(configuration);
+
         var connectionString = configuration.GetConnectionString(name)
             ?? throw new InvalidOperationException($"Connection string '{name}' not found.");
 

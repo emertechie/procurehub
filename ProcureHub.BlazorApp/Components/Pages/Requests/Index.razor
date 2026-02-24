@@ -2,13 +2,12 @@
 @attribute [Authorize]
 @layout AuthenticatedLayout
 
+@using ProcureHub.Application.Abstractions.Identity
+@using ProcureHub.Application.Common.Pagination
+@using ProcureHub.Application.Features.Departments
+@using ProcureHub.Application.Features.PurchaseRequests
 @using ProcureHub.BlazorApp.Helpers
-@using ProcureHub.Features.PurchaseRequests
-@using ProcureHub.Features.Departments
-@using ProcureHub.Common.Pagination
-@using ProcureHub.Infrastructure
-@using ProcureHub.Infrastructure.Authentication
-@using ProcureHub.Models
+@using ProcureHub.Domain.Entities
 
 @inject IQueryHandler<QueryPurchaseRequests.Request, Result<PagedResult<QueryPurchaseRequests.Response>>> QueryPurchaseRequestsHandler
 @inject IQueryHandler<QueryDepartments.Request, QueryDepartments.Response[]> QueryDepartmentsHandler

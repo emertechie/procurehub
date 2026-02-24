@@ -39,14 +39,16 @@
     </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ProcureHub\ProcureHub.csproj" />
-    <ProjectReference Include="..\ProcureHub.Infrastructure.Hosting\ProcureHub.Infrastructure.Hosting.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Update="appsettings.Staging.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CA\ProcureHub.Application\ProcureHub.Application.csproj" />
+    <ProjectReference Include="..\CA\ProcureHub.Domain\ProcureHub.Domain.csproj" />
+    <ProjectReference Include="..\CA\ProcureHub.Infrastructure\ProcureHub.Infrastructure.csproj" />
+    <ProjectReference Include="..\ProcureHub.Infrastructure.Hosting\ProcureHub.Infrastructure.Hosting.csproj" />
   </ItemGroup>
 
 </Project>

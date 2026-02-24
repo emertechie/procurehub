@@ -26,7 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ProcureHub\ProcureHub.csproj" />
+    <ProjectReference Include="..\CA\ProcureHub.Application\ProcureHub.Application.csproj" />
+    <ProjectReference Include="..\CA\ProcureHub.Domain\ProcureHub.Domain.csproj" />
+    <ProjectReference Include="..\CA\ProcureHub.Infrastructure\ProcureHub.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

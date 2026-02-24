@@ -17,8 +17,4 @@
       <ProjectReference Include="..\ProcureHub.Domain\ProcureHub.Domain.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Validation\" />
-    </ItemGroup>
-
 </Project>

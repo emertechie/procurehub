@@ -13,5 +13,5 @@ public interface IApplicationDbContext
     
     DbSet<PurchaseRequest> PurchaseRequests { get; }
     
-    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

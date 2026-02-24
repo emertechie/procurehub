@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using ProcureHub.Models;
+using ProcureHub.Domain.Entities;
 
 namespace ProcureHub.BlazorApp.Components.Account;
 

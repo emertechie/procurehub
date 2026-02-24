@@ -61,7 +61,7 @@ public static class Extensions
             .ConfigureResource(resource => resource
                 .AddService(
                     serviceName: builder.Environment.ApplicationName,
-                    serviceVersion: typeof(ApplicationDbContext).Assembly.GetName().Version?.ToString() ?? "unknown",
+                    serviceVersion: typeof(ProcureHub.Application.DependencyInjection).Assembly.GetName().Version?.ToString() ?? "unknown",
                     serviceInstanceId: Environment.MachineName));
 
         builder.AddOpenTelemetryExporters();

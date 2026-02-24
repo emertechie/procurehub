@@ -3,15 +3,16 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Identity.Web;
-using ProcureHub;
+using ProcureHub.Application;
+using ProcureHub.Application.Abstractions.Identity;
 using ProcureHub.BlazorApp.Components;
 using ProcureHub.BlazorApp.Components.Account;
 using ProcureHub.BlazorApp.Components.Pages.Requests;
+using ProcureHub.BlazorApp.Infrastructure;
 using ProcureHub.BlazorApp.Infrastructure.Authentication;
-using ProcureHub.Infrastructure;
-using ProcureHub.Infrastructure.Authentication;
+using ProcureHub.Domain.Entities;
+using ProcureHub.Infrastructure.Database;
 using ProcureHub.Infrastructure.Hosting;
-using ProcureHub.Models;
 using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,7 +22,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddRadzenComponents();
-builder.Services.AddDomainServices();
+builder.Services.AddApplicationServices();
 builder.Services.AddValidatorsFromAssemblyContaining<PurchaseRequestFormModelValidator>(ServiceLifetime.Singleton);
 
 builder.Services.AddCascadingAuthenticationState();

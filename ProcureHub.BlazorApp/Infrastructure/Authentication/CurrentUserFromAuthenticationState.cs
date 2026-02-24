@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components.Authorization;
+using ProcureHub.Application.Abstractions.Identity;
 using ProcureHub.Infrastructure.Authentication;
 
 namespace ProcureHub.BlazorApp.Infrastructure.Authentication;

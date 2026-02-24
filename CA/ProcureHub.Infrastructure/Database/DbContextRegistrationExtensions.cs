@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ProcureHub.Infrastructure.Hosting;
+namespace ProcureHub.Infrastructure.Database;
 
 public static class DbContextRegistrationExtensions
 {

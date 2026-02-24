@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using ProcureHub.BlazorApp.Components.Account.Pages;
 using ProcureHub.BlazorApp.Components.Account.Pages.Manage;
-using ProcureHub.Models;
+using ProcureHub.Domain.Entities;
 
 namespace Microsoft.AspNetCore.Routing;
 

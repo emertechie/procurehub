@@ -3,8 +3,9 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using ProcureHub.Data;
-using ProcureHub.Models;
+using ProcureHub.Domain.Entities;
+using ProcureHub.Infrastructure.Database;
+using ProcureHub.Infrastructure.Database.Seeding;
 using Respawn;
 
 namespace ProcureHub.BlazorApp.E2ETests.Infrastructure;

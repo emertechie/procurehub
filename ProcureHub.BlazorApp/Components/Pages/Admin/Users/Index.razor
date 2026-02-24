@@ -2,10 +2,9 @@
 @attribute [Authorize(Roles = "Admin")]
 @layout AuthenticatedLayout
 
+@using ProcureHub.Application.Common.Pagination
 @using ProcureHub.BlazorApp.Helpers
-@using ProcureHub.Features.Users
-@using ProcureHub.Common.Pagination
-@using ProcureHub.Infrastructure
+@using ProcureHub.Application.Features.Users
 
 @inject IQueryHandler<QueryUsers.Request, PagedResult<QueryUsers.Response>> QueryUsersHandler
 @inject ICommandHandler<EnableUser.Command, Result> EnableUserHandler

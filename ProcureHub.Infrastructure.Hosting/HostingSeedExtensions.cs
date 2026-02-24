@@ -4,8 +4,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using ProcureHub.Data;
-using ProcureHub.Models;
+using ProcureHub.Application.Abstractions.Data;
+using ProcureHub.Domain.Entities;
+using ProcureHub.Infrastructure.Database.Seeding;
 
 namespace ProcureHub.Infrastructure.Hosting;
 
@@ -24,7 +25,7 @@ public static class HostingSeedExtensions
         }
 
         using var scope = app.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
 
         var seeder = new DataSeeder(
             dbContext,

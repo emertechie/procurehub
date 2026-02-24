@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ProcureHub.Infrastructure.Database;
 
 namespace ProcureHub.BlazorApp.E2ETests.Infrastructure;
 
@@ -86,6 +87,9 @@ public sealed class BlazorApplicationFactory(
             // Remove existing DbContext registration
             services.RemoveAll<DbContextOptions<ApplicationDbContext>>();
             services.RemoveAll<ApplicationDbContext>();
+
+            // TODO:
+            const migrationsAssembly = typeof()
 
             // Add SQL Server database for tests
             services.AddDbContext<ApplicationDbContext>(options =>

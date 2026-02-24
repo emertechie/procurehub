@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
-using ProcureHub.Models;
+using ProcureHub.Domain.Entities;
 
 namespace ProcureHub.BlazorApp.Components.Account;
 

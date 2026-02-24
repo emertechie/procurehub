@@ -1,5 +1,5 @@
 using FluentValidation;
-using ProcureHub.Models;
+using ProcureHub.Domain.Entities;
 
 namespace ProcureHub.BlazorApp.Components.Pages.Requests;
 
@@ -19,16 +19,16 @@ public class PurchaseRequestFormModelValidator : AbstractValidator<PurchaseReque
     {
         RuleFor(m => m.Title)
             .NotEmpty()
-            .MaximumLength(PurchaseRequestConfiguration.TitleMaxLength);
+            .MaximumLength(PurchaseRequest.TitleMaxLength);
 
         RuleFor(m => m.Description)
-            .MaximumLength(PurchaseRequestConfiguration.DescriptionMaxLength);
+            .MaximumLength(PurchaseRequest.DescriptionMaxLength);
 
         RuleFor(m => m.EstimatedAmount)
             .GreaterThan(0);
 
         RuleFor(m => m.BusinessJustification)
-            .MaximumLength(PurchaseRequestConfiguration.BusinessJustificationMaxLength);
+            .MaximumLength(PurchaseRequest.BusinessJustificationMaxLength);
 
         RuleFor(m => m.CategoryId)
             .NotEmpty().WithMessage("'Category' must not be empty.");

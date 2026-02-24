@@ -1,14 +1,12 @@
 @page "/requests/{Id:guid}"
 @attribute [Authorize]
-@layout AuthenticatedLayout
 
-@using Blazilla
-@using ProcureHub.Features.Categories
-@using ProcureHub.Features.Departments
-@using ProcureHub.Features.PurchaseRequests
-@using ProcureHub.Infrastructure
-@using ProcureHub.Infrastructure.Authentication
-@using ProcureHub.Models
+@layout AuthenticatedLayout
+@using ProcureHub.Application.Abstractions.Identity
+@using ProcureHub.Application.Features.Categories
+@using ProcureHub.Application.Features.Departments
+@using ProcureHub.Application.Features.PurchaseRequests
+@using ProcureHub.Domain.Entities
 
 @inject IQueryHandler<GetPurchaseRequestById.Request, Result<GetPurchaseRequestById.Response>> GetByIdHandler
 @inject IQueryHandler<QueryCategories.Request, QueryCategories.Response[]> QueryCategoriesHandler

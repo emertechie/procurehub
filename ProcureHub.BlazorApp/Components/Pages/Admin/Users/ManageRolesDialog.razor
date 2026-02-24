@@ -1,10 +1,10 @@
-@using ProcureHub.Features.Roles
-@using ProcureHub.Features.Users
+@using ProcureHub.Application.Features.Roles
+@using ProcureHub.Application.Features.Users
 @using ProcureHub.Infrastructure
 
 @inject DialogService DialogService
 @inject NotificationService NotificationService
-@inject IQueryHandler<QueryRoles.Request, QueryRoles.Role[]> QueryRolesHandler
+@inject IQueryHandler<QueryRoles.Request, QueryRoles.RoleInfo[]> QueryRolesHandler
 @inject IQueryHandler<GetUserById.Request, GetUserById.Response?> GetUserHandler
 @inject ICommandHandler<AssignRole.Command, Result> AssignRoleHandler
 @inject ICommandHandler<RemoveRole.Command, Result> RemoveRoleHandler
@@ -40,7 +40,7 @@
 @code {
     [Parameter] public Guid UserId { get; set; }
 
-    private QueryRoles.Role[] _allRoles = [];
+    private QueryRoles.RoleInfo[] _allRoles = [];
     private IEnumerable<string> _selectedRoleIds = [];
     private HashSet<string> _originalRoleIds = [];
     private bool _isLoading = true;
