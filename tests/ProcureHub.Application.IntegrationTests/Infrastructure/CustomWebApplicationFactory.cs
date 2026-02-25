@@ -6,6 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using ProcureHub.Application.Abstractions.Identity;
+using ProcureHub.Application.IntegrationTests.Infrastructure.Identity;
 using ProcureHub.Infrastructure.Database;
 using Xunit;
 
@@ -47,6 +49,11 @@ public class CustomWebApplicationFactory(string connectionString)
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString, options => options.MigrationsAssembly(migrationsAssembly))
                     .EnableSensitiveDataLogging());
+
+            services.RemoveAll<ICurrentUserProvider>();
+            services.AddSingleton<TestCurrentUserAccessor>();
+            services.AddScoped<ICurrentUserProvider, TestCurrentUserProvider>();
+            services.AddScoped<IdentityTestDataBuilder>();
 
             // Create & migrate database
             lock (Lock)
