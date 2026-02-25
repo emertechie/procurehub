@@ -55,18 +55,6 @@ public abstract class BlazorTestContext : BunitContext
     }
 
     /// <summary>
-    /// Registers a mock ICommandHandler{TCommand} (void return) that completes successfully.
-    /// </summary>
-    protected ICommandHandler<TCommand> AddMockCommandHandler<TCommand>()
-    {
-        var handler = Substitute.For<ICommandHandler<TCommand>>();
-        handler.HandleAsync(Arg.Any<TCommand>(), Arg.Any<CancellationToken>())
-            .Returns(Task.CompletedTask);
-        Services.AddSingleton(handler);
-        return handler;
-    }
-
-    /// <summary>
     /// Sets up auth context as an authorized user with the given roles.
     /// </summary>
     protected void AuthorizeWithRoles(params string[] roles)

@@ -19,7 +19,6 @@ public static class DependencyInjection
     /// <summary>
     /// Scans the current assembly for concrete classes implementing
     /// <see cref="IQueryHandler{TRequest,TResponse}"/> or <see cref="ICommandHandler{TCommand, TResponse}"/>
-    /// or <see cref="ICommandHandler{TCommand}"/>
     /// and registers them as transient services in the provided <paramref name="services"/> collection.
     /// Also decorates all handlers with validation decorators.
     /// </summary>
@@ -36,8 +35,7 @@ public static class DependencyInjection
             var interfaces = type.GetInterfaces()
                 .Where(i => i.IsGenericType &&
                             (i.GetGenericTypeDefinition() == typeof(IQueryHandler<,>) ||
-                             i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>) ||
-                             i.GetGenericTypeDefinition() == typeof(ICommandHandler<>)));
+                             i.GetGenericTypeDefinition() == typeof(ICommandHandler<,>)));
 
             foreach (var @interface in interfaces)
             {
@@ -48,7 +46,6 @@ public static class DependencyInjection
         // Wrap all handlers with validation decorator
         services.Decorate(typeof(IQueryHandler<,>), typeof(ValidationQueryHandlerDecorator<,>));
         services.Decorate(typeof(ICommandHandler<,>), typeof(ValidationCommandHandlerDecorator<,>));
-        services.TryDecorate(typeof(ICommandHandler<>), typeof(ValidationCommandHandlerDecorator<>));
 
         return services;
     }

@@ -28,19 +28,6 @@ public class ValidationCommandHandlerDecorator<TCommand, TResponse>(
     }
 }
 
-/// <summary>Validation decorator for command handlers without response</summary>
-public class ValidationCommandHandlerDecorator<TCommand>(
-    ICommandHandler<TCommand> inner,
-    IValidator<TCommand>? validator = null
-) : ICommandHandler<TCommand>
-{
-    public async Task HandleAsync(TCommand command, CancellationToken token)
-    {
-        await ValidationHelper.ValidateAsync(validator, command, token);
-        await inner.HandleAsync(command, token);
-    }
-}
-
 file static class ValidationHelper
 {
     public static async Task ValidateAsync<T>(IValidator<T>? validator, T request, CancellationToken token)
