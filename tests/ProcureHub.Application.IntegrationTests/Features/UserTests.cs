@@ -1,5 +1,5 @@
 using ProcureHub.Application.IntegrationTests.Infrastructure.BaseTestTypes;
-using ProcureHub.Application.IntegrationTests.Infrastructure.xUnit;
+using ProcureHub.Application.IntegrationTests.Infrastructure.Xunit;
 using Xunit;
 
 namespace ProcureHub.Application.IntegrationTests.Features;
