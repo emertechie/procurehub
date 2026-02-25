@@ -4,10 +4,7 @@
 
 @inject DialogService DialogService
 @inject NotificationService NotificationService
-@inject IRequestHandler<QueryRoles.Request, QueryRoles.RoleInfo[]> QueryRolesHandler
-@inject IRequestHandler<GetUserById.Request, GetUserById.Response?> GetUserHandler
-@inject IRequestHandler<AssignRole.Command, Result> AssignRoleHandler
-@inject IRequestHandler<RemoveRole.Command, Result> RemoveRoleHandler
+@inject IRequestDispatcher RequestDispatcher
 
 <RadzenStack Gap="1rem">
     @if (_errorMessage != null)
@@ -59,10 +56,10 @@
         try
         {
             // Load all available roles
-            _allRoles = await QueryRolesHandler.HandleAsync(new QueryRoles.Request(), CancellationToken.None);
+            _allRoles = await RequestDispatcher.SendAsync(new QueryRoles.Request(), CancellationToken.None);
 
             // Load user's current roles
-            var user = await GetUserHandler.HandleAsync(new GetUserById.Request(UserId.ToString()), CancellationToken.None);
+            var user = await RequestDispatcher.SendAsync(new GetUserById.Request(UserId.ToString()), CancellationToken.None);
             if (user == null)
             {
                 _errorMessage = "User not found";
@@ -101,7 +98,7 @@
             // Add new roles
             foreach (var roleId in rolesToAdd)
             {
-                var result = await AssignRoleHandler.HandleAsync(
+                var result = await RequestDispatcher.SendAsync(
                     new AssignRole.Command(UserId.ToString(), roleId),
                     CancellationToken.None);
 
@@ -115,7 +112,7 @@
             // Remove unselected roles
             foreach (var roleId in rolesToRemove)
             {
-                var result = await RemoveRoleHandler.HandleAsync(
+                var result = await RequestDispatcher.SendAsync(
                     new RemoveRole.Command(UserId.ToString(), roleId),
                     CancellationToken.None);
 

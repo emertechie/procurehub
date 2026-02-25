@@ -7,10 +7,7 @@
 @using ProcureHub.Application.Features.Departments
 @using ProcureHub.Application.Features.PurchaseRequests
 
-@inject IRequestHandler<QueryCategories.Request, QueryCategories.Response[]> QueryCategoriesHandler
-@inject IRequestHandler<QueryDepartments.Request, QueryDepartments.Response[]> QueryDepartmentsHandler
-@inject IRequestHandler<CreatePurchaseRequest.Command, Result<Guid>> CreateHandler
-@inject IRequestHandler<SubmitPurchaseRequest.Command, Result> SubmitHandler
+@inject IRequestDispatcher RequestDispatcher
 @inject ICurrentUserProvider CurrentUserProvider
 @inject NotificationService NotificationService
 @inject NavigationManager Navigation
@@ -80,8 +77,8 @@
     protected override async Task OnInitializedAsync()
     {
         _editContext = new EditContext(_model);
-        _categories = await QueryCategoriesHandler.HandleAsync(new QueryCategories.Request(), CancellationToken.None);
-        _departments = await QueryDepartmentsHandler.HandleAsync(new QueryDepartments.Request(), CancellationToken.None);
+        _categories = await RequestDispatcher.SendAsync(new QueryCategories.Request(), CancellationToken.None);
+        _departments = await RequestDispatcher.SendAsync(new QueryDepartments.Request(), CancellationToken.None);
     }
 
     private async Task SubmitForm(bool submitAfterCreate)
@@ -126,7 +123,7 @@
                 currentUser.UserId.Value.ToString()
             );
 
-            var createResult = await CreateHandler.HandleAsync(command, CancellationToken.None);
+            var createResult = await RequestDispatcher.SendAsync(command, CancellationToken.None);
             if (createResult.IsFailure)
             {
                 _errorMessage = createResult.Error.Message;
@@ -135,7 +132,7 @@
 
             if (_submitAfterCreate)
             {
-                var submitResult = await SubmitHandler.HandleAsync(
+                var submitResult = await RequestDispatcher.SendAsync(
                     new SubmitPurchaseRequest.Command(createResult.Value), CancellationToken.None);
 
                 if (submitResult.IsFailure)

@@ -8,13 +8,7 @@
 @using ProcureHub.Application.Features.PurchaseRequests
 @using ProcureHub.Domain.Entities
 
-@inject IRequestHandler<GetPurchaseRequestById.Request, Result<GetPurchaseRequestById.Response>> GetByIdHandler
-@inject IRequestHandler<QueryCategories.Request, QueryCategories.Response[]> QueryCategoriesHandler
-@inject IRequestHandler<QueryDepartments.Request, QueryDepartments.Response[]> QueryDepartmentsHandler
-@inject IRequestHandler<UpdatePurchaseRequest.Command, Result> UpdateHandler
-@inject IRequestHandler<SubmitPurchaseRequest.Command, Result> SubmitHandler
-@inject IRequestHandler<WithdrawPurchaseRequest.Command, Result> WithdrawHandler
-@inject IRequestHandler<DeletePurchaseRequest.Command, Result> DeleteHandler
+@inject IRequestDispatcher RequestDispatcher
 @inject ICurrentUserProvider CurrentUserProvider
 @inject NotificationService NotificationService
 @inject DialogService DialogService
@@ -206,8 +200,8 @@ else if (_request != null)
 
     protected override async Task OnInitializedAsync()
     {
-        _categories = await QueryCategoriesHandler.HandleAsync(new QueryCategories.Request(), CancellationToken.None);
-        _departments = await QueryDepartmentsHandler.HandleAsync(new QueryDepartments.Request(), CancellationToken.None);
+        _categories = await RequestDispatcher.SendAsync(new QueryCategories.Request(), CancellationToken.None);
+        _departments = await RequestDispatcher.SendAsync(new QueryDepartments.Request(), CancellationToken.None);
         await LoadRequest();
     }
 
@@ -225,7 +219,7 @@ else if (_request != null)
                 return;
             }
 
-            var result = await GetByIdHandler.HandleAsync(
+            var result = await RequestDispatcher.SendAsync(
                 new GetPurchaseRequestById.Request(Id, currentUser.UserId.Value.ToString()),
                 CancellationToken.None);
 
@@ -309,7 +303,7 @@ else if (_request != null)
                 _model.DepartmentId!.Value
             );
 
-            var result = await UpdateHandler.HandleAsync(command, CancellationToken.None);
+            var result = await RequestDispatcher.SendAsync(command, CancellationToken.None);
 
             if (result.IsFailure)
             {
@@ -350,7 +344,7 @@ else if (_request != null)
                 _model.DepartmentId!.Value
             );
 
-            var updateResult = await UpdateHandler.HandleAsync(updateCommand, CancellationToken.None);
+            var updateResult = await RequestDispatcher.SendAsync(updateCommand, CancellationToken.None);
 
             if (updateResult.IsFailure)
             {
@@ -359,7 +353,7 @@ else if (_request != null)
             }
 
             // Then submit
-            var submitResult = await SubmitHandler.HandleAsync(new SubmitPurchaseRequest.Command(Id), CancellationToken.None);
+            var submitResult = await RequestDispatcher.SendAsync(new SubmitPurchaseRequest.Command(Id), CancellationToken.None);
 
             if (submitResult.IsFailure)
             {
@@ -382,7 +376,7 @@ else if (_request != null)
 
         try
         {
-            var result = await WithdrawHandler.HandleAsync(new WithdrawPurchaseRequest.Command(Id), CancellationToken.None);
+            var result = await RequestDispatcher.SendAsync(new WithdrawPurchaseRequest.Command(Id), CancellationToken.None);
 
             if (result.IsFailure)
             {
@@ -415,7 +409,7 @@ else if (_request != null)
 
         try
         {
-            var result = await DeleteHandler.HandleAsync(new DeletePurchaseRequest.Command(Id), CancellationToken.None);
+            var result = await RequestDispatcher.SendAsync(new DeletePurchaseRequest.Command(Id), CancellationToken.None);
 
             if (result.IsFailure)
             {

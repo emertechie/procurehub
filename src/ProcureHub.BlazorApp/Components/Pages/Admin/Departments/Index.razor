@@ -5,8 +5,7 @@
 @using ProcureHub.BlazorApp.Helpers
 @using ProcureHub.Application.Features.Departments
 
-@inject IRequestHandler<QueryDepartments.Request, QueryDepartments.Response[]> QueryDepartmentsHandler
-@inject IRequestHandler<DeleteDepartment.Command, Result> DeleteDepartmentHandler
+@inject IRequestDispatcher RequestDispatcher
 @inject DialogService DialogService
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService
@@ -58,7 +57,7 @@
     {
         using (new BusyScope(b => _loading = b))
         {
-            _departments = await QueryDepartmentsHandler.HandleAsync(new QueryDepartments.Request(), CancellationToken.None);
+            _departments = await RequestDispatcher.SendAsync(new QueryDepartments.Request(), CancellationToken.None);
         }
     }
 
@@ -104,7 +103,7 @@
 
         if (confirmed == true)
         {
-            var result = await DeleteDepartmentHandler.HandleAsync(new DeleteDepartment.Command(dept.Id), CancellationToken.None);
+            var result = await RequestDispatcher.SendAsync(new DeleteDepartment.Command(dept.Id), CancellationToken.None);
             if (result.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Success, "Success", "Department deleted");

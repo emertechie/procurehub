@@ -25,6 +25,7 @@ public abstract class BlazorTestContext : BunitContext
         Services.AddScoped<NotificationService>();
         Services.AddScoped<TooltipService>();
         Services.AddScoped<ContextMenuService>();
+        Services.AddScoped<IRequestDispatcher, RequestDispatcher>();
 
         // Enable fake authorization support
         AuthContext = this.AddAuthorization();

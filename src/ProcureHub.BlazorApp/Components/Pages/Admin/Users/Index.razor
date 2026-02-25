@@ -6,9 +6,7 @@
 @using ProcureHub.BlazorApp.Helpers
 @using ProcureHub.Application.Features.Users
 
-@inject IRequestHandler<QueryUsers.Request, PagedResult<QueryUsers.Response>> QueryUsersHandler
-@inject IRequestHandler<EnableUser.Command, Result> EnableUserHandler
-@inject IRequestHandler<DisableUser.Command, Result> DisableUserHandler
+@inject IRequestDispatcher RequestDispatcher
 @inject DialogService DialogService
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService
@@ -167,7 +165,7 @@
 
         using (new BusyScope(b => _loading = b))
         {
-            _pagedUsers = await QueryUsersHandler.HandleAsync(request, CancellationToken.None);
+            _pagedUsers = await RequestDispatcher.SendAsync(request, CancellationToken.None);
         }
     }
 
@@ -237,7 +235,7 @@
 
         if (confirmed == true)
         {
-            var result = await EnableUserHandler.HandleAsync(new EnableUser.Command(userId.ToString()), CancellationToken.None);
+            var result = await RequestDispatcher.SendAsync(new EnableUser.Command(userId.ToString()), CancellationToken.None);
             if (result.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Success, "Success", "User enabled");
@@ -260,7 +258,7 @@
 
         if (confirmed == true)
         {
-            var result = await DisableUserHandler.HandleAsync(new DisableUser.Command(userId.ToString()), CancellationToken.None);
+            var result = await RequestDispatcher.SendAsync(new DisableUser.Command(userId.ToString()), CancellationToken.None);
             if (result.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Success, "Success", "User disabled");

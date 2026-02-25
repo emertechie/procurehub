@@ -2,8 +2,7 @@
 
 @inject DialogService DialogService
 @inject NotificationService NotificationService
-@inject IRequestHandler<CreateDepartment.Command, Result<Guid>> CreateDepartmentHandler
-@inject IRequestHandler<UpdateDepartment.Command, Result> UpdateDepartmentHandler
+@inject IRequestDispatcher RequestDispatcher
 
 <RadzenStack Gap="1rem">
     @if (_errorMessage != null)
@@ -51,7 +50,7 @@
             if (IsEdit)
             {
                 var command = new UpdateDepartment.Command(DepartmentId!.Value, _name);
-                var result = await UpdateDepartmentHandler.HandleAsync(command, CancellationToken.None);
+                var result = await RequestDispatcher.SendAsync(command, CancellationToken.None);
 
                 if (result.IsSuccess)
                 {
@@ -66,7 +65,7 @@
             else
             {
                 var command = new CreateDepartment.Command(_name);
-                var result = await CreateDepartmentHandler.HandleAsync(command, CancellationToken.None);
+                var result = await RequestDispatcher.SendAsync(command, CancellationToken.None);
 
                 if (result.IsSuccess)
                 {

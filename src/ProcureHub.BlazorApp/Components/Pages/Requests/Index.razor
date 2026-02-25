@@ -9,8 +9,7 @@
 @using ProcureHub.BlazorApp.Helpers
 @using ProcureHub.Domain.Entities
 
-@inject IRequestHandler<QueryPurchaseRequests.Request, Result<PagedResult<QueryPurchaseRequests.Response>>> QueryPurchaseRequestsHandler
-@inject IRequestHandler<QueryDepartments.Request, QueryDepartments.Response[]> QueryDepartmentsHandler
+@inject IRequestDispatcher RequestDispatcher
 @inject ICurrentUserProvider CurrentUserProvider
 @inject NavigationManager Navigation
 
@@ -144,7 +143,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _departments = await QueryDepartmentsHandler.HandleAsync(new QueryDepartments.Request(), CancellationToken.None);
+        _departments = await RequestDispatcher.SendAsync(new QueryDepartments.Request(), CancellationToken.None);
     }
 
     async Task OnLoadData(LoadDataArgs args)
@@ -206,7 +205,7 @@
 
         using (new BusyScope(b => _loading = b))
         {
-            var result = await QueryPurchaseRequestsHandler.HandleAsync(request, CancellationToken.None);
+            var result = await RequestDispatcher.SendAsync(request, CancellationToken.None);
             if (result.IsSuccess)
             {
                 _pagedRequests = result.Value;

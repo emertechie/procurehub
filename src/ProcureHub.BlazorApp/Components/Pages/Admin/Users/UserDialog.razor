@@ -2,9 +2,7 @@
 
 @inject DialogService DialogService
 @inject NotificationService NotificationService
-@inject IRequestHandler<GetUserById.Request, GetUserById.Response?> GetUserHandler
-@inject IRequestHandler<CreateUser.Command, Result<string>> CreateUserHandler
-@inject IRequestHandler<UpdateUser.Command, Result> UpdateUserHandler
+@inject IRequestDispatcher RequestDispatcher
 
 <RadzenStack Gap="1rem">
     @if (_errorMessage != null)
@@ -69,7 +67,7 @@
 
     private async Task LoadUser()
     {
-        var user = await GetUserHandler.HandleAsync(new GetUserById.Request(UserId!.Value.ToString()), CancellationToken.None);
+        var user = await RequestDispatcher.SendAsync(new GetUserById.Request(UserId!.Value.ToString()), CancellationToken.None);
         if (user == null)
         {
             _errorMessage = "User not found";
@@ -97,7 +95,7 @@
                     _model.LastName
                 );
 
-                var result = await UpdateUserHandler.HandleAsync(updateCommand, CancellationToken.None);
+                var result = await RequestDispatcher.SendAsync(updateCommand, CancellationToken.None);
                 if (result.IsSuccess)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "Success", "User updated");
@@ -117,7 +115,7 @@
                     _model.LastName
                 );
 
-                var result = await CreateUserHandler.HandleAsync(createCommand, CancellationToken.None);
+                var result = await RequestDispatcher.SendAsync(createCommand, CancellationToken.None);
                 if (result.IsSuccess)
                 {
                     NotificationService.Notify(NotificationSeverity.Success, "Success", "User created");

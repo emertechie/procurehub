@@ -3,9 +3,7 @@
 
 @inject DialogService DialogService
 @inject NotificationService NotificationService
-@inject IRequestHandler<QueryDepartments.Request, QueryDepartments.Response[]> QueryDepartmentsHandler
-@inject IRequestHandler<GetUserById.Request, GetUserById.Response?> GetUserHandler
-@inject IRequestHandler<AssignUserToDepartment.Command, Result> AssignDepartmentHandler
+@inject IRequestDispatcher RequestDispatcher
 
 <RadzenStack Gap="1rem">
     @if (_errorMessage != null)
@@ -60,10 +58,10 @@
         try
         {
             // Load all departments
-            _departments = await QueryDepartmentsHandler.HandleAsync(new QueryDepartments.Request(), CancellationToken.None);
+            _departments = await RequestDispatcher.SendAsync(new QueryDepartments.Request(), CancellationToken.None);
 
             // Load user's current department
-            var user = await GetUserHandler.HandleAsync(new GetUserById.Request(UserId.ToString()), CancellationToken.None);
+            var user = await RequestDispatcher.SendAsync(new GetUserById.Request(UserId.ToString()), CancellationToken.None);
             if (user == null)
             {
                 _errorMessage = "User not found";
@@ -86,7 +84,7 @@
         try
         {
             var command = new AssignUserToDepartment.Command(UserId.ToString(), _selectedDepartmentId);
-            var result = await AssignDepartmentHandler.HandleAsync(command, CancellationToken.None);
+            var result = await RequestDispatcher.SendAsync(command, CancellationToken.None);
             if (result.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Success, "Success", "Department updated");

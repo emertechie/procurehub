@@ -10,6 +10,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddScoped<PurchaseRequestNumberGenerator>();
+        services.AddScoped<IRequestDispatcher, RequestDispatcher>();
         services.AddRequestHandlers();
         services.AddSingleton<Instrumentation>();
 
