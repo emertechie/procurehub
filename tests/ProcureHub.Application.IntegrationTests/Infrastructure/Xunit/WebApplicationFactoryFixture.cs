@@ -1,4 +1,4 @@
-namespace ProcureHub.Application.IntegrationTests.Infrastructure.xUnit;
+namespace ProcureHub.Application.IntegrationTests.Infrastructure.Xunit;
 
 public sealed class WebApplicationFactoryFixture : IDisposable
 {
