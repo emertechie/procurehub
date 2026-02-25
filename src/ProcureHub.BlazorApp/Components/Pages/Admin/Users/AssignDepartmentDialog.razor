@@ -3,9 +3,9 @@
 
 @inject DialogService DialogService
 @inject NotificationService NotificationService
-@inject IQueryHandler<QueryDepartments.Request, QueryDepartments.Response[]> QueryDepartmentsHandler
-@inject IQueryHandler<GetUserById.Request, GetUserById.Response?> GetUserHandler
-@inject ICommandHandler<AssignUserToDepartment.Command, Result> AssignDepartmentHandler
+@inject IRequestHandler<QueryDepartments.Request, QueryDepartments.Response[]> QueryDepartmentsHandler
+@inject IRequestHandler<GetUserById.Request, GetUserById.Response?> GetUserHandler
+@inject IRequestHandler<AssignUserToDepartment.Command, Result> AssignDepartmentHandler
 
 <RadzenStack Gap="1rem">
     @if (_errorMessage != null)

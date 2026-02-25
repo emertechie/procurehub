@@ -10,7 +10,7 @@ namespace ProcureHub.Application.Features.Departments;
 
 public static class CreateDepartment
 {
-    public record Command(string Name);
+    public record Command(string Name) : IRequest<Result<Guid>>;
 
     public class CommandValidator : AbstractValidator<Command>
     {
@@ -21,7 +21,7 @@ public static class CreateDepartment
     }
 
     public class Handler(IApplicationDbContext dbContext, IDbConstraints dbConstraints)
-        : ICommandHandler<Command, Result<Guid>>
+        : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> HandleAsync(Command command, CancellationToken cancellationToken)
         {

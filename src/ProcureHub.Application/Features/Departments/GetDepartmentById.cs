@@ -6,12 +6,12 @@ namespace ProcureHub.Application.Features.Departments;
 
 public static class GetDepartmentById
 {
-    public record Request(Guid id);
+    public record Request(Guid id) : IRequest<Response?>;
 
     public record Response(Guid Id, string Name);
 
     public class Handler(IApplicationDbContext dbContext)
-        : IQueryHandler<Request, Response?>
+        : IRequestHandler<Request, Response?>
     {
         public Task<Response?> HandleAsync(Request request, CancellationToken cancellationToken)
         {

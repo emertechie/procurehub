@@ -7,10 +7,10 @@ namespace ProcureHub.Application.Features.Departments;
 
 public static class DeleteDepartment
 {
-    public record Command(Guid Id);
+    public record Command(Guid Id) : IRequest<Result>;
 
     public class Handler(IApplicationDbContext dbContext)
-        : ICommandHandler<Command, Result>
+        : IRequestHandler<Command, Result>
     {
         public async Task<Result> HandleAsync(Command command, CancellationToken cancellationToken)
         {

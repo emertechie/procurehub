@@ -10,7 +10,7 @@ namespace ProcureHub.Application.Features.Categories;
 
 public static class UpdateCategory
 {
-    public record Command(Guid Id, string Name);
+    public record Command(Guid Id, string Name) : IRequest<Result>;
 
     public class CommandValidator : AbstractValidator<Command>
     {
@@ -21,7 +21,7 @@ public static class UpdateCategory
     }
 
     public class Handler(IApplicationDbContext dbContext, IDbConstraints dbConstraints)
-        : ICommandHandler<Command, Result>
+        : IRequestHandler<Command, Result>
     {
         public async Task<Result> HandleAsync(Command command, CancellationToken cancellationToken)
         {

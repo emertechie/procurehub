@@ -13,7 +13,7 @@ namespace ProcureHub.Application.Features.PurchaseRequests;
 
 public static class GetPurchaseRequestById
 {
-    public record Request(Guid Id, string UserId);
+    public record Request(Guid Id, string UserId) : IRequest<Result<Response>>;
 
     public class RequestValidator : AbstractValidator<Request>
     {
@@ -47,7 +47,7 @@ public static class GetPurchaseRequestById
     public record ReviewerInfo(string Id, string Email, string FirstName, string LastName);
 
     public class Handler(IApplicationDbContext dbContext, ICurrentUserProvider currentUserProvider)
-        : IQueryHandler<Request, Result<Response>>
+        : IRequestHandler<Request, Result<Response>>
     {
         public async Task<Result<Response>> HandleAsync(Request request, CancellationToken token)
         {

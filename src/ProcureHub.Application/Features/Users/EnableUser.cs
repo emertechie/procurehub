@@ -9,7 +9,7 @@ namespace ProcureHub.Application.Features.Users;
 
 public static class EnableUser
 {
-    public record Command(string Id);
+    public record Command(string Id) : IRequest<Result>;
 
     public class CommandValidator : AbstractValidator<Command>
     {
@@ -22,7 +22,7 @@ public static class EnableUser
     public class Handler(
         IApplicationDbContext dbContext,
         ILogger<Handler> logger)
-        : ICommandHandler<Command, Result>
+        : IRequestHandler<Command, Result>
     {
         public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {

@@ -6,9 +6,9 @@
 @using ProcureHub.BlazorApp.Helpers
 @using ProcureHub.Application.Features.Users
 
-@inject IQueryHandler<QueryUsers.Request, PagedResult<QueryUsers.Response>> QueryUsersHandler
-@inject ICommandHandler<EnableUser.Command, Result> EnableUserHandler
-@inject ICommandHandler<DisableUser.Command, Result> DisableUserHandler
+@inject IRequestHandler<QueryUsers.Request, PagedResult<QueryUsers.Response>> QueryUsersHandler
+@inject IRequestHandler<EnableUser.Command, Result> EnableUserHandler
+@inject IRequestHandler<DisableUser.Command, Result> DisableUserHandler
 @inject DialogService DialogService
 @inject NotificationService NotificationService
 @inject TooltipService TooltipService

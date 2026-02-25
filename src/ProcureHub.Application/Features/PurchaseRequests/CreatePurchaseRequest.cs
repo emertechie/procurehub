@@ -19,7 +19,7 @@ public static class CreatePurchaseRequest
         Guid CategoryId,
         Guid DepartmentId,
         string RequesterUserId
-    );
+    ) : IRequest<Result<Guid>>;
 
     public class CommandValidator : AbstractValidator<Command>
     {
@@ -39,7 +39,7 @@ public static class CreatePurchaseRequest
         IApplicationDbContext dbContext,
         IDbConstraints dbConstraints,
         PurchaseRequestNumberGenerator purchaseRequestNumberGenerator)
-        : ICommandHandler<Command, Result<Guid>>
+        : IRequestHandler<Command, Result<Guid>>
     {
         public async Task<Result<Guid>> HandleAsync(Command command, CancellationToken token)
         {

@@ -20,7 +20,7 @@ public static class QueryPurchaseRequests
         int? Page,
         int? PageSize,
         string UserId
-    );
+    ) : IRequest<Result<PagedResult<Response>>>;
 
     public class RequestValidator : AbstractValidator<Request>
     {
@@ -55,7 +55,7 @@ public static class QueryPurchaseRequests
     public record ReviewerInfo(string Id, string Email, string FirstName, string LastName);
 
     public class Handler(IApplicationDbContext dbContext, ICurrentUserProvider currentUserProvider)
-        : IQueryHandler<Request, Result<PagedResult<Response>>>
+        : IRequestHandler<Request, Result<PagedResult<Response>>>
     {
         public async Task<Result<PagedResult<Response>>> HandleAsync(Request request, CancellationToken token)
         {

@@ -7,10 +7,10 @@
 @using ProcureHub.Application.Features.Departments
 @using ProcureHub.Application.Features.PurchaseRequests
 
-@inject IQueryHandler<QueryCategories.Request, QueryCategories.Response[]> QueryCategoriesHandler
-@inject IQueryHandler<QueryDepartments.Request, QueryDepartments.Response[]> QueryDepartmentsHandler
-@inject ICommandHandler<CreatePurchaseRequest.Command, Result<Guid>> CreateHandler
-@inject ICommandHandler<SubmitPurchaseRequest.Command, Result> SubmitHandler
+@inject IRequestHandler<QueryCategories.Request, QueryCategories.Response[]> QueryCategoriesHandler
+@inject IRequestHandler<QueryDepartments.Request, QueryDepartments.Response[]> QueryDepartmentsHandler
+@inject IRequestHandler<CreatePurchaseRequest.Command, Result<Guid>> CreateHandler
+@inject IRequestHandler<SubmitPurchaseRequest.Command, Result> SubmitHandler
 @inject ICurrentUserProvider CurrentUserProvider
 @inject NotificationService NotificationService
 @inject NavigationManager Navigation

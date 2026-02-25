@@ -18,7 +18,7 @@ public static class UpdatePurchaseRequest
         string? BusinessJustification,
         Guid CategoryId,
         Guid DepartmentId
-    );
+    ) : IRequest<Result>;
 
     public class CommandValidator : AbstractValidator<Command>
     {
@@ -35,7 +35,7 @@ public static class UpdatePurchaseRequest
     }
 
     public class Handler(IApplicationDbContext dbContext, IDbConstraints dbConstraints)
-        : ICommandHandler<Command, Result>
+        : IRequestHandler<Command, Result>
     {
         public async Task<Result> HandleAsync(Command command, CancellationToken cancellationToken)
         {

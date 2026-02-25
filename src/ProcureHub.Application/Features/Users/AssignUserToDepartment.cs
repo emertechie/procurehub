@@ -10,7 +10,7 @@ namespace ProcureHub.Application.Features.Users;
 
 public static class AssignUserToDepartment
 {
-    public record Command(string Id, Guid? DepartmentId);
+    public record Command(string Id, Guid? DepartmentId) : IRequest<Result>;
 
     internal sealed class CommandValidator : AbstractValidator<Command>
     {
@@ -24,7 +24,7 @@ public static class AssignUserToDepartment
         IApplicationDbContext dbContext,
         ILogger<Handler> logger,
         Instrumentation instrumentation)
-        : ICommandHandler<Command, Result>
+        : IRequestHandler<Command, Result>
     {
         public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {

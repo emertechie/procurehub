@@ -7,12 +7,12 @@ namespace ProcureHub.Application.Features.Roles;
 
 public static class QueryRoles
 {
-    public record Request;
+    public record Request : IRequest<RoleInfo[]>;
 
     public record RoleInfo(string Id, string Name);
 
     public class Handler(RoleManager<Role> roleManager)
-        : IQueryHandler<Request, RoleInfo[]>
+        : IRequestHandler<Request, RoleInfo[]>
     {
         public async Task<RoleInfo[]> HandleAsync(Request request, CancellationToken cancellationToken)
         {

@@ -11,7 +11,7 @@ namespace ProcureHub.Application.Features.Users;
 
 public static class UpdateUser
 {
-    public record Command(string Id, string Email, string FirstName, string LastName);
+    public record Command(string Id, string Email, string FirstName, string LastName) : IRequest<Result>;
 
     public class CommandValidator : AbstractValidator<Command>
     {
@@ -28,7 +28,7 @@ public static class UpdateUser
         IApplicationDbContext dbContext,
         UserManager<User> userManager,
         ILogger<Handler> logger)
-        : ICommandHandler<Command, Result>
+        : IRequestHandler<Command, Result>
     {
         public async Task<Result> HandleAsync(Command command, CancellationToken cancellationToken)
         {

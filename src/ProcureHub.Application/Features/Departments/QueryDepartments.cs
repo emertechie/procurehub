@@ -7,13 +7,13 @@ namespace ProcureHub.Application.Features.Departments;
 public static class QueryDepartments
 {
 #pragma warning disable S2094
-    public record Request();
+    public record Request() : IRequest<Response[]>;
 #pragma warning restore S2094
 
     public record Response(Guid Id, string Name);
 
     public class Handler(IApplicationDbContext dbContext)
-        : IQueryHandler<Request, Response[]>
+        : IRequestHandler<Request, Response[]>
     {
         public Task<Response[]> HandleAsync(Request request, CancellationToken cancellationToken)
         {

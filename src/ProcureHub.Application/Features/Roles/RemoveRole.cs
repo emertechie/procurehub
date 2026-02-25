@@ -9,7 +9,7 @@ namespace ProcureHub.Application.Features.Roles;
 
 public static class RemoveRole
 {
-    public record Command(string UserId, string RoleId);
+    public record Command(string UserId, string RoleId) : IRequest<Result>;
 
     public class CommandValidator : AbstractValidator<Command>
     {
@@ -24,7 +24,7 @@ public static class RemoveRole
         UserManager<User> userManager,
         RoleManager<Role> roleManager,
         ILogger<Handler> logger)
-        : ICommandHandler<Command, Result>
+        : IRequestHandler<Command, Result>
     {
         public async Task<Result> HandleAsync(Command command, CancellationToken cancellationToken)
         {

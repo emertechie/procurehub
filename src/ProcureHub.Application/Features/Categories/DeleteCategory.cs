@@ -8,10 +8,10 @@ namespace ProcureHub.Application.Features.Categories;
 
 public static class DeleteCategory
 {
-    public record Command(Guid Id);
+    public record Command(Guid Id) : IRequest<Result>;
 
     public class Handler(IApplicationDbContext dbContext, IDbConstraints dbConstraints)
-        : ICommandHandler<Command, Result>
+        : IRequestHandler<Command, Result>
     {
         public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {

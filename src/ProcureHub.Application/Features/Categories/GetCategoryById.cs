@@ -7,12 +7,12 @@ namespace ProcureHub.Application.Features.Categories;
 
 public static class GetCategoryById
 {
-    public record Request(Guid Id);
+    public record Request(Guid Id) : IRequest<Result<Response>>;
 
     public record Response(Guid Id, string Name, DateTime CreatedAt, DateTime UpdatedAt);
 
     public class Handler(IApplicationDbContext dbContext)
-        : IQueryHandler<Request, Result<Response>>
+        : IRequestHandler<Request, Result<Response>>
     {
         public async Task<Result<Response>> HandleAsync(Request request, CancellationToken token)
         {

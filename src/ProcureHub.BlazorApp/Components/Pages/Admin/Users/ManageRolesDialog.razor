@@ -4,10 +4,10 @@
 
 @inject DialogService DialogService
 @inject NotificationService NotificationService
-@inject IQueryHandler<QueryRoles.Request, QueryRoles.RoleInfo[]> QueryRolesHandler
-@inject IQueryHandler<GetUserById.Request, GetUserById.Response?> GetUserHandler
-@inject ICommandHandler<AssignRole.Command, Result> AssignRoleHandler
-@inject ICommandHandler<RemoveRole.Command, Result> RemoveRoleHandler
+@inject IRequestHandler<QueryRoles.Request, QueryRoles.RoleInfo[]> QueryRolesHandler
+@inject IRequestHandler<GetUserById.Request, GetUserById.Response?> GetUserHandler
+@inject IRequestHandler<AssignRole.Command, Result> AssignRoleHandler
+@inject IRequestHandler<RemoveRole.Command, Result> RemoveRoleHandler
 
 <RadzenStack Gap="1rem">
     @if (_errorMessage != null)

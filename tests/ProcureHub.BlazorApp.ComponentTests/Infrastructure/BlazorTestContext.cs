@@ -31,11 +31,12 @@ public abstract class BlazorTestContext : BunitContext
     }
 
     /// <summary>
-    /// Registers a mock IQueryHandler that returns the given response for any request.
+    /// Registers a mock IRequestHandler that returns the given response for any request.
     /// </summary>
-    protected IQueryHandler<TRequest, TResponse> AddMockQueryHandler<TRequest, TResponse>(TResponse response)
+    protected IRequestHandler<TRequest, TResponse> AddMockQueryHandler<TRequest, TResponse>(TResponse response)
+        where TRequest : IRequest<TResponse>
     {
-        var handler = Substitute.For<IQueryHandler<TRequest, TResponse>>();
+        var handler = Substitute.For<IRequestHandler<TRequest, TResponse>>();
         handler.HandleAsync(Arg.Any<TRequest>(), Arg.Any<CancellationToken>())
             .Returns(response);
         Services.AddSingleton(handler);
@@ -43,11 +44,12 @@ public abstract class BlazorTestContext : BunitContext
     }
 
     /// <summary>
-    /// Registers a mock ICommandHandler{TCommand, TResponse} that returns the given response.
+    /// Registers a mock IRequestHandler that returns the given response.
     /// </summary>
-    protected ICommandHandler<TCommand, TResponse> AddMockCommandHandler<TCommand, TResponse>(TResponse response)
+    protected IRequestHandler<TCommand, TResponse> AddMockCommandHandler<TCommand, TResponse>(TResponse response)
+        where TCommand : IRequest<TResponse>
     {
-        var handler = Substitute.For<ICommandHandler<TCommand, TResponse>>();
+        var handler = Substitute.For<IRequestHandler<TCommand, TResponse>>();
         handler.HandleAsync(Arg.Any<TCommand>(), Arg.Any<CancellationToken>())
             .Returns(response);
         Services.AddSingleton(handler);

@@ -2,8 +2,8 @@
 
 @inject DialogService DialogService
 @inject NotificationService NotificationService
-@inject ICommandHandler<CreateDepartment.Command, Result<Guid>> CreateDepartmentHandler
-@inject ICommandHandler<UpdateDepartment.Command, Result> UpdateDepartmentHandler
+@inject IRequestHandler<CreateDepartment.Command, Result<Guid>> CreateDepartmentHandler
+@inject IRequestHandler<UpdateDepartment.Command, Result> UpdateDepartmentHandler
 
 <RadzenStack Gap="1rem">
     @if (_errorMessage != null)

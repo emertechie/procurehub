@@ -10,7 +10,7 @@ namespace ProcureHub.Application.Features.Users;
 
 public static class QueryUsers
 {
-    public record Request(string? Email, int? Page, int? PageSize);
+    public record Request(string? Email, int? Page, int? PageSize) : IRequest<PagedResult<Response>>;
 
     public class RequestValidator : AbstractValidator<Request>
     {
@@ -36,7 +36,7 @@ public static class QueryUsers
     public record DepartmentInfo(Guid Id, string Name);
 
     public class Handler(IApplicationDbContext dbContext, UserManager<User> userManager)
-        : IQueryHandler<Request, PagedResult<Response>>
+        : IRequestHandler<Request, PagedResult<Response>>
     {
         public async Task<PagedResult<Response>> HandleAsync(Request request, CancellationToken token)
         {

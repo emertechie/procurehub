@@ -10,7 +10,7 @@ namespace ProcureHub.Application.Features.Users;
 
 public static class CreateUser
 {
-    public record Command(string Email, string Password, string FirstName, string LastName);
+    public record Command(string Email, string Password, string FirstName, string LastName) : IRequest<Result<string>>;
 
     public class CommandValidator : AbstractValidator<Command>
     {
@@ -26,7 +26,7 @@ public static class CreateUser
     public class Handler(
         UserManager<User> userManager,
         ILogger<Handler> logger)
-        : ICommandHandler<Command, Result<string>>
+        : IRequestHandler<Command, Result<string>>
     {
         public async Task<Result<string>> HandleAsync(Command command, CancellationToken cancellationToken)
         {

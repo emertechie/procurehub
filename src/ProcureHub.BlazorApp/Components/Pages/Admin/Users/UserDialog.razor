@@ -2,9 +2,9 @@
 
 @inject DialogService DialogService
 @inject NotificationService NotificationService
-@inject IQueryHandler<GetUserById.Request, GetUserById.Response?> GetUserHandler
-@inject ICommandHandler<CreateUser.Command, Result<string>> CreateUserHandler
-@inject ICommandHandler<UpdateUser.Command, Result> UpdateUserHandler
+@inject IRequestHandler<GetUserById.Request, GetUserById.Response?> GetUserHandler
+@inject IRequestHandler<CreateUser.Command, Result<string>> CreateUserHandler
+@inject IRequestHandler<UpdateUser.Command, Result> UpdateUserHandler
 
 <RadzenStack Gap="1rem">
     @if (_errorMessage != null)

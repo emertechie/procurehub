@@ -7,7 +7,7 @@ namespace ProcureHub.Application.Features.Users;
 
 public static class GetUserById
 {
-    public record Request(string Id);
+    public record Request(string Id) : IRequest<Response?>;
 
     public class RequestValidator : AbstractValidator<Request>
     {
@@ -32,7 +32,7 @@ public static class GetUserById
     public record DepartmentInfo(Guid Id, string Name);
 
     public class Handler(IApplicationDbContext dbContext)
-        : IQueryHandler<Request, Response?>
+        : IRequestHandler<Request, Response?>
     {
         public Task<Response?> HandleAsync(Request request, CancellationToken token)
         {

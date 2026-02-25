@@ -1,7 +1,7 @@
 namespace ProcureHub.Application.Common;
 
-/// <summary>Query handler - reads data, returns TResponse</summary>
-public interface IQueryHandler<in TRequest, TResponse>
+public interface IRequestHandler<in TRequest, TResponse>
+    where TRequest : IRequest<TResponse>
 {
     Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken);
 }

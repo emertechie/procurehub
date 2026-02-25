@@ -9,8 +9,8 @@
 @using ProcureHub.BlazorApp.Helpers
 @using ProcureHub.Domain.Entities
 
-@inject IQueryHandler<QueryPurchaseRequests.Request, Result<PagedResult<QueryPurchaseRequests.Response>>> QueryPurchaseRequestsHandler
-@inject IQueryHandler<QueryDepartments.Request, QueryDepartments.Response[]> QueryDepartmentsHandler
+@inject IRequestHandler<QueryPurchaseRequests.Request, Result<PagedResult<QueryPurchaseRequests.Response>>> QueryPurchaseRequestsHandler
+@inject IRequestHandler<QueryDepartments.Request, QueryDepartments.Response[]> QueryDepartmentsHandler
 @inject ICurrentUserProvider CurrentUserProvider
 @inject NavigationManager Navigation
 

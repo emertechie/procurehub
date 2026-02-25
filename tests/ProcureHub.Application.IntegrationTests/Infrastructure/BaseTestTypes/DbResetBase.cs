@@ -28,16 +28,18 @@ public abstract class DbResetBase : IAsyncLifetime
     }
 
     protected async Task<TResponse> ExecuteQueryAsync<TRequest, TResponse>(TRequest request)
+        where TRequest : IRequest<TResponse>
     {
         using var scope = CreateScope();
-        var handler = scope.ServiceProvider.GetRequiredService<IQueryHandler<TRequest, TResponse>>();
+        var handler = scope.ServiceProvider.GetRequiredService<IRequestHandler<TRequest, TResponse>>();
         return await handler.HandleAsync(request, CancellationToken.None);
     }
 
     protected async Task<TResponse> ExecuteCommandAsync<TCommand, TResponse>(TCommand command)
+        where TCommand : IRequest<TResponse>
     {
         using var scope = CreateScope();
-        var handler = scope.ServiceProvider.GetRequiredService<ICommandHandler<TCommand, TResponse>>();
+        var handler = scope.ServiceProvider.GetRequiredService<IRequestHandler<TCommand, TResponse>>();
         return await handler.HandleAsync(command, CancellationToken.None);
     }
 

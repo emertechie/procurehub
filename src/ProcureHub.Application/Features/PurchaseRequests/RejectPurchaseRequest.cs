@@ -10,7 +10,7 @@ namespace ProcureHub.Application.Features.PurchaseRequests;
 
 public static class RejectPurchaseRequest
 {
-    public record Command(Guid Id, string ReviewerUserId);
+    public record Command(Guid Id, string ReviewerUserId) : IRequest<Result>;
 
     public class CommandValidator : AbstractValidator<Command>
     {
@@ -22,7 +22,7 @@ public static class RejectPurchaseRequest
     }
 
     public class Handler(IApplicationDbContext dbContext)
-        : ICommandHandler<Command, Result>
+        : IRequestHandler<Command, Result>
     {
         public async Task<Result> HandleAsync(Command command, CancellationToken token)
         {
