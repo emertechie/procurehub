@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Application.Abstractions.Data;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
 
 namespace ProcureHub.Application.Features.Categories;
 
 public static class QueryCategories
 {
+    [AuthorizeRequest]
     public record Request() : IRequest<Response[]>;
 
     public record Response(Guid Id, string Name);

@@ -3,12 +3,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ProcureHub.Application.Abstractions.Data;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
+using ProcureHub.Application.Constants;
 using ProcureHub.Domain.Common;
 
 namespace ProcureHub.Application.Features.Users;
 
 public static class EnableUser
 {
+    [AuthorizeRequest(RoleNames.Admin)]
     public record Command(string Id) : IRequest<Result>;
 
     public class CommandValidator : AbstractValidator<Command>

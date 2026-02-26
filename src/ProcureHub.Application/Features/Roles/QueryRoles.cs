@@ -1,12 +1,15 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
+using ProcureHub.Application.Constants;
 using ProcureHub.Domain.Entities;
 
 namespace ProcureHub.Application.Features.Roles;
 
 public static class QueryRoles
 {
+    [AuthorizeRequest(RoleNames.Admin)]
     public record Request : IRequest<RoleInfo[]>;
 
     public record RoleInfo(string Id, string Name);

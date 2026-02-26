@@ -2,11 +2,14 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Application.Abstractions.Data;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
+using ProcureHub.Application.Constants;
 
 namespace ProcureHub.Application.Features.Users;
 
 public static class GetUserById
 {
+    [AuthorizeRequest(RoleNames.Admin)]
     public record Request(string Id) : IRequest<Response?>;
 
     public class RequestValidator : AbstractValidator<Request>

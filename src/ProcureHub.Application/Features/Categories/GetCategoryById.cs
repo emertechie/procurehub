@@ -1,12 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Application.Abstractions.Data;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
 using ProcureHub.Domain.Common;
 
 namespace ProcureHub.Application.Features.Categories;
 
 public static class GetCategoryById
 {
+    [AuthorizeRequest]
     public record Request(Guid Id) : IRequest<Result<Response>>;
 
     public record Response(Guid Id, string Name, DateTime CreatedAt, DateTime UpdatedAt);

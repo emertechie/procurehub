@@ -1,11 +1,13 @@
-﻿@using ProcureHub.BlazorApp.Components.Account.Shared
+@using ProcureHub.BlazorApp.Components.Account.Shared
 <Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
     <Found Context="routeData">
-        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(AuthenticatedLayout)">
-            <NotAuthorized>
-                <RedirectToLogin/>
-            </NotAuthorized>
-        </AuthorizeRouteView>
+        <AppErrorBoundary>
+            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(AuthenticatedLayout)">
+                <NotAuthorized>
+                    <RedirectToLogin/>
+                </NotAuthorized>
+            </AuthorizeRouteView>
+        </AppErrorBoundary>
         <FocusOnNavigate RouteData="routeData" Selector="h1"/>
     </Found>
 </Router>

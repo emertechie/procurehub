@@ -2,6 +2,8 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Application.Abstractions.Data;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
+using ProcureHub.Application.Constants;
 using ProcureHub.Application.Features.PurchaseRequests.Errors;
 using ProcureHub.Domain.Common;
 using ProcureHub.Domain.Entities;
@@ -10,6 +12,7 @@ namespace ProcureHub.Application.Features.PurchaseRequests;
 
 public static class RejectPurchaseRequest
 {
+    [AuthorizeRequest(RoleNames.Approver)]
     public record Command(Guid Id, string ReviewerUserId) : IRequest<Result>;
 
     public class CommandValidator : AbstractValidator<Command>

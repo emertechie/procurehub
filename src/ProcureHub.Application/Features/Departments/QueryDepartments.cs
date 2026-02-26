@@ -1,12 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Application.Abstractions.Data;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
 
 namespace ProcureHub.Application.Features.Departments;
 
 public static class QueryDepartments
 {
 #pragma warning disable S2094
+    [AuthorizeRequest]
     public record Request() : IRequest<Response[]>;
 #pragma warning restore S2094
 

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using ProcureHub.Application.Abstractions.Data;
 using ProcureHub.Application.Abstractions.Identity;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
 using ProcureHub.Domain.Common;
 using ProcureHub.Domain.Entities;
 using ProcureHub.Application.Common.Pagination;
@@ -13,6 +14,7 @@ namespace ProcureHub.Application.Features.PurchaseRequests;
 
 public static class QueryPurchaseRequests
 {
+    [AuthorizeRequest]
     public record Request(
         PurchaseRequestStatus? Status,
         string? Search,

@@ -4,12 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ProcureHub.Application.Abstractions.Data;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
+using ProcureHub.Application.Constants;
 using ProcureHub.Domain.Common;
 
 namespace ProcureHub.Application.Features.Users;
 
 public static class AssignUserToDepartment
 {
+    [AuthorizeRequest(RoleNames.Admin)]
     public record Command(string Id, Guid? DepartmentId) : IRequest<Result>;
 
     internal sealed class CommandValidator : AbstractValidator<Command>

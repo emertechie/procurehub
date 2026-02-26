@@ -1,12 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Application.Abstractions.Data;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
+using ProcureHub.Application.Constants;
 using ProcureHub.Domain.Common;
 
 namespace ProcureHub.Application.Features.Departments;
 
 public static class DeleteDepartment
 {
+    [AuthorizeRequest(RoleNames.Admin)]
     public record Command(Guid Id) : IRequest<Result>;
 
     public class Handler(IApplicationDbContext dbContext)

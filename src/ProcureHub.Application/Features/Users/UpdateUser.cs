@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ProcureHub.Application.Abstractions.Data;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
+using ProcureHub.Application.Constants;
 using ProcureHub.Domain.Common;
 using ProcureHub.Domain.Entities;
 
@@ -11,6 +13,7 @@ namespace ProcureHub.Application.Features.Users;
 
 public static class UpdateUser
 {
+    [AuthorizeRequest(RoleNames.Admin)]
     public record Command(string Id, string Email, string FirstName, string LastName) : IRequest<Result>;
 
     public class CommandValidator : AbstractValidator<Command>

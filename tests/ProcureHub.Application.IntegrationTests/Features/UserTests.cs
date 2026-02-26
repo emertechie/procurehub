@@ -1,8 +1,10 @@
 using ProcureHub.Application.IntegrationTests.Infrastructure.BaseTestTypes;
 using ProcureHub.Application.IntegrationTests.Infrastructure.Identity;
+using ProcureHub.Application.Common.Authorization;
 using ProcureHub.Application.IntegrationTests.Infrastructure.Xunit;
 using ProcureHub.Application.Common.Pagination;
 using ProcureHub.Application.Features.Users;
+using ProcureHub.Application.Constants;
 using ProcureHub.Domain.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -51,5 +53,34 @@ public class UserTests(
         Assert.NotNull(userById);
         Assert.Equal(newUserId, userById!.Id);
         Assert.Equal(newUserEmailLower, userById.Email);
+    }
+
+    [Fact]
+    public async Task Non_admin_user_cannot_create_user()
+    {
+        using var scope = CreateScope();
+        var identityData = scope.ServiceProvider.GetRequiredService<IdentityTestDataBuilder>();
+        var requesterUser = await identityData.EnsureUserAsync(
+            email: "test-requester@example.com",
+            password: IdentityTestDataBuilder.ValidPassword,
+            firstName: "Test",
+            lastName: "Requester",
+            roles: [RoleNames.Requester]);
+
+        using var _ = RunAs(Guid.Parse(requesterUser.Id), RoleNames.Requester);
+
+        var command = new CreateUser.Command("new-user@example.com", IdentityTestDataBuilder.ValidPassword, "New", "User");
+
+        await Assert.ThrowsAsync<RequestForbiddenException>(
+            () => ExecuteCommandAsync<CreateUser.Command, Result<string>>(command));
+    }
+
+    [Fact]
+    public async Task Anonymous_user_cannot_create_user()
+    {
+        var command = new CreateUser.Command("new-user@example.com", IdentityTestDataBuilder.ValidPassword, "New", "User");
+
+        await Assert.ThrowsAsync<RequestUnauthenticatedException>(
+            () => ExecuteCommandAsync<CreateUser.Command, Result<string>>(command));
     }
 }

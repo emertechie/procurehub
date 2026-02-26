@@ -2,6 +2,8 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Application.Abstractions.Data;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
+using ProcureHub.Application.Constants;
 using ProcureHub.Application.Features.PurchaseRequests.Errors;
 using ProcureHub.Domain.Common;
 
@@ -9,6 +11,7 @@ namespace ProcureHub.Application.Features.PurchaseRequests;
 
 public static class DeletePurchaseRequest
 {
+    [AuthorizeRequest(RoleNames.Requester)]
     public record Command(Guid Id) : IRequest<Result>;
 
     public class CommandValidator : AbstractValidator<Command>

@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Application.Abstractions.Data;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
+using ProcureHub.Application.Constants;
 using ProcureHub.Domain.Common;
 using ProcureHub.Domain.Entities;
 
@@ -8,6 +10,7 @@ namespace ProcureHub.Application.Features.Categories;
 
 public static class DeleteCategory
 {
+    [AuthorizeRequest(RoleNames.Admin)]
     public record Command(Guid Id) : IRequest<Result>;
 
     public class Handler(IApplicationDbContext dbContext, IDbConstraints dbConstraints)

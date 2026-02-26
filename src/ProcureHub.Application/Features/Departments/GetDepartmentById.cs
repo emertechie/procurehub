@@ -1,11 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Application.Abstractions.Data;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
 
 namespace ProcureHub.Application.Features.Departments;
 
 public static class GetDepartmentById
 {
+    [AuthorizeRequest]
     public record Request(Guid id) : IRequest<Response?>;
 
     public record Response(Guid Id, string Name);

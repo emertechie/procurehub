@@ -2,6 +2,8 @@ using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
+using ProcureHub.Application.Constants;
 using ProcureHub.Application.Features.Users.Validation;
 using ProcureHub.Domain.Common;
 using ProcureHub.Domain.Entities;
@@ -10,6 +12,7 @@ namespace ProcureHub.Application.Features.Users;
 
 public static class CreateUser
 {
+    [AuthorizeRequest(RoleNames.Admin)]
     public record Command(string Email, string Password, string FirstName, string LastName) : IRequest<Result<string>>;
 
     public class CommandValidator : AbstractValidator<Command>

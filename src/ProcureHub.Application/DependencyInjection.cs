@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using ProcureHub.Application.Common.Authorization;
 using ProcureHub.Application.Common;
 using ProcureHub.Application.Common.Validation;
 using ProcureHub.Application.Features.PurchaseRequests.Services;
@@ -45,6 +46,8 @@ public static class DependencyInjection
 
         // Wrap all handlers with validation decorator
         services.Decorate(typeof(IRequestHandler<,>), typeof(ValidationRequestHandlerDecorator<,>));
+        // Wrap all handlers with authorization decorator
+        services.Decorate(typeof(IRequestHandler<,>), typeof(AuthorizationRequestHandlerDecorator<,>));
 
         return services;
     }

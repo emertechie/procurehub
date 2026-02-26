@@ -2,6 +2,8 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Application.Abstractions.Data;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
+using ProcureHub.Application.Constants;
 using ProcureHub.Application.Features.Departments.Validation;
 using ProcureHub.Domain.Common;
 using ProcureHub.Domain.Entities;
@@ -10,6 +12,7 @@ namespace ProcureHub.Application.Features.Departments;
 
 public static class CreateDepartment
 {
+    [AuthorizeRequest(RoleNames.Admin)]
     public record Command(string Name) : IRequest<Result<Guid>>;
 
     public class CommandValidator : AbstractValidator<Command>

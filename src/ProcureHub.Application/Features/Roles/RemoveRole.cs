@@ -2,6 +2,8 @@ using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
+using ProcureHub.Application.Constants;
 using ProcureHub.Domain.Common;
 using ProcureHub.Domain.Entities;
 
@@ -9,6 +11,7 @@ namespace ProcureHub.Application.Features.Roles;
 
 public static class RemoveRole
 {
+    [AuthorizeRequest(RoleNames.Admin)]
     public record Command(string UserId, string RoleId) : IRequest<Result>;
 
     public class CommandValidator : AbstractValidator<Command>

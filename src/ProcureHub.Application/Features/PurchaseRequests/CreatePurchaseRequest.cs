@@ -2,6 +2,8 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Application.Abstractions.Data;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
+using ProcureHub.Application.Constants;
 using ProcureHub.Application.Features.PurchaseRequests.Errors;
 using ProcureHub.Application.Features.PurchaseRequests.Services;
 using ProcureHub.Domain.Common;
@@ -11,6 +13,7 @@ namespace ProcureHub.Application.Features.PurchaseRequests;
 
 public static class CreatePurchaseRequest
 {
+    [AuthorizeRequest(RoleNames.Requester)]
     public record Command(
         string Title,
         string? Description,

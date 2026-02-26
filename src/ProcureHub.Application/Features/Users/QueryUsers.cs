@@ -3,13 +3,16 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProcureHub.Application.Abstractions.Data;
 using ProcureHub.Application.Common;
+using ProcureHub.Application.Common.Authorization;
 using ProcureHub.Application.Common.Pagination;
+using ProcureHub.Application.Constants;
 using ProcureHub.Domain.Entities;
 
 namespace ProcureHub.Application.Features.Users;
 
 public static class QueryUsers
 {
+    [AuthorizeRequest(RoleNames.Admin)]
     public record Request(string? Email, int? Page, int? PageSize) : IRequest<PagedResult<Response>>;
 
     public class RequestValidator : AbstractValidator<Request>
