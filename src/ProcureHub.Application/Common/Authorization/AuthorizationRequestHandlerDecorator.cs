@@ -15,7 +15,7 @@ public class AuthorizationRequestHandlerDecorator<TRequest, TResponse>(
     {
         if (AuthorizationAttribute is null)
         {
-            return await inner.HandleAsync(request, token);
+            throw new MissingRequestAuthorizationAttributeException(RequestName);
         }
 
         var currentUser = await currentUserProvider.GetCurrentUserAsync();

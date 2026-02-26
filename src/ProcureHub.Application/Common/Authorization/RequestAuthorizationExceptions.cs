@@ -1,5 +1,10 @@
 namespace ProcureHub.Application.Common.Authorization;
 
+public sealed class MissingRequestAuthorizationAttributeException(string requestName)
+    : Exception($"Request '{requestName}' must declare [{nameof(AuthorizeRequestAttribute)}].")
+{
+}
+
 public sealed class RequestUnauthenticatedException(string requestName)
     : Exception($"Request '{requestName}' requires authenticated user.")
 {
